@@ -1,0 +1,23 @@
+- name: Configure webhook
+  hosts: main
+  vars_prompt:
+    - name: GITLAB_WEBHOOK_SECRET
+      prompt: Enter global password for gitlab webhook
+      private: true
+      confirm: true
+  tasks:
+    - name: install service
+      become: yes
+      ansible.builtin.template:
+        src: files/gitlab_webhook.service.j2
+        dest: /etc/systemd/system/gitlab_webhook.service
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: start service
+      become: yes
+      ansible.builtin.service:
+        name: gitlab_webhook
+        state: started
+        enabled: yes

@@ -1,0 +1,12 @@
+[Unit]
+Description=Gitlab webhook service
+After=network-online.target
+
+[Service]
+User=debian
+Group=debian
+Type=simple
+ExecStart=node /home/debian/monorepo/infra/webhook_listener.js {{ GITLAB_WEBHOOK_SECRET }}
+
+[Install]
+WantedBy=multi-user.target
