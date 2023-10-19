@@ -4,7 +4,10 @@ const express = require('express');
 const { exec } = require('child_process');
 
 const app = express();
-const secretToken = 'your_secret_token'; // Replace with your secret token
+
+// Look for the "--secret" argument
+
+const secretToken = process.argv[2];  // like node webhook_listener.js 123456
 
 app.use(express.json());
 
@@ -23,6 +26,6 @@ app.post('/webhook', (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Webhook listener running on port 3000');
+app.listen(4000, () => {
+  console.log('Webhook listener running on port 4000');
 });

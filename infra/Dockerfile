@@ -1,5 +1,5 @@
 # run with something like
-# docker run -p 3000:3000 -v /path/to/external/build.sh:/app/build.sh -d webhook-listener
+# docker run -p 4000:4000 -v ./build.sh:/app/build.sh -d webhook-listener -e "SECRET=your_secret_value"
 
 # Use an official Node.js runtime as a base image
 FROM node:20
@@ -8,7 +8,7 @@ FROM node:20
 WORKDIR /app
 
 # Copy your script and any other necessary files into the container
-COPY ./webhook-listener.js /app/
+COPY ./webhook_listener.js /app/
 
 # Install any required dependencies
 RUN npm install express
@@ -17,7 +17,7 @@ RUN npm install express
 EXPOSE 4000
 
 # Define a build argument for your secret
-ARG SECRET
+ENV SECRET="your_secret_value"
 
 # Use the build argument in your CMD
-CMD ["node", "webhook-listener.js", "--secret=$SECRET"]
+CMD ["node", "webhook-listener.js", "$SECRET"]
