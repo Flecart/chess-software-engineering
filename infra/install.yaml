@@ -2,13 +2,12 @@
 # si ha che la secret immessa nel codice è undefined, nonostante
 - name: Configure webhook
   hosts: main
-  vars_prompt:
-    - name: GITLAB_WEBHOOK_SECRET
-      prompt: Enter global password for gitlab webhook
-      private: true
-      confirm: true
+  vars: 
+    GITLAB_WEBHOOK_SECRET: "{{ lookup('ansible.builtin.file', 'secrets/gitlab_webhook_secret') }}"
+    GITLAB_ACCESS_TOKEN: "{{ lookup('ansible.builtin.file', 'secrets/gitlab_access_token') }}"
+    REPO_DEST : "/home/debian/monorepo"
   tasks:
-    - name: install service
+    - name: install webhook service
       become: yes
       ansible.builtin.template:
         src: files/gitlab_webhook.service.j2
@@ -16,18 +15,62 @@
         owner: root
         group: root
         mode: 0755
+    
+    - name: install chess website service
+      become: yes
+      ansible.builtin.template:
+        src: files/chess_website.service.j2
+        dest: /etc/systemd/system/chess_website.service
+        owner: root
+        group: root
+        mode: 0755
 
-    - name: start service
+    - name: pull updates
+      become: yes
+      ansible.builtin.git:
+        repo: "https://oauth2:{{GITLAB_ACCESS_TOKEN}}@aminsep.disi.unibo.it/gitlab/t1-check-mates/monorepo.git"
+        depth: 1
+        dest: {{REPO_DEST}}
+        single_branch: true
+        version: main
+
+    - name: build website
+      become: yes
+      ansible.builtin.shell: |
+        cd {{REPO_DEST}}/code
+        npm install
+
+    - name: build webhook
+      become: yes
+      ansible.builtin.shell: |
+        cd {{REPO_DEST}}/infra
+        npm install
+
+    - name: start webhook service
       become: yes
       ansible.builtin.service:
         name: gitlab_webhook
         state: started
         enabled: yes
 
-    - name: restart service
+    - name: restart webhook service
       become: yes
       ansible.builtin.service:
         name: gitlab_webhook
+        state: restarted
+        enabled: yes
+
+    - name: start chess website service
+      become: yes
+      ansible.builtin.service:
+        name: chess_website
+        state: started
+        enabled: yes
+
+    - name: restart chess website service
+      become: yes
+      ansible.builtin.service:
+        name: chess_website
         state: restarted
         enabled: yes
 
