@@ -1,0 +1,4 @@
+hosts: 
+    main:
+        ansible_host: 130.136.3.50
+        ansible_user: debian
