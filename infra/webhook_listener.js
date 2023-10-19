@@ -13,7 +13,7 @@ app.use(express.json());
 
 app.post('/webhook', (req, res) => {
   if (req.header('X-Gitlab-Token') === secretToken) {
-    exec('./build.sh', (error, stdout, stderr) => {
+    exec('bash ./build.sh', (error, stdout, stderr) => {
       if (error) {
         console.error(`Build failed: ${error}`);
         return res.status(500).send('Build failed');
