@@ -26,7 +26,6 @@
         mode: 0755
 
     - name: pull updates
-      become: yes
       ansible.builtin.git:
         repo: "https://oauth2:{{GITLAB_ACCESS_TOKEN}}@aminsep.disi.unibo.it/gitlab/t1-check-mates/monorepo.git"
         depth: 1
@@ -35,13 +34,11 @@
         version: main
 
     - name: build website
-      become: yes
       ansible.builtin.shell: |
         cd "{{REPO_DEST}}/code"
         npm install
 
     - name: build webhook
-      become: yes
       ansible.builtin.shell: |
         cd "{{REPO_DEST}}/infra"
         npm install
