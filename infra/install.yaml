@@ -1,3 +1,5 @@
+# NOTE: per qualche motivo prima che facessi daemon reload a mano, non funzionava
+# si ha che la secret immessa nel codice è undefined, nonostante
 - name: Configure webhook
   hosts: main
   vars_prompt:
@@ -28,3 +30,8 @@
         name: gitlab_webhook
         state: restarted
         enabled: yes
+
+    - name: reload daemon
+      become: yes
+      ansible.builtin.systemd:
+        daemon_reload: yes

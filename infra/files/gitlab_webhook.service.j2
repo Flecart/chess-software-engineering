@@ -6,6 +6,7 @@ After=network-online.target
 User=debian
 Group=debian
 Type=simple
+WorkingDirectory=/home/debian/monorepo/infra
 ExecStart=node /home/debian/monorepo/infra/webhook_listener.js {{ GITLAB_WEBHOOK_SECRET }}
 
 [Install]
