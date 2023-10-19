@@ -22,7 +22,8 @@ app.post('/webhook', (req, res) => {
       res.status(200).send('Build successful');
     });
   } else {
-    console.log(req.header('X-Gitlab-Token') );
+    console.log("-" + req.header('X-Gitlab-Token') + "-");
+    console.log("-" + secretToken + "-");
     res.status(403).send('Unauthorized');
   }
 });

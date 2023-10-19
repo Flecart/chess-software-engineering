@@ -21,3 +21,10 @@
         name: gitlab_webhook
         state: started
         enabled: yes
+
+    - name: restart service
+      become: yes
+      ansible.builtin.service:
+        name: gitlab_webhook
+        state: restarted
+        enabled: yes
