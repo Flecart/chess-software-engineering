@@ -1,5 +1,3 @@
-## Deployment
+# Deployment
 
-### How does it work
-
-We have a gitlab *webhook* that fires everytime 
+Vedere [la pagina di doc principale](deployment.md).
