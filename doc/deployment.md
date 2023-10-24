@@ -14,6 +14,9 @@ e il sito in *production*, che sarà quello che l'utente finale vedrà.
 - Questo webhook fa una richiesta a un nostro servizio, il **webhook_listener**
 - Se riceve una richiesta corretta (con giusto segreto impostato) allora chiama uno script per ribuildare il servizio e restartarlo in modo aggiornato
 
+### Sequence diagram
+
+![deployment](images/deployment-1.png)
 
 <!--
 @startuml gitlabSync
