@@ -1,4 +1,4 @@
-# Relazione: escape the bomb
+# Relazione: escape the boom
 
 ## Dinamiche del gioco
 
