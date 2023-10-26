@@ -18,6 +18,8 @@ Inoltre abbiamo prodotto qualche documento in più durante questa prima fase:
 - [Analisi delle api-social](analisi-social.md)
 - [Descrizione del sistema di deployment](deployment.md)
 
+NOTA: durante la creazione delle user stories abbiamo utilizzato brevemente [chatGPT](https://chat.openai.com/share/89fd6d8f-431a-4d90-8bbf-09b7df6a7564)
+
 ## Architettura ad alto livello
 ![architecture](images/architecture.jpg)
 

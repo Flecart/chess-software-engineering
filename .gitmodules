@@ -1,0 +1,3 @@
+[submodule "docs"]
+	path = docs
+	url = http://gitlab.t1-check-mates.mooo.com/t1-check-mates/monorepo.wiki.git
