@@ -1,11 +1,15 @@
-La documentazione è tutta messa sulla wiki del nostro gitlab presente a questo link:
+
+
+
+La documentazione principale è tutta messa sulla wiki del nostro gitlab presente a questo link:
 
 > http://gitlab.t1-check-mates.mooo.com/t1-check-mates/monorepo.wiki.git 
 
 Saranno presenti tutte le nostre consegne e sarà anche il **knowledge base principale del nostro team**
+Quanto è presente qui è utile per il prof. missiroli, dato che non dovrà più andare a cercare i file in altri posti, ma sono esattamente dove ha preferito lui
 
 
-## Istruzioni per lo sviluppo
+## Istruzioni per lo sviluppo della wiki:
 
 La wiki può essere aggiornata attraverso l'interfaccia web, oppure scaricata, modificata in locale e aggiornata come se fosse una repository git.
 
@@ -19,5 +23,15 @@ Al fine di usarlo come repository git:
 E ora si può iniziare a modificare la wiki in local.
 Quando si è fatto si può pushare come se fosse una repository git normale.
 Se si hanno problemi, chiedere sulla sezione supporto tecnico su mattermost.
+
+
+# Docs
+
+Questa directory contiene alcuni documenti importanti come
+- Deliverables per il progetto
+
+## Sprint-0
+
+Descrizione dei deliverables è presente in [deliverables_0](deliverables_0.md)
 
 
