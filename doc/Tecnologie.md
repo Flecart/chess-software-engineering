@@ -1,12 +1,12 @@
 ## Backend
 
 **Lang**:Python
-**Framework**: ()[fast api]
+**Framework**: [fast api](https://fastapi.tiangolo.com/)
 
 ## FrontEnd
 
 **Lang**:js
-**Framework UI**: (https://ant.design/)[ant design]
+**Framework UI**: [ant design](https://ant.design/)
 
 ## Database
 
