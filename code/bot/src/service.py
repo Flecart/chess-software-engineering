@@ -5,7 +5,7 @@ TODO: Later this should be refactored into a directory with __init__.py so that 
 TODO: Define the return types of ALL the functions
 """
 
-from singleton import SingletonMeta
+from .singleton import SingletonMeta
 
 class GameMapper(metaclass=SingletonMeta):
     """class used to track all the games that are being played with the bot
