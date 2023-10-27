@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "bot"
+version = "0.1.0"
+description = "A bot that implements all the steps to communicate with the telegram API"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pytelegrambotapi = "^4.14.0"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
