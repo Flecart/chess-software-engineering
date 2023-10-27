@@ -2,3 +2,7 @@ monorepo.wiki
 node_modules
 .env
 secrets
+
+# python ignores
+__pycache__
+.pytest_cache
