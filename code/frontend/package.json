@@ -53,7 +53,6 @@
         "antd": "^5.10.2",
         "axios": "^1.6.0",
         "lucide-react": "^0.290.0",
-        "path": "^0.12.7",
         "react": "^18.2.0",
         "react-chessboard": "^4.3.0",
         "react-dom": "^18.2.0",
