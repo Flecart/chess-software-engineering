@@ -7,5 +7,16 @@ module.exports = {
     plugins: ['react-refresh'],
     rules: {
         'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+        'no-restricted-imports': [
+            'error',
+            {
+                patterns: [
+                    {
+                        group: ['@/features/*/*'],
+                        message: 'Please import from the feature folder instead.',
+                    },
+                ],
+            },
+        ],
     },
 };
