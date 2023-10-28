@@ -8,11 +8,14 @@ class ChessGame:
     By default creates a dark chess board.
     
     """
-    game: DarkChessGame
-
     def __init__(self):
-        game = DarkChessGame()
+        self.game = DarkChessGame()
         self.has_game_ended = False
+
+    @property
+    def moves(self):
+        """Returns the moves of the current game"""
+        return self.game.moves
 
     def get_board_view(self) -> str:
         """Returns the current board view"""
@@ -36,7 +39,7 @@ class ChessGame:
 
         try: 
             self.game.move(start_position, end_position)
-        except (errors.NotFoundError, errors.WrongFigureError):
+        except (errors.NotFoundError, errors.WrongFigureError, errors.WrongMoveError):
             return False
         except errors.EndGame:
             # TODO: test what happens when you move even if the game has ended
