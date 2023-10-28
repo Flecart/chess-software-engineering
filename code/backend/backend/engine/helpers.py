@@ -32,10 +32,11 @@ def invert_color(color: Colors) -> Colors:
 
 def validate_move_format(move: str) -> bool:
     """ Just a quick way to check the move format, 
-    TODO: should be moved to correct location later, if any
     
     Example correct format:
     e2e4
+    Meaning: move piece on e2 to e4.
+    The correctness check should be done by the engine
     """
     if len(move) != 4:
         return False
