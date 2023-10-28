@@ -30,31 +30,24 @@ def invert_color(color: Colors) -> Colors:
     return Colors.WHITE
 
 
-#def encrypt_password(password):
-#    pass_md5 = md5(password.encode()).hexdigest()
-#    return md5((pass_md5 + config.PASSWORD_SALT).encode()).hexdigest()
-#
-#
-#def generate_token(short=False):
-#    token = uuid.uuid4().hex
-#    if short:
-#        return token[:config.TOKEN_SHORT_LENGTH]
-#    return token
-#
-#
-#def with_context(data):
-#    context = {
-#        'site_url': config.SITE_URL,
-#    }
-#    context.update(data)
-#    return context
-#
-#
-#def get_queue_name(prefix):
-#    return '{}_{}'.format(prefix, config.GAME_QUEUE_NAME)
-#
-#
-#def get_prefix(game_type, game_limit=None):
-#
-#def get_request_arg(request, name):
-    return request.form.get(name) or (request.json or {}).get(name)
+def validate_move_format(move: str) -> bool:
+    """ Just a quick way to check the move format, 
+    
+    Example correct format:
+    e2e4
+    Meaning: move piece on e2 to e4.
+    The correctness check should be done by the engine
+    """
+    if len(move) != 4:
+        return False
+    
+    letter_set = "abcdefgh"
+    number_set = "12345678"
+
+    if not move[0] in letter_set or not move[2] in letter_set:
+        return False
+    
+    if not move[1] in number_set or not move[3] in number_set:
+        return False
+    
+    return True

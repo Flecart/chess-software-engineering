@@ -8,7 +8,7 @@ from .errors import OutOfBoardError, CellIsBusyError, NotFoundError, Draw, White
 
 class Board(object):
     _figures: dict[Colors, dict[Pieces, list[Figure]]]  = {}
-    _figure_list: list[tuple[Pieces, list[Figure]]] = [] # TODO: check if type is correct
+    _figure_list: list[tuple[Pieces, list[Figure]]] = [] 
     _moves = []
     _cut = None
 
