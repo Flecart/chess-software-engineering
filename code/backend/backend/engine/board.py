@@ -1,18 +1,18 @@
 
 from .enums import Colors, Pieces
-from .figures import Pawn, Rook, Knight, Bishop, Queen, King
+from .figures import Pawn, Rook, Knight, Bishop, Queen, King, Figure
 from .const import FIGURES_MAP
 from .helpers import coors2pos, onBoard
 from .errors import OutOfBoardError, CellIsBusyError, NotFoundError, Draw, WhiteWon, BlackWon
 
 
 class Board(object):
-    _figures = {}
-    _figure_list = []
+    _figures: dict[Colors, dict[Pieces, list[Figure]]]  = {}
+    _figure_list: list[tuple[Pieces, list[Figure]]] = [] # TODO: check if type is correct
     _moves = []
     _cut = None
 
-    def __init__(self, figures=None, cut=[]):
+    def __init__(self, figures: None | Pieces = None, cut: list[Pieces] =[]):
         if figures is not None:
             self.loadFigures(figures)
         else:
@@ -22,6 +22,25 @@ class Board(object):
             for fig in cut:
                 cls, color = FIGURES_MAP[fig]
                 self._cut_list.append((cls.kind, color))
+
+    def __str__(self):
+        return ','.join(map(str, self.figures))
+
+    @property
+    def figures(self):
+        return self._figure_list
+    
+    @property
+    def moves(self):
+        return self._moves
+    
+    @property
+    def lastCut(self):
+        return self._cut
+
+    @property
+    def cuts(self):
+        return self._cut_list
 
     def standFigures(self):
         self._figures = {
@@ -69,7 +88,7 @@ class Board(object):
         self._figures = figures
         self._figure_list = figure_list
 
-    def cell2Figure(self, x, y):
+    def cell2Figure(self, x: int, y: int):
         if not onBoard(x, y):
             raise OutOfBoardError
         for fig in self.figures:
@@ -91,7 +110,7 @@ class Board(object):
                 return True
         return False
 
-    def move(self, figure, x, y):
+    def move(self, figure, x: int, y: int):
         self._cut = None
         end_game = None
         fig = self.cell2Figure(x, y)
@@ -126,18 +145,11 @@ class Board(object):
                 return
         raise Draw
 
-    def __str__(self):
-        return ','.join(map(str, self.figures))
-
     def updateFigures(self):
         for fig in self.figures:
             fig.reset()
         for fig in self.figures:
             fig.update()
-
-    @property
-    def figures(self):
-        return self._figure_list
 
     def getFigure(self, color, kind, index=0):
         try:
@@ -156,10 +168,6 @@ class Board(object):
         else:
             king.x, rook.x = 3, 4
         self.updateFigures()
-
-    @property
-    def moves(self):
-        return self._moves
 
     def denyCastle(self, color, short=None):
         if short is None:
@@ -180,11 +188,3 @@ class Board(object):
         self._figure_list.append(queen)
         self._figure_list.remove(pawn)
         pawn.terminate()
-
-    @property
-    def lastCut(self):
-        return self._cut
-
-    @property
-    def cuts(self):
-        return self._cut_list

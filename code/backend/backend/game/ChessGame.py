@@ -1,5 +1,5 @@
 class ChessGame:
-    moves:list[str]
+    moves: list[str]
 
     def __init__(self):
         self.moves = []
