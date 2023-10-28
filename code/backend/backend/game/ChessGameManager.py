@@ -4,7 +4,7 @@ import uuid
 from backend.game.ChessGame import ChessGame
 
 class ChessGameManager:
-    _instance: "ChessGameManager" | None = None
+    _instance: "ChessGameManager" = None
     games: dict[uuid.UUID, ChessGame]
 
     def __new__(cls):
@@ -16,7 +16,7 @@ class ChessGameManager:
     def __init(self):
         self.games = {}
 
-    def get_game(self, game_id:uuid) -> ChessGame | None:
+    def get_game(self, game_id: uuid) -> ChessGame | None:
         return self.games.get(game_id, None)
 
     def create_game(self) -> uuid.UUID:

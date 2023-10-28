@@ -4,11 +4,11 @@ from .enums import Colors, Pieces
 from .helpers import invert_color, pos2coors
 from .figures import King
 
-class Game(object):
+class Game:
     def __init__(self, 
                  figures: Pieces | None = None, 
                  current_player: Colors = Colors.WHITE, 
-                 cut: list[Pieces]=[]):
+                 cut: list[Pieces] = []):
         """ Creates a new game
 
         Args:
@@ -23,13 +23,21 @@ class Game(object):
     def moves(self):
         return self.board.moves
 
-    def move(self, color, pos1: tuple[int, int], pos2: tuple[int, int]):
-        if color != self.current_player:
-            raise WrongTurnError
+    def get_board_view(self, last: bool = True) -> str:
+        """Returns the board view after the last players move.
+        
+        """
+        color = self.current_player
+        if last:
+            color = invert_color(color)
+
+        return self.board.get_view(color)
+
+    def move(self, pos1: tuple[int, int], pos2: tuple[int, int]):
         figure = self.board.cell2Figure(*pos1)
         if not figure:
             raise NotFoundError
-        if figure.color != color:
+        if figure.color != self.current_player:
             raise WrongFigureError
 
         try:

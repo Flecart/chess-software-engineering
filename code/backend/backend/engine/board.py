@@ -88,7 +88,7 @@ class Board(object):
         self._figures = figures
         self._figure_list = figure_list
 
-    def cell2Figure(self, x: int, y: int):
+    def cell2Figure(self, x: int, y: int) -> Figure | None:
         if not onBoard(x, y):
             raise OutOfBoardError
         for fig in self.figures:
@@ -188,3 +188,33 @@ class Board(object):
         self._figure_list.append(queen)
         self._figure_list.remove(pawn)
         pawn.terminate()
+
+    def get_view(self, color: Colors) -> str:
+        """Returns the view of the board from the perspective of the color
+
+        """
+        view = [
+            ['.' for _ in range(8)] for _ in range(8)
+        ]
+
+        for fig in self.figures:
+            view[fig.y - 1][fig.x - 1] = fig.symbol
+
+        # create not visible mask
+        mask: list[bool] = [
+            [True for _ in range(8)] for _ in range(8)
+        ]
+
+        for fig in self.figures:
+            if fig.color == color:
+                mask[fig.y - 1][fig.x - 1] = False
+                for x, y in fig.getMoves():
+                    mask[y - 1][x - 1] = False
+
+        # apply mask
+        for y in range(8):
+            for x in range(8):
+                if mask[y][x]:
+                    view[y][x] = 'X'
+
+        return '\n'.join(''.join(row) for row in view)
