@@ -46,40 +46,46 @@ class King(Figure):
         super(King, self).reset()
         self._aura = None
 
-    def can_castle(self, short=True):
+    def can_castle(self, short: bool = True):
         if self.moved:
             return False
+
         if self.color == Colors.WHITE:
             y = 1
         else:
             y = 8
+
         if short:
-            rook_x = 8
+            rook_x: int = 8
             cells = ((6, y), (7, y))
         else:
-            rook_x = 1
+            rook_x: int = 1
             cells = ((2, y), (3, y), (4, y))
+
         try:
             rook = self.board.cell2Figure(x=rook_x, y=y)
         except (NotFoundError, OutOfBoardError):
             return False
+
         if not rook or rook.moved:
             return False
+
         for cell in cells:
             try:
                 if self.board.cell2Figure(*cell):
                     return False
             except OutOfBoardError:
                 return False
+
         return rook
 
-    def castle(self, short=True):
+    def castle(self, short: bool = True):
         rook = self.can_castle(short)
         if not rook:
             raise WrongMoveError
         self.board.castle(self, rook)
 
-    def try_to_castle(self, x, y):
+    def try_to_castle(self, x: int, y: int):
         if (self.color == Colors.WHITE and (x, y) in ((7, 1), (3, 1))) or \
            (self.color == Colors.BLACK and (x, y) in ((7, 8), (3, 8))):
             try:
@@ -87,11 +93,12 @@ class King(Figure):
                 move = '0-0' if x == 7 else '0-0-0'
             except WrongMoveError:
                 pass
-            except EndGame as exc:
-                exc.move = move
-                raise exc
+            except EndGame as e:
+                e.move = move
+                raise e
             else:
                 return move
+
         return False
 
     def remove(self, *args, **kwargs):

@@ -294,8 +294,8 @@ class TestPawn(unittest.TestCase):
         self.assertEqual(str(game.board.getFigure(Colors.WHITE, Pieces.PAWN)), 'Pc7')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.WHITE, Pieces.QUEEN)
-        game.move(Colors.WHITE, (3, 7), (3, 8))
-        self.assertEqual(str(game.board), 'Ke1,ke8,Qc8')
+        game.move( (3, 7), (3, 8))
+        self.assertEqualGameBoard(str(game.board), 'Ke1,ke8,Qc8')
         self.assertEqual(str(game.board.getFigure(Colors.WHITE, Pieces.QUEEN)), 'Qc8')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.WHITE, Pieces.PAWN)
@@ -305,11 +305,18 @@ class TestPawn(unittest.TestCase):
         self.assertEqual(str(game.board.getFigure(Colors.BLACK, Pieces.PAWN)), 'pc2')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.BLACK, Pieces.QUEEN)
-        game.move(Colors.BLACK, (3, 2), (3, 1))
-        self.assertEqual(str(game.board), 'Ke1,ke8,qc1')
+        game.move((3, 2), (3, 1))
+        self.assertEqualGameBoard(str(game.board),'Ke1,ke8,qc1')
         self.assertEqual(str(game.board.getFigure(Colors.BLACK, Pieces.QUEEN)), 'qc1')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.BLACK, Pieces.PAWN)
+    
+    def assertEqualGameBoard(self, board1:str, board2:str):
+        board1 = board1.split(',')
+        board2 = board2.split(',')
+        self.assertEqual(sorted(board1), sorted(board2))
+        
+
 
 
 class TestGame(unittest.TestCase):
@@ -317,25 +324,23 @@ class TestGame(unittest.TestCase):
     def test_move(self):
         game = Game('Kf3,Pe2,ke8,qf7')
         self.assertEqual(game.current_player, Colors.WHITE)
-        with self.assertRaises(errors.WrongTurnError):
-            game.move(Colors.BLACK, (5, 4), (5, 5))
         with self.assertRaises(errors.NotFoundError):
-            game.move(Colors.WHITE, (5, 4), (5, 5))
+            game.move( (5, 4), (5, 5))
         with self.assertRaises(errors.WrongFigureError):
-            game.move(Colors.WHITE, (5, 8), (5, 7))
+            game.move( (5, 8), (5, 7))
         with self.assertRaises(errors.WrongMoveError):
-            game.move(Colors.WHITE, (5, 2), (5, 5))
-        fig, move = game.move(Colors.WHITE, (5, 2), (5, 4))
+            game.move( (5, 2), (5, 5))
+        fig, move = game.move( (5, 2), (5, 4))
         self.assertIsInstance(fig, Pawn)
         self.assertEqual(move, 'e2-e4')
         self.assertEqual(game.current_player, Colors.BLACK)
         with self.assertRaises(errors.BlackWon) as cm:
-            game.move(Colors.BLACK, (6, 7), (6, 3))
+            game.move((6, 7), (6, 3))
         self.assertIsInstance(cm.exception.figure, Queen)
         self.assertEqual(cm.exception.move, 'f7-f3')
         self.assertEqual(str(game.board.lastCut), 'Kf3')
         game = Game('Ke1,Rh1,ke8')
-        fig, move = game.move(Colors.WHITE, (5, 1), (7, 1))
+        fig, move = game.move( (5, 1), (7, 1))
         self.assertIsInstance(fig, King)
         self.assertEqual(move, '0-0')
         self.assertEqual(game.current_player, Colors.BLACK)
@@ -350,7 +355,7 @@ class TestGame(unittest.TestCase):
         with self.assertRaises(errors.BlackWon):
             for move in moves:
                 positions = map(coors2pos, move.split('-'))
-                game.move(game.current_player, *positions)
+                game.move(*positions)
         expect = [
             'Pa2', 'Pb2', 'Pc2', 'Pd2', 'Pf2', 'Ph2', 'Ra1', 'Rf1', 'Nb1', 'Nf7',
             'Bc1', 'Bf3', 'Qd1', 'pa7', 'pb7', 'pc7', 'pd7', 'pg7', 'ph7', 'ra8',
@@ -362,3 +367,43 @@ class TestGame(unittest.TestCase):
             (Pieces.KNIGHT, Colors.BLACK), (Pieces.KING, Colors.WHITE)
         ]
         self.assertEqual(game.board.cuts, expect)
+
+
+class TestFEN(unittest.TestCase):
+    # test taken from https://it.wikipedia.org/wiki/Notazione_Forsyth-Edwards
+
+    def test_initial_configuration(self):
+        game = Game()
+        self.assertEqual(game.compute_fen(), 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+
+    def test_move_1(self):
+        game = Game()
+        positions = map(coors2pos, "e2-e4".split('-'))
+        game.move(*positions)
+        self.assertEqual(game.compute_fen(), 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1')
+
+    def test_sicilian_defence_moves(self):
+        game = Game()
+        moves = [
+            "e2-e4", "c7-c5",
+        ]
+
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+        self.assertEqual(game.compute_fen(), 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2')
+                          
+
+    def test_sicilian_defence_moves_2(self):
+        game = Game()
+        moves = [
+            "e2-e4", "c7-c5", "g1-f3"
+        ]
+
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        self.assertEqual(game.compute_fen(), 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 0 2')
+
+    # TODO: test when nobody can castle, it should be displayed a "-"
