@@ -1,3 +1,4 @@
+from backend.engine.helpers import onBoard
 from .figure import Figure
 from ..errors import OutOfBoardError
 from ..enums import Colors, Pieces
@@ -38,3 +39,23 @@ class Pawn(Figure):
             if fig and self.isEnemy(fig):
                 result.append((x, y))
         self._moves = result
+
+    def getVisibleCells(self) -> list[tuple[int, int]]:
+        all_moves = self.getMoves()
+
+        if self.color == Colors.WHITE:
+            front_moves = [(self.x - 1, self.y + 1), (self.x, self.y + 1), (self.x + 1, self.y + 1)]
+        else:
+            front_moves = [(self.x - 1, self.y - 1), (self.x, self.y - 1), (self.x + 1, self.y - 1)]
+        front_moves = [(x, y) for x, y in front_moves if onBoard(x, y)]
+
+        for position in front_moves:
+            if position not in all_moves:
+                all_moves.append(position)
+        
+        return all_moves
+
+    def move(self, x, y):
+        super(Pawn, self).move(x, y)
+        if (self.color == Colors.WHITE and y == 8) or (self.color == Colors.BLACK and y == 1):
+            self.board.transform(self)
