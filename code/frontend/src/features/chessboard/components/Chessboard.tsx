@@ -1,4 +1,7 @@
 import { Chessboard as ReactChessboard } from 'react-chessboard';
+import { generateFogObject, generateStandardFen } from '../utils/fen';
+
+const customFEN = 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXX...XX/4P3/8/PPPP1PPP/RNBQKBNR';
 
 export const Chessboard = () => {
     return (
@@ -9,7 +12,11 @@ export const Chessboard = () => {
                 margin: '3rem auto',
             }}
         >
-            <ReactChessboard id="mainboard" />
+            <ReactChessboard
+                id="mainboard"
+                position={generateStandardFen(customFEN)}
+                customSquareStyles={generateFogObject(customFEN)}
+            />
         </div>
     );
 };
