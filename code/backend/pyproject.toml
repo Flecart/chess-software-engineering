@@ -13,6 +13,7 @@ pyyaml = "^6.0.1"
 
 [tool.poetry.scripts]
 start = 'backend:start'
+tests = 'tests:tests'
 
 [build-system]
 requires = ["poetry-core"]

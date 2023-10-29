@@ -6,29 +6,35 @@ from .figures import King
 
 class Game:
     def __init__(self, 
-                 figures: Pieces | None = None, 
+                 figures: str | None = None, 
                  current_player: Colors = Colors.WHITE, 
                  cut: list[Pieces] = []):
         """ Creates a new game
 
         Args:
-            figures (Pieces | None, optional): If None, then a new game will be created. Defaults to None.
+            figures (str | None, optional): If None, then a new game will be created. Defaults to None.
             current_player (Colors, optional): Current player. Defaults to Colors.WHITE.
             cut (list[Pieces], optional): List of cut figures (probably (TODO: check me) the pieces not present in the board). Defaults to [].
         """
         self.board = Board(figures, cut)
         self.current_player = current_player
 
+    def __str__(self):
+        return self.board.__str__()
+
     @property
     def moves(self):
         return self.board.moves
 
-    def get_board_view(self, last: bool = True) -> str:
+    def compute_fen(self):
+        return self.board.compute_fen(self.current_player)
+
+    def get_board_view(self, last_player_view: bool = True) -> str:
         """Returns the board view after the last players move.
         
         """
         color = self.current_player
-        if last:
+        if last_player_view:
             color = invert_color(color)
 
         return self.board.get_view(color)

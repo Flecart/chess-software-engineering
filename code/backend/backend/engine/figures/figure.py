@@ -11,20 +11,26 @@ class Figure:
     _moves: None | list[tuple[int, int]] = None
     _moved: bool = False
 
-    def __init__(self, x, y, color, board):
-        self.x = x
-        self.y = y
-        self.color = color
-        self.board = board
+    def __init__(self, x: int, y: int, color: Colors, board):
+        from ..board import Board # just for type hinting, needs to be here for circular imports.
+        
+        self.x: int = x
+        self.y: int = y
+        self.color: Colors = color
+        self.board: Board = board
 
+    def __str__(self):
+        return '{}{}'.format(self.symbol, pos2coors(self.x, self.y))
+    
     @property
     def symbol(self):
         if self.color == Colors.WHITE:
             return self._symbol.upper()
         return self._symbol.lower()
 
-    def __str__(self):
-        return '{}{}'.format(self.symbol, pos2coors(self.x, self.y))
+    @property
+    def moved(self):
+        return self._moved
 
     def getMoves(self):
         if self._moves is None:
@@ -72,10 +78,6 @@ class Figure:
 
     def reset(self):
         _moves = None
-
-    @property
-    def moved(self):
-        return self._moved
 
     def terminate(self):
         self.board._figures[self.color][self.kind].remove(self)
