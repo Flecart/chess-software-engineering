@@ -10,6 +10,7 @@ python = "^3.11"
 fastapi = "^0.104.0"
 uvicorn = "^0.23.2"
 pyyaml = "^6.0.1"
+pylint = "^3.0.2"
 
 [tool.poetry.group.test.dependencies]
 requests = "^2.31.0"

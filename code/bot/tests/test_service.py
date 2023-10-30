@@ -3,8 +3,8 @@
 
 import pytest
 
-from src.game import Game
-from src.service import GameMapper
+from backend.game import Game
+from backend.service import GameMapper
 
 class TestGameMapper:
     # GameMapper can add a game to the list of games

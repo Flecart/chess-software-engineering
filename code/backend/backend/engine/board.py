@@ -135,7 +135,8 @@ class Board(object):
         # anche perché poi è difficile loadarle da una serie di mosse
 
         self._moves.append({
-            'figure': figure, 
+            'figure': figure.kind, 
+            'color': figure.color, 
             'x1': figure.x,
             'y1': figure.y,
             'x2': x,
