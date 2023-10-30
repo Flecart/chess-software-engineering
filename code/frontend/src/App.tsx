@@ -1,9 +1,9 @@
-import { Button } from 'antd';
+import { Chessboard } from './features/chessboard';
 
 export const App = () => {
     return (
-        <div className="App">
-            <Button type="primary">Button</Button>
-        </div>
+        <>
+            <Chessboard />
+        </>
     );
 };
