@@ -1,30 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
 import { generateFogObject, generateStandardFen } from '../utils/fen';
 import { makeMove } from '../api/game';
 
-const customFEN = 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/8/8/PPPPPPPP/RNBQKBNR';
+const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX';
+// const startWhiteFEN = 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/......../......../PPPPPPPP/RNBQKBNR';
+const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 
 type Props = {
     gameId: string;
+    boardOrientation: 'white' | 'black';
 };
 
-export const Chessboard = ({ gameId }: Props) => {
-    const [fen, setFen] = useState(customFEN);
-    const isMoved = useRef({ moved: false, move: '' });
-
-    useEffect(() => {
-        // call api
-        async function getFen() {
-            if (isMoved.current.moved) {
-                const { board } = await makeMove(gameId, isMoved.current.move);
-                setFen(board.split('\n').reverse().join('/'));
-                isMoved.current.moved = false;
-            }
-        }
-
-        getFen();
-    }, [isMoved.current.moved]);
+export const Chessboard = ({ gameId, boardOrientation }: Props) => {
+    const [fen, setFen] = useState(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
     return (
         <div
@@ -36,13 +25,14 @@ export const Chessboard = ({ gameId }: Props) => {
         >
             <ReactChessboard
                 id="mainboard"
+                boardOrientation={boardOrientation}
                 position={generateStandardFen(fen)}
                 customSquareStyles={generateFogObject(fen)}
-                onPieceDrop={(from, to, piece) => {
-                    console.log(piece, from, to);
-                    isMoved.current.moved = true;
-                    isMoved.current.move = `${from}${to}`;
-                    return true;
+                onPieceDrop={(from, to) => {
+                    makeMove(gameId, `${from}${to}`).then((res) => {
+                        setFen(res.board.split('\n').reverse().join('/'));
+                    });
+                    return true; //TODO: seems like it doesn't matter the return value, investigate
                 }}
             />
         </div>
