@@ -4,8 +4,8 @@ import { generateFogObject, generateStandardFen } from '../utils/fen';
 import { makeMove } from '../api/game';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX';
-// const startWhiteFEN = 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/......../......../PPPPPPPP/RNBQKBNR';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
+// ^ white fen is 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/......../......../PPPPPPPP/RNBQKBNR';
 
 type Props = {
     gameId: string;
