@@ -311,6 +311,34 @@ class TestPawn(unittest.TestCase):
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.BLACK, Pieces.PAWN)
     
+    def test_en_passant(self):
+        """Check if en passant move is possible"""
+        moves = [
+            "d2-d4", "a7-a6", "d4-d5", "c7-c5"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        all_moves = game.board.cell2Figure(4, 5).getMoves()
+        self.assertEqual(all_moves, [(4, 6), (3, 6)]) # 3, 6 is the en passant move
+
+    def test_en_passant_declined(self):
+        """Check if after one move the en passant board is not possible"""
+        
+        moves = [
+            "d2-d4", "a7-a6", "d4-d5", "c7-c5", "b1-c3", "a6-a5"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        all_moves = game.board.cell2Figure(4, 5).getMoves()
+        self.assertEqual(all_moves, [(4, 6)])
+
+
     def assertEqualGameBoard(self, board1:str, board2:str):
         board1 = board1.split(',')
         board2 = board2.split(',')
