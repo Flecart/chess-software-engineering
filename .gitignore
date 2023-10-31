@@ -2,6 +2,7 @@ monorepo.wiki
 node_modules
 .env
 secrets
+.vscode
 
 # python ignores
 __pycache__
