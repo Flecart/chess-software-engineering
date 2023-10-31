@@ -25,4 +25,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY backend/ ./backend
 COPY default_config.yaml ./
 
+EXPOSE 8000
+
 ENTRYPOINT ["python", "-m", "backend.__init__"]
