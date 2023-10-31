@@ -1,5 +1,10 @@
 # Frontend
 
+## Infrastruttura:
+
+-   Avere `node` e `npm` installato
+-   Eseguire `npm run start`
+
 ## Used libraries
 
 -   [Ant Design](https://ant.design/): UI components
