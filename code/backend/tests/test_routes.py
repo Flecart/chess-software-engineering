@@ -21,7 +21,6 @@ class TestGame(unittest.TestCase):
    def setUp(self):
       config = Config()
       self.base_url = f'http://{config["host"]}:{config["port"]}/game'
-      self.game_id = None
 
    def test_game_base_root(self): # ci andra qualcosa qui?
       res = requests.get(self.base_url)
@@ -49,10 +48,11 @@ class TestGame(unittest.TestCase):
       # Use re.match to check if the 'game-id' value matches the UUID pattern
       self.assertIsNotNone(re.match(uuid_pattern, session_id))
 
-      self.game_id = session_id
 
    def test_game_move(self):
-      
+      res = requests.get(self.base_url + '/start')
+      self.game_id = res.json()['game-id']
+
       with self.subTest(msg='test UUID malformato'):
          bad_id = 'aa-bb-0042'
          res_bad_id = requests.get(f'{self.base_url}/{bad_id}/move/e4f1')
@@ -85,11 +85,11 @@ class TestGame(unittest.TestCase):
          self.assertIn('game-ended',good_json)
          self.assertIn('board',good_json)
 
-         # board = good_json['board'] TODO
+         board = good_json['board']
 
-         # board_pattern = r''
+         board_pattern = r'([RNBQKPprnbqk\.X]+\\n){7}([RNBQKPprnbqk\.X]+)'
          
-         # self.assertIsNone(re.match(board,board_pattern))
+         self.assertIsNone(re.match(board,board_pattern))
 
 
       
