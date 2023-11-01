@@ -311,8 +311,8 @@ class TestPawn(unittest.TestCase):
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.BLACK, Pieces.PAWN)
     
-    def test_en_passant(self):
-        """Check if en passant move is possible"""
+    def test_en_passant_white(self):
+        """Check if en passant move is possible for white"""
         moves = [
             "d2-d4", "a7-a6", "d4-d5", "c7-c5"
         ]
@@ -324,8 +324,21 @@ class TestPawn(unittest.TestCase):
         all_moves = game.board.cell2Figure(4, 5).getMoves()
         self.assertEqual(all_moves, [(4, 6), (3, 6)]) # 3, 6 is the en passant move
 
-    def test_en_passant_declined(self):
-        """Check if after one move the en passant board is not possible"""
+    def test_en_passant_black(self):
+        """Check if en passant move is possible for black"""
+        moves = [
+            "b1-c3", "e7-e5", "g1-f3", "e5-e4", "d2-d4"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        all_moves = game.board.cell2Figure(5, 4).getMoves()
+        self.assertEqual(all_moves, [(5, 3), (6, 3), (4, 3)]) # 3, 6 is the en passant move
+
+    def test_en_passant_declined_white(self):
+        """Check after one move if en passant is not possible anymore for white"""
         
         moves = [
             "d2-d4", "a7-a6", "d4-d5", "c7-c5", "b1-c3", "a6-a5"
@@ -338,6 +351,18 @@ class TestPawn(unittest.TestCase):
         all_moves = game.board.cell2Figure(4, 5).getMoves()
         self.assertEqual(all_moves, [(4, 6)])
 
+    def test_en_passant_declined_black(self):
+        """Check after one move if en passant is not possible anymore for black"""
+        moves = [
+            "b1-c3", "e7-e5", "g1-f3", "e5-e4", "d2-d4", "f8-b4", "a2-a3"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        all_moves = game.board.cell2Figure(5, 4).getMoves()
+        self.assertEqual(all_moves, [(5, 3), (6, 3)])
 
     def assertEqualGameBoard(self, board1:str, board2:str):
         board1 = board1.split(',')

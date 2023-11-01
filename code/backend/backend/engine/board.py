@@ -292,3 +292,8 @@ class Board(object):
             return "-"
 
         return final_string
+    
+    def resetEnPassant(self):
+        for fig in self.figures:
+            if isinstance(fig, Pawn):
+                fig.en_passant = False
