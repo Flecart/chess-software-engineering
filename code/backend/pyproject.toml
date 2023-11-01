@@ -11,6 +11,9 @@ fastapi = "^0.104.0"
 uvicorn = "^0.23.2"
 pyyaml = "^6.0.1"
 
+[tool.poetry.group.test.dependencies]
+requests = "^2.31.0"
+
 [tool.poetry.scripts]
 start = 'backend:start'
 tests = 'tests:tests'
