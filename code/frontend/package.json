@@ -9,6 +9,7 @@
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "preview": "vite preview",
         "test": "vitest",
+        "coverage": "vitest run --coverage",
         "prettier": "prettier --write .",
         "prepare": "cd ../.. && husky install code/frontend/.husky"
     },
@@ -32,6 +33,7 @@
         "@typescript-eslint/eslint-plugin": "^6.0.0",
         "@typescript-eslint/parser": "^6.0.0",
         "@vitejs/plugin-react-swc": "^3.3.2",
+        "@vitest/coverage-istanbul": "^0.34.6",
         "commitizen": "^4.3.0",
         "eslint": "^8.45.0",
         "eslint-plugin-react-hooks": "^4.6.0",
