@@ -302,12 +302,12 @@ class Board(object):
         return final_string
 
     def __pawn_en_passant_capture_check(self, pawn: Pawn, x: int, y: int) -> None:
-        if pawn.y == y: # same column = no capture
+        if pawn.x == x: # same column = no capture
             return
         
         fig = self.cell2Figure(x, y)
         if fig is not None:
-            return # normal capture
+            return # normal capture, pawn captured a piece
 
         captured_fig = None
         if pawn.color == Colors.WHITE:

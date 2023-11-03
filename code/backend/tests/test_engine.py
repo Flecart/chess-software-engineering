@@ -288,19 +288,18 @@ class TestKing(unittest.TestCase):
 
 
 class TestPawn(unittest.TestCase):
-
-    def test_move_1(self):
+    def test_white_upgrade_queen(self):
         game = Game('Pc7,Ke1,ke8')
         self.assertEqual(str(game.board.getFigure(Colors.WHITE, Pieces.PAWN)), 'Pc7')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.WHITE, Pieces.QUEEN)
-        game.move( (3, 7), (3, 8))
+        game.move((3, 7), (3, 8))
         self.assertEqualGameBoard(str(game.board), 'Ke1,ke8,Qc8')
         self.assertEqual(str(game.board.getFigure(Colors.WHITE, Pieces.QUEEN)), 'Qc8')
         with self.assertRaises(errors.NotFoundError):
             game.board.getFigure(Colors.WHITE, Pieces.PAWN)
 
-    def test_move_2(self):
+    def test_black_upgrade_queen(self):
         game = Game('pc2,Ke1,ke8', Colors.BLACK)
         self.assertEqual(str(game.board.getFigure(Colors.BLACK, Pieces.PAWN)), 'pc2')
         with self.assertRaises(errors.NotFoundError):
@@ -336,6 +335,34 @@ class TestPawn(unittest.TestCase):
 
         all_moves = game.board.cell2Figure(5, 4).getMoves()
         self.assertEqual(all_moves, [(5, 3), (6, 3), (4, 3)])
+
+    def test_en_passant_white_accepted(self):
+        """Check if en passant move is possible for white"""
+        moves = [
+            "d2-d4", "a7-a6", "d4-d5", "c7-c5", "d5-c6"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        captured_pawn = game.board.cell2Figure(3, 5)
+        # the pawn has been captured, so no piece should be there anymore
+        self.assertTrue(captured_pawn is None)
+
+    def test_en_passant_black_accepted(self):
+        """Check if en passant move is possible for black"""
+        moves = [
+            "b1-c3", "e7-e5", "g1-f3", "e5-e4", "d2-d4", "e4-d3"
+        ]
+        game = Game()
+        for move in moves:
+            positions = map(coors2pos, move.split('-'))
+            game.move(*positions)
+
+        captured_pawn = game.board.cell2Figure(4, 4)
+        # the pawn has been captured, so no piece should be there anymore
+        self.assertTrue(captured_pawn is None)
 
     def test_en_passant_declined_white(self):
         """Check after one move if en passant is not possible anymore for white"""
