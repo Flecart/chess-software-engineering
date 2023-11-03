@@ -335,7 +335,7 @@ class TestPawn(unittest.TestCase):
             game.move(*positions)
 
         all_moves = game.board.cell2Figure(5, 4).getMoves()
-        self.assertEqual(all_moves, [(5, 3), (6, 3), (4, 3)]) # 3, 6 is the en passant move
+        self.assertEqual(all_moves, [(5, 3), (6, 3), (4, 3)])
 
     def test_en_passant_declined_white(self):
         """Check after one move if en passant is not possible anymore for white"""

@@ -22,7 +22,7 @@ class Pawn(Figure):
             elif self.y > 1:
                 moves.append((self.x, self.y - 1))
             cutMoves = (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)
-        enPassantMoves = (self.x - 1, self.y), (self.x + 1, self.y)
+        en_passant_squares = (self.x - 1, self.y), (self.x + 1, self.y)
 
         for x, y in moves:
             try:
@@ -41,7 +41,7 @@ class Pawn(Figure):
             if fig and self.isEnemy(fig):
                 result.append((x, y))
 
-        for x, y in enPassantMoves:
+        for x, y in en_passant_squares:
             try:
                 fig = self.board.cell2Figure(x, y)
             except OutOfBoardError:
@@ -52,11 +52,6 @@ class Pawn(Figure):
                 else:
                     result.append((x, y - 1))
         self._moves = result
-
-    def allowEnPassant(self, x1: int, y1: int, x2: int, y2: int):
-        if (self.color == Colors.WHITE and y1 == 2 and y2 == 4) or \
-           (self.color == Colors.BLACK and y1 == 7 and y2 == 5):
-            self.en_passant = True
 
     def getVisibleCells(self) -> list[tuple[int, int]]:
         all_moves = self.getMoves()
@@ -73,7 +68,12 @@ class Pawn(Figure):
         
         return all_moves
 
-    def move(self, x, y):
+    def move(self, x: int, y: int):
+        if self.color == Colors.WHITE and self.y == 2 and y == 4:
+            self.en_passant = True
+        elif self.color == Colors.BLACK and self.y == 7 and y == 5:
+            self.en_passant = True
+
         super(Pawn, self).move(x, y)
         if (self.color == Colors.WHITE and y == 8) or (self.color == Colors.BLACK and y == 1):
             self.board.transform(self)

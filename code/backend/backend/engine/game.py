@@ -55,9 +55,6 @@ class Game:
 
         self.board.resetEnPassant()
 
-        if isinstance(figure, Pawn):
-            figure.allowEnPassant(*pos1, *pos2)
-
         if not castled:
             result = figure, '{}-{}'.format(pos2coors(*pos1), pos2coors(*pos2))
             try:

@@ -117,19 +117,21 @@ class Board(object):
         if fig:
             if fig.color == figure.color:
                 raise CellIsBusyError
-            else:
-                if isinstance(fig, King):
-                    if fig.color == Colors.WHITE:
-                        end_game = BlackWon
-                    else:
-                        end_game = WhiteWon
-                self._figure_list.remove(fig)
-                self._cut = fig
-                self._cut_list.append((fig.kind, fig.color))
-                fig.terminate()
+
+            if isinstance(fig, King):
+                if fig.color == Colors.WHITE:
+                    end_game = BlackWon
+                else:
+                    end_game = WhiteWon
+            self._figure_list.remove(fig)
+            self._cut = fig
+            self._cut_list.append((fig.kind, fig.color))
+            fig.terminate()
+
         #TODO(gio): refactor si può mettere in una classe l'oggetto mossa e inoltre non credo 
         # la figura ma basta sapere la figura come enum e il colore, non l'oggetto (che poi rimane in memoria a caso)
         # anche perché poi è difficile loadarle da una serie di mosse
+
         self._moves.append({
             'figure': figure, 
             'x1': figure.x,

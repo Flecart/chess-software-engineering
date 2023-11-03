@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 from ..enums import Colors, Pieces
 from .. import errors
 from ..helpers import pos2coors
@@ -37,10 +39,13 @@ class Figure:
             self.updateMoves()
         return self._moves
 
+    @abstractmethod
     def updateMoves(self):
+        """ Updates the current possible moves of the figure
+        """
         raise NotImplementedError
 
-    def move(self, x, y):
+    def move(self, x: int, y: int):
         if (x, y) not in self.getMoves():
             raise errors.WrongMoveError
         self.board.move(self, x, y)
@@ -80,6 +85,9 @@ class Figure:
         _moves = None
 
     def terminate(self):
+        """ Eliminates the selected piece from the board
+        """
+
         self.board._figures[self.color][self.kind].remove(self)
 
     def getVisibleCells(self):
