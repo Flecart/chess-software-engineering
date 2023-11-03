@@ -113,6 +113,10 @@ class Board(object):
     def move(self, figure, x: int, y: int):
         self._cut = None
         end_game = None
+
+        if isinstance(figure, Pawn):
+            self.__pawn_en_passant_capture_check(figure, x, y)
+
         fig = self.cell2Figure(x, y)
         if fig:
             if fig.color == figure.color:
@@ -123,10 +127,8 @@ class Board(object):
                     end_game = BlackWon
                 else:
                     end_game = WhiteWon
-            self._figure_list.remove(fig)
-            self._cut = fig
-            self._cut_list.append((fig.kind, fig.color))
-            fig.terminate()
+
+            self.__remove_piece(fig)
 
         #TODO(gio): refactor si può mettere in una classe l'oggetto mossa e inoltre non credo 
         # la figura ma basta sapere la figura come enum e il colore, non l'oggetto (che poi rimane in memoria a caso)
@@ -298,3 +300,25 @@ class Board(object):
             return "-"
 
         return final_string
+
+    def __pawn_en_passant_capture_check(self, pawn: Pawn, x: int, y: int) -> None:
+        if pawn.y == y: # same column = no capture
+            return
+        
+        fig = self.cell2Figure(x, y)
+        if fig is not None:
+            return # normal capture
+
+        captured_fig = None
+        if pawn.color == Colors.WHITE:
+            captured_fig = self.cell2Figure(x, y - 1)
+        else:
+            captured_fig = self.cell2Figure(x, y + 1)
+
+        self.__remove_piece(captured_fig)
+
+    def __remove_piece(self, figure: Figure):
+        self._figure_list.remove(figure)
+        self._cut = figure
+        self._cut_list.append((figure.kind, figure.color))
+        figure.terminate()
