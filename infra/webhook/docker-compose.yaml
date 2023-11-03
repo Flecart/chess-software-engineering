@@ -10,7 +10,7 @@ services:
     ports:
       - 5000:80
     volumes:
-      - ../../:/app/deploy:ro
+      - ../../:/app/deploy
       - /usr/libexec/docker:/usr/libexec/docker:ro
       - /usr/bin/docker:/usr/bin/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
