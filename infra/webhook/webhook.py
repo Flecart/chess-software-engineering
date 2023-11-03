@@ -1,5 +1,4 @@
 from flask import Flask, request
-from flask_wtf.csrf import CSRFProtect
 import os
 import subprocess
 import sys
@@ -7,8 +6,6 @@ import threading
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
-csrf = CSRFProtect()
-csrf.init_app(app)
 
 post_script = os.getenv("POST_SCRIPT")
 webhook_token = os.getenv("WEBHOOK_TOKEN")
