@@ -5,7 +5,7 @@ import sys
 import threading
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = False
 
 post_script = os.getenv("POST_SCRIPT")
 webhook_token = os.getenv("WEBHOOK_TOKEN")
