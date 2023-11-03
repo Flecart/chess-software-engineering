@@ -1,6 +1,6 @@
-from typing import Union
 import uvicorn
 import logging
+
 from backend.config import Config
 
 def start():
