@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apt update && apt install -y --no-install-recommends sudo git
 
-RUN pip install flask
+RUN pip install flask Flask-WTF
 
 COPY webhook.py ./webhook.py
 
