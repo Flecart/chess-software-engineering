@@ -17,7 +17,7 @@ services:
       context: ../code/frontend/
       dockerfile: Dockerfile
     ports:
-      - 8080:5173
+      - 3000:5173
     networks:
       - deploy
 
