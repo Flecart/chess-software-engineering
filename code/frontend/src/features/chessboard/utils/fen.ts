@@ -1,3 +1,4 @@
+import type { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
 /**
  * Converts a non standard fen string to a standard fen string
  * the difference between the two is:
@@ -40,22 +41,26 @@ export function generateStandardFen(customFen: string): string {
  *
  * @param customFen the non standard fen string
  */
-export function generateFogObject(customFen: string): {
-    [key: string]: React.CSSProperties;
-} {
-    const fogObject: { [key: string]: React.CSSProperties } = {};
-    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+export function generateFogObject(customFen: string): CustomSquareStyles {
+    const fogObject: CustomSquareStyles = {};
+    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
 
-    for (let i = 0; i < customFen.length; i++) {
-        const char = customFen.charAt(i);
+    // split the fen into an array
+    // each element of the array is a row of the board,
+    // reverse the array so the first element is the row number 1
+    const rowsArray = customFen.split('/').reverse();
 
-        if (char === 'X') {
-            const row = 8 - Math.floor(i / 9);
-            const col = labels.at(i % 9);
-            const key = `${col}${row}`;
-            fogObject[key] = { backgroundColor: 'rgba(21, 21, 21, 0.95)' }; // TODO: create cooler custom fog
+    rowsArray.forEach((row, i) => {
+        for (let j = 0; j < row.length; j++) {
+            const char = row.charAt(j);
+
+            if (char === 'X') {
+                const number = i + 1;
+                const letter = labels.at(j);
+                const key = `${letter}${number}` as Square; // even if I define unexsisting square's key, it's fine because they will be ignored
+                fogObject[key] = { backgroundColor: 'rgba(21, 21, 21, 0.95)' }; // TODO: create cooler custom fog
+            }
         }
-    }
-
+    });
     return fogObject;
 }
