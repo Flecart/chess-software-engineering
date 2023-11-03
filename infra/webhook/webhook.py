@@ -6,6 +6,8 @@ import threading
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 post_script = os.getenv("POST_SCRIPT")
 webhook_token = os.getenv("WEBHOOK_TOKEN")
@@ -32,8 +34,6 @@ def root():
 
     if not request_token or request_token != webhook_token:
         return "Unauthorized", 401
-
-    data = request.get_json()
 
     event_type = request.headers.get('X-Gitlab-Event')
 

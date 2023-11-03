@@ -1,5 +1,8 @@
 FROM python:3.11 as builder
 
+RUN adduser -D worker
+USER worker
+
 RUN pip install poetry
 
 ENV POETRY_NO_INTERACTION=1 \
