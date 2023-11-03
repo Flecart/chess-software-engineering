@@ -255,16 +255,20 @@ class Board(object):
         # also the number of semimoves is debatable in this verion of chess
 
         black_moves = len(self._moves) // 2
-        print(self._moves)
-        print(len(self._moves))
         return f"{'/'.join(rows)} {current_player} {self.__compute_castle_string()} - 0 {1 + black_moves}" 
 
     def toTextChessBoard(self) -> str:
+        # TODO: use me
         out = [['.' for _ in range(8)] for _ in range(8) ]
-        for pice in self._figure_list:
-            out[pice.y-1][pice.x-1] = pice.symbol
-        
+        for piece in self._figure_list:
+            out[piece.y - 1][piece.x - 1] = piece.symbol
+
         return out.join('\n')
+
+    def resetEnPassant(self):
+        for fig in self.figures:
+            if isinstance(fig, Pawn):
+                fig.en_passant = False
 
     def __compute_castle_string(self) -> str:
         # Check if white king can castle
@@ -294,8 +298,3 @@ class Board(object):
             return "-"
 
         return final_string
-    
-    def resetEnPassant(self):
-        for fig in self.figures:
-            if isinstance(fig, Pawn):
-                fig.en_passant = False
