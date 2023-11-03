@@ -22,7 +22,7 @@ test_frontend:
 
 test_backend:
   stage: test
-  image: python:3.11
+  image: python:3.11-bookworm
   before_script:
     - curl -sSL https://install.python-poetry.org | python3 -
     - export PATH="$HOME/.local/bin:$PATH"
