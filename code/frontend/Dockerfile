@@ -16,6 +16,9 @@ WORKDIR /app
 
 COPY --from=build /app/dist ./public
 
+# so http-server always returns index.html, for SPA
+RUN mv ./public/index.html ./public/404.html
+
 RUN npm install -g http-server
 
 EXPOSE 5173
