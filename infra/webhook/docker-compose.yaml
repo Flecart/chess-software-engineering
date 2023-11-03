@@ -1,0 +1,21 @@
+version: "3.5"
+
+services:
+  webhook:
+    image: t1-check-mates/webhook
+    container_name: t1-check-mates-webhook
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:80
+    volumes:
+      - ../../:/app/deploy
+      - ${GITLABUSER}/.gitconfig:/root/.gitconfig:ro
+      - ${GITLABUSER}/.git-credentials:/root/.git-credentials
+      - /usr/libexec/docker:/usr/libexec/docker:ro
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - WEBHOOK_TOKEN=${WEBHOOK_TOKEN}
+      - POST_SCRIPT=cd deploy && infra/deploy.sh
