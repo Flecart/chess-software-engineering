@@ -2,7 +2,7 @@ FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
-RUN apt update && apt install --no-install-recommends sudo
+RUN apt update && apt install -y --no-install-recommends sudo git
 
 RUN pip install flask
 
