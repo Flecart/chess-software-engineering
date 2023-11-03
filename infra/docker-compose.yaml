@@ -1,0 +1,36 @@
+version: "3.5"
+
+services:
+  backend:
+    image: t1-check-mates/backend
+    container_name: t1-check-mates-backend
+    build:
+      context: ../code/backend/
+      dockerfile: Dockerfile
+    networks:
+      - deploy
+
+  frontend:
+    image: t1-check-mates/frontend
+    container_name: t1-check-mates-frontend
+    build:
+      context: ../code/frontend/
+      dockerfile: Dockerfile
+    ports:
+      - 8080:5173
+    networks:
+      - deploy
+
+  bot:
+    image: t1-check-mates/bot
+    container_name: t1-check-mates-bot
+    build:
+      context: ../code/bot/
+      dockerfile: Dockerfile
+    environment:
+      - "TELEGRAM_TOKEN=${TELEGRAM_TOKEN}"
+    networks:
+      - deploy
+
+networks:
+  deploy:
