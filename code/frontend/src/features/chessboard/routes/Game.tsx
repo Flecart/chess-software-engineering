@@ -1,8 +1,9 @@
-import { Button } from 'antd';
-import { Chessboard } from '../components/Chessboard';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { startGame } from '../api/game';
 import { frontendUrl } from '@/config';
+import { UserOutlined } from '@ant-design/icons';
+import { useNavigate } from '@tanstack/react-router';
+import { Avatar, Button, Flex, Typography } from 'antd';
+import { startGame } from '../api/game';
+import { Chessboard } from '../components/Chessboard';
 
 type Props = {
     useParams: () => { gameId?: string };
@@ -34,12 +35,31 @@ export const Game = ({ useParams, useSearch }: Props) => {
             </Button>
 
             {gameStarted && (
-                <Link to="/game/$gameId" params={{ gameId }} search={{ boardOrientation: opponentBoardOrientation }}>
-                    {frontendUrl}/game/{gameId}?boardOrientation=
-                    {opponentBoardOrientation}
-                </Link>
+                <Typography.Paragraph
+                    copyable={{ text: `${frontendUrl}/game/${gameId}?boardOrientation=${opponentBoardOrientation}` }}
+                >
+                    Copia il link per invitare qualcuno
+                </Typography.Paragraph>
             )}
-            {gameStarted && <Chessboard gameId={gameId} boardOrientation={boardOrientation} />}
+            {gameStarted && (
+                <Flex vertical gap="small" style={{ margin: '0 auto', width: 'fit-content' }}>
+                    <Flex align="center" gap="small" style={{ flexDirection: 'row-reverse' }}>
+                        <Avatar shape="square" icon={<UserOutlined />} />
+                        <p>{boardOrientation === 'black' ? 'Bianco' : 'Nero'}</p>
+                        {/* space filler */}
+                        <div style={{ width: '100%' }}></div>
+                        <div style={{ border: '1px solid', borderRadius: '3px', padding: '3px' }}>Timer</div>
+                    </Flex>
+                    <Chessboard gameId={gameId} boardOrientation={boardOrientation} />
+                    <Flex align="center" gap="small">
+                        <Avatar shape="square" icon={<UserOutlined />} />
+                        <p>{boardOrientation === 'black' ? 'Nero' : 'Bianco'}</p>
+                        {/* space filler */}
+                        <div style={{ width: '100%' }}></div>
+                        <div style={{ border: '1px solid', borderRadius: '3px', padding: '3px' }}>Timer</div>
+                    </Flex>
+                </Flex>
+            )}
         </>
     );
 };

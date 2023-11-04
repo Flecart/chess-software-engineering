@@ -10,17 +10,18 @@ const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/')
 type Props = {
     gameId: string;
     boardOrientation: 'white' | 'black';
+    style?: React.CSSProperties;
 };
 
-export const Chessboard = ({ gameId, boardOrientation }: Props) => {
+export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
     const [fen, setFen] = useState(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
     return (
         <div
             style={{
-                width: `70vw`,
+                width: 'max(70vw, 250px)',
                 maxWidth: '70vh',
-                margin: '3rem auto',
+                ...style,
             }}
         >
             <ReactChessboard

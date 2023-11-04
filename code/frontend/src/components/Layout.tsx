@@ -1,7 +1,7 @@
 import { Layout as LibLayout, Menu } from 'antd';
 import { Link, Outlet } from '@tanstack/react-router';
 import { PlayCircleOutlined, RobotOutlined, TrophyOutlined } from '@ant-design/icons';
-import ChessLogo from '@public/colored_knight.svg';
+import ChessLogo from '/colored_knight.svg';
 import type { MenuProps } from 'antd';
 
 const { Sider, Content } = LibLayout;
