@@ -1,7 +1,5 @@
 FROM node:21-bookworm-slim as build
 
-USER node
-
 WORKDIR /app
 
 COPY . ./
