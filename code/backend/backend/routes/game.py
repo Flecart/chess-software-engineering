@@ -45,6 +45,13 @@ def create_game_routes(app: FastAPI):
 
     @app.get(prefix + "/{session_id}/moves")
     def get_moves(session_id: uuid.UUID):
-        return ChessGameManager().get_game(session_id).moves
+        moves = ChessGameManager().get_game(session_id).moves
+        end_result = []
+        for move in moves:
+            item  = dict(**move)
+            item["figure"] = str(item["figure"])
+            end_result.append(item)
+
+        return end_result
 
         
