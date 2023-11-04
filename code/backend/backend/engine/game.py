@@ -1,4 +1,6 @@
-from .errors import WrongTurnError, NotFoundError, WrongFigureError, EndGame
+from typing import Literal
+
+from .errors import  NotFoundError, WrongFigureError, EndGame
 from .board import Board
 from .enums import Colors, Pieces
 from .helpers import invert_color, pos2coors
@@ -37,6 +39,18 @@ class Game:
         color = self.current_player
         if last_player_view:
             color = invert_color(color)
+
+        return self.board.get_view(color)
+
+    def get_color_board_view(self, color: Literal["white"] | Literal["black"]) -> str:
+        """Returns the board view for the specified color
+        """
+        if color == "white":
+            color = Colors.WHITE
+        elif color == "black":
+            color = Colors.BLACK
+        else:
+            raise ValueError("Invalid color")
 
         return self.board.get_view(color)
 

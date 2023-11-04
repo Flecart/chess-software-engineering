@@ -13,17 +13,24 @@ def create_game_routes(app: FastAPI):
             "game-id": ChessGameManager().create_game()
         }
 
-    # @app.get(prefix + "/{game_id}/board/{player}")
-    # def get_board(game_id: uuid.UUID, player: int):
-    #     game = ChessGameManager().get_game(game_id)
-    #     if game is None:
-    #         return JSONResponse({
-    #             "error": "game not found"
-    #         }, status_code=404)
+    @app.get(prefix + "/{game_id}/board/{player}")
+    def get_board(game_id: uuid.UUID, player: str):
+        # TODO: we should refactor these endpoints so that we have a form of authentication
+
+        if player != "white" and player != "black":
+            return JSONResponse({
+                "error": "Invalid player"
+            }, status_code=400)
+
+        game = ChessGameManager().get_game(game_id)
+        if game is None:
+            return JSONResponse({
+                "error": "game not found"
+            }, status_code=404)
         
-    #     return {
-    #         "board": game.get_board_view(player)
-    #     }
+        return {
+            "board": game.get_color_board_view(player)
+        }
 
     @app.get(prefix + "/{game_id}/move/{move}", status_code=200) # TODO: move me to POST
     def move(game_id: uuid.UUID, move: str):
