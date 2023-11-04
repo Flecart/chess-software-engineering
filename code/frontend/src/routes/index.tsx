@@ -1,7 +1,7 @@
 import { Layout } from '@/components/Layout';
 import { RootRoute, Route, Router } from '@tanstack/react-router';
 import { gameRoutes } from './game';
-import { ToBeImplemented } from '@/components/ToBeImplemented';
+import { ToBeImplemented } from '@/features/misc/';
 
 export const rootRoute = new RootRoute({ component: Layout });
 
