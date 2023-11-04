@@ -3,6 +3,7 @@ from .board import Board
 from .enums import Colors, Pieces
 from .helpers import invert_color, pos2coors
 from .figures import King
+from .figures import Pawn
 
 class Game:
     def __init__(self, 
@@ -51,6 +52,8 @@ class Game:
         except EndGame as exc:
             exc.figure = figure
             raise exc
+
+        self.board.resetEnPassant()
 
         if not castled:
             result = figure, '{}-{}'.format(pos2coors(*pos1), pos2coors(*pos2))

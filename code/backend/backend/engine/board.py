@@ -113,23 +113,27 @@ class Board(object):
     def move(self, figure, x: int, y: int):
         self._cut = None
         end_game = None
+
+        if isinstance(figure, Pawn):
+            self.__pawn_en_passant_capture_check(figure, x, y)
+
         fig = self.cell2Figure(x, y)
         if fig:
             if fig.color == figure.color:
                 raise CellIsBusyError
-            else:
-                if isinstance(fig, King):
-                    if fig.color == Colors.WHITE:
-                        end_game = BlackWon
-                    else:
-                        end_game = WhiteWon
-                self._figure_list.remove(fig)
-                self._cut = fig
-                self._cut_list.append((fig.kind, fig.color))
-                fig.terminate()
+
+            if isinstance(fig, King):
+                if fig.color == Colors.WHITE:
+                    end_game = BlackWon
+                else:
+                    end_game = WhiteWon
+
+            self.__remove_piece(fig)
+
         #TODO(gio): refactor si può mettere in una classe l'oggetto mossa e inoltre non credo 
         # la figura ma basta sapere la figura come enum e il colore, non l'oggetto (che poi rimane in memoria a caso)
         # anche perché poi è difficile loadarle da una serie di mosse
+
         self._moves.append({
             'figure': figure, 
             'x1': figure.x,
@@ -253,16 +257,20 @@ class Board(object):
         # also the number of semimoves is debatable in this verion of chess
 
         black_moves = len(self._moves) // 2
-        print(self._moves)
-        print(len(self._moves))
         return f"{'/'.join(rows)} {current_player} {self.__compute_castle_string()} - 0 {1 + black_moves}" 
 
     def toTextChessBoard(self) -> str:
+        # TODO: use me
         out = [['.' for _ in range(8)] for _ in range(8) ]
-        for pice in self._figure_list:
-            out[pice.y-1][pice.x-1] = pice.symbol
-        
+        for piece in self._figure_list:
+            out[piece.y - 1][piece.x - 1] = piece.symbol
+
         return out.join('\n')
+
+    def resetEnPassant(self):
+        for fig in self.figures:
+            if isinstance(fig, Pawn):
+                fig.en_passant = False
 
     def __compute_castle_string(self) -> str:
         # Check if white king can castle
@@ -292,3 +300,25 @@ class Board(object):
             return "-"
 
         return final_string
+
+    def __pawn_en_passant_capture_check(self, pawn: Pawn, x: int, y: int) -> None:
+        if pawn.x == x: # same column = no capture
+            return
+        
+        fig = self.cell2Figure(x, y)
+        if fig is not None:
+            return # normal capture, pawn captured a piece
+
+        captured_fig = None
+        if pawn.color == Colors.WHITE:
+            captured_fig = self.cell2Figure(x, y - 1)
+        else:
+            captured_fig = self.cell2Figure(x, y + 1)
+
+        self.__remove_piece(captured_fig)
+
+    def __remove_piece(self, figure: Figure):
+        self._figure_list.remove(figure)
+        self._cut = figure
+        self._cut_list.append((figure.kind, figure.color))
+        figure.terminate()
