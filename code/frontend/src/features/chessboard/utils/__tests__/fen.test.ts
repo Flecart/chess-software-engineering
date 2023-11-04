@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generateFogObject, generateStandardFen } from '../fen';
+import type { CustomSquareStyles } from 'react-chessboard/dist/chessboard/types';
 
 describe('generateStandardFen', () => {
     it('should generate a standard FEN string from a already standard FEN string', () => {
@@ -26,6 +27,13 @@ describe('generateStandardFen', () => {
     it('should handle a string with the last row empty in the custom FEN string', () => {
         const customFen = 'XXXX.XXX/XXXXXXXX/......../......../......../PPPPPPPP/RNBQKBNR/........';
         const expectedFen = '8/8/8/8/8/PPPPPPPP/RNBQKBNR/8';
+        const result = generateStandardFen(customFen);
+        expect(result).toEqual(expectedFen);
+    });
+
+    it('should handle a string with . mixed with X and numbers in the custom FEN string', () => {
+        const customFen = 'XXXXXX.X/XXnXXX.X/XX.p1p2/XX3P.X/pp1PNB2/3X.X.P/PP5Q/K1R3R1';
+        const expectedFen = '8/2n5/3p1p2/5P2/pp1PNB2/7P/PP5Q/K1R3R1';
         const result = generateStandardFen(customFen);
         expect(result).toEqual(expectedFen);
     });
@@ -78,6 +86,34 @@ describe('generateFogObject', () => {
                 expectedFogObject[key] = { backgroundColor: 'rgba(21, 21, 21, 0.95)' };
             }
         }
+        const result = generateFogObject(customFen);
+        expect(result).toEqual(expectedFogObject);
+    });
+
+    it('should generate a correct fog object using an advanced game position custom FEN string', () => {
+        const customFen = 'XXXXXX.X/XXnXXX.X/XX.p1p2/XX...P.X/pp1PNB2/...X.X.P/PP5Q/K1R3R1';
+        const expectedFogObject: CustomSquareStyles = {
+            a8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            b8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            c8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            d8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            e8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            f8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            h8: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            a7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            b7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            d7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            e7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            f7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            h7: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            a6: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            b6: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            a5: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            b5: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            h5: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            d3: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+            f3: { backgroundColor: 'rgba(21, 21, 21, 0.95)' },
+        };
         const result = generateFogObject(customFen);
         expect(result).toEqual(expectedFogObject);
     });
