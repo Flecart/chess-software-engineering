@@ -1,7 +1,9 @@
+import { Layout } from '@/components/Layout';
 import { RootRoute, Route, Router } from '@tanstack/react-router';
 import { gameRoutes } from './game';
+import { ToBeImplemented } from '@/components/ToBeImplemented';
 
-export const rootRoute = new RootRoute();
+export const rootRoute = new RootRoute({ component: Layout });
 
 export const indexRoute = new Route({
     getParentRoute: () => rootRoute,
@@ -9,7 +11,13 @@ export const indexRoute = new Route({
     component: () => <h1>Landing Page</h1>,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, gameRoutes]);
+export const notFoundRoute = new Route({
+    getParentRoute: () => rootRoute,
+    path: '404',
+    component: ToBeImplemented,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, gameRoutes, notFoundRoute]);
 
 export const router = new Router({ routeTree });
 
