@@ -1,8 +1,10 @@
-from typing import Union
-from backend.game.ChessGameManager import ChessGameManager
-from backend.engine.helpers import validate_move_format
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 import uuid
+
+from backend.game.ChessGameManager import ChessGameManager
+from backend.game.ChessGame import ChessGame
+from backend.engine.helpers import validate_move_format
 
 def create_game_routes(app: FastAPI):
     prefix = '/game'
@@ -13,24 +15,44 @@ def create_game_routes(app: FastAPI):
             "game-id": ChessGameManager().create_game()
         }
 
-    @app.get(prefix + "/{session_id}/move/{move}")
-    def move(session_id: uuid.UUID, move: str):
-        if not validate_move_format(move):
-            return {
-                "error": "Invalid move format"
-            }
+    @app.get(prefix + "/{game_id}/board/{player}")
+    def get_board(game_id: uuid.UUID, player: str):
+        # TODO: we should refactor these endpoints so that we have a form of authentication
 
-        game = ChessGameManager().get_game(session_id)
+        if player != "white" and player != "black":
+            return JSONResponse({
+                "error": "Invalid player"
+            }, status_code=400)
+
+        game = ChessGameManager().get_game(game_id)
         if game is None:
-            return {
-                "error": "game not found"
-            }
+            return JSONResponse({
+                "error": "Game not found"
+            }, status_code=404)
+
+        return {
+            "has_enemy_moved": game.has_moved(ChessGame.invert_colors(player)),
+            "board": game.get_color_board_view(player)
+        }
+
+    @app.get(prefix + "/{game_id}/move/{move}", status_code=200) # TODO: move me to POST
+    def move(game_id: uuid.UUID, move: str):
+        if not validate_move_format(move):
+            return JSONResponse({
+                "error": "Invalid move format"
+            }, status_code=400)
+
+        game = ChessGameManager().get_game(game_id)
+        if game is None:
+            return JSONResponse({
+                "error": "Game not found"
+            }, status_code=404)
         
         move_successful = game.add_move(move)
         if not move_successful:
-            return {
+            return JSONResponse({
                 "error": "Invalid move"
-            }
+            }, status_code=400)
         
         if game.has_ended():
             return {
@@ -43,9 +65,9 @@ def create_game_routes(app: FastAPI):
             "board": game.get_board_view()
         }
 
-    @app.get(prefix + "/{session_id}/moves")
-    def get_moves(session_id: uuid.UUID):
-        moves = ChessGameManager().get_game(session_id).moves
+    @app.get(prefix + "/{game_id}/moves", status_code=200)
+    def get_moves(game_id: uuid.UUID):
+        moves = ChessGameManager().get_game(game_id).moves
         end_result = []
         for move in moves:
             item  = dict(**move)

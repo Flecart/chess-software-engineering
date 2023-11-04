@@ -1,3 +1,5 @@
+from typing import Literal
+
 from ..engine import Game as DarkChessGame
 from ..engine import helpers
 from ..engine import errors
@@ -20,6 +22,14 @@ class ChessGame:
     def get_board_view(self) -> str:
         """Returns the current board view"""
         return self.game.get_board_view()
+    
+    def get_color_board_view(self, color: Literal["white"] | Literal["black"]) -> str:
+        """Returns the current board view for the specified color"""
+        return self.game.get_color_board_view(color)
+    
+    def has_moved(self, color: Literal["white"] | Literal["black"]) -> bool:
+        """Returns True if the player with that color has moved, False otherwise"""
+        return self.game.has_moved(color)
 
     def has_ended(self) -> bool:
         """Returns True if the game has ended, False otherwise"""
@@ -46,3 +56,12 @@ class ChessGame:
             self.has_game_ended = True
         
         return True
+
+    def invert_colors(color: Literal["white"] | Literal["black"]) -> Literal["white"] | Literal["black"]:
+        """Inverts the color"""
+        if color == "white":
+            return "black"
+        elif color == "black":
+            return "white"
+        else:
+            raise ValueError("Invalid color")

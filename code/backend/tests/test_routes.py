@@ -24,7 +24,7 @@ class TestGame(unittest.TestCase):
 
    def test_game_base_root(self): # ci andra qualcosa qui?
       res = requests.get(self.base_url)
-      self.assertEqual(res.status_code,404)
+      self.assertEqual(res.status_code, 404)
 
    def test_create_game(self):
       # Make an HTTP GET request to your API endpoint
@@ -51,7 +51,7 @@ class TestGame(unittest.TestCase):
 
    def test_game_move(self):
       res = requests.get(self.base_url + '/start')
-      self.game_id = res.json()['game-id']
+      self.game_id = res.json()['game_id']
 
       with self.subTest(msg='test UUID malformato'):
          bad_id = 'aa-bb-0042'
@@ -61,8 +61,8 @@ class TestGame(unittest.TestCase):
       with self.subTest(msg='test gameID inesistente'):
          inexitent_id = '21ec318f-b3a7-4d82-bb1e-cd479422baf1' # ...well highly improbable
          res_nex_id = requests.get(f'{self.base_url}/{inexitent_id}/move/e4f1')
-         self.assertEqual(res_nex_id.status_code,404)
-         self.assertEqual(res_nex_id.json(),{"error":"Game not found"})
+         self.assertEqual(res_nex_id.status_code, 404)
+         self.assertEqual(res_nex_id.json(), {"error": "Game not found"})
 
       with self.subTest(msg='test meaningless move'):
          bad_move_format = 'z3kg'
@@ -82,7 +82,7 @@ class TestGame(unittest.TestCase):
          self.assertEqual(res_good_move.status_code,200)
 
          good_json = res_good_move.json()
-         self.assertIn('game-ended',good_json)
+         self.assertIn('game_ended',good_json)
          self.assertIn('board',good_json)
 
          board = good_json['board']
