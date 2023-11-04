@@ -1,2 +1,1 @@
-export * from './components/Chessboard';
-export * from './routes/Game';
+export * from './routes';
