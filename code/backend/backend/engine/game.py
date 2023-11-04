@@ -19,8 +19,8 @@ class Game:
             current_player (Colors, optional): Current player. Defaults to Colors.WHITE.
             cut (list[Pieces], optional): List of cut figures (probably (TODO: check me) the pieces not present in the board). Defaults to [].
         """
-        self.board = Board(figures, cut)
-        self.current_player = current_player
+        self.board: Board = Board(figures, cut)
+        self.current_player: Colors = current_player
 
     def __str__(self):
         return self.board.__str__()
@@ -28,6 +28,7 @@ class Game:
     @property
     def moves(self):
         return self.board.moves
+
 
     def compute_fen(self):
         return self.board.compute_fen(self.current_player)
@@ -41,6 +42,18 @@ class Game:
             color = invert_color(color)
 
         return self.board.get_view(color)
+    
+    def has_moved(self, color: Literal["white"] | Literal["black"]) -> bool:
+        """Returns True if the player with that color has moved, False otherwise
+        """
+        if color == "white":
+            color = Colors.WHITE
+        elif color == "black":
+            color = Colors.BLACK
+        else:
+            raise ValueError("Invalid color")
+
+        return color != self.current_player
 
     def get_color_board_view(self, color: Literal["white"] | Literal["black"]) -> str:
         """Returns the board view for the specified color

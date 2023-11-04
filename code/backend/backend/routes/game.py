@@ -1,8 +1,10 @@
-from backend.game.ChessGameManager import ChessGameManager
-from backend.engine.helpers import validate_move_format
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import uuid
+
+from backend.game.ChessGameManager import ChessGameManager
+from backend.game.ChessGame import ChessGame
+from backend.engine.helpers import validate_move_format
 
 def create_game_routes(app: FastAPI):
     prefix = '/game'
@@ -29,6 +31,7 @@ def create_game_routes(app: FastAPI):
             }, status_code=404)
         
         return {
+            "has_moved": game.has_moved(ChessGame.invert_colors(player)),
             "board": game.get_color_board_view(player)
         }
 
