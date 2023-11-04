@@ -27,11 +27,11 @@ def create_game_routes(app: FastAPI):
         game = ChessGameManager().get_game(game_id)
         if game is None:
             return JSONResponse({
-                "error": "game not found"
+                "error": "Game not found"
             }, status_code=404)
-        
+
         return {
-            "has_moved": game.has_moved(ChessGame.invert_colors(player)),
+            "has_enemy_moved": game.has_moved(ChessGame.invert_colors(player)),
             "board": game.get_color_board_view(player)
         }
 
@@ -45,7 +45,7 @@ def create_game_routes(app: FastAPI):
         game = ChessGameManager().get_game(game_id)
         if game is None:
             return JSONResponse({
-                "error": "game not found"
+                "error": "Game not found"
             }, status_code=404)
         
         move_successful = game.add_move(move)
