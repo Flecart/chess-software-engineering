@@ -19,6 +19,8 @@ export function generateStandardFen(customFen: string): string {
             emptySpaces++;
         } else if (char === 'X') {
             emptySpaces++;
+        } else if (char >= '0' && char <= '9') {
+            emptySpaces += parseInt(char);
         } else {
             if (emptySpaces > 0) {
                 fen += emptySpaces;
@@ -26,10 +28,10 @@ export function generateStandardFen(customFen: string): string {
             }
             fen += char;
         }
+    }
 
-        if (i === customFen.length - 1 && emptySpaces > 0) {
-            fen += emptySpaces;
-        }
+    if (emptySpaces > 0) {
+        fen += emptySpaces;
     }
 
     return fen;
