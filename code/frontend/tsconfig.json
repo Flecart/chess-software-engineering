@@ -29,8 +29,7 @@
         /* Absolute imports */
         "baseUrl": ".",
         "paths": {
-            "@/*": ["./src/*"],
-            "@public/*": ["./public/*"]
+            "@/*": ["./src/*"]
         }
     },
     "include": ["src"],

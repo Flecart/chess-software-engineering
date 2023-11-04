@@ -8,10 +8,7 @@ import { fileURLToPath, URL } from 'url';
 export default defineConfig({
     plugins: [react()],
     resolve: {
-        alias: [
-            { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
-            { find: '@public', replacement: fileURLToPath(new URL('./public', import.meta.url)) },
-        ],
+        alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
     },
 
     test: {
