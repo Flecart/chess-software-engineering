@@ -7,6 +7,7 @@ services:
     build:
       context: ../code/backend/
       dockerfile: Dockerfile
+      no_cache: true
     networks:
       - deploy
 
@@ -16,6 +17,7 @@ services:
     build:
       context: ../code/frontend/
       dockerfile: Dockerfile
+      no_cache: true
     ports:
       - 3000:5173
     networks:
@@ -27,6 +29,7 @@ services:
     build:
       context: ../code/bot/
       dockerfile: Dockerfile
+      no_cache: true
     environment:
       - "TELEGRAM_TOKEN=${TELEGRAM_TOKEN}"
     networks:
