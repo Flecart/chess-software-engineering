@@ -17,7 +17,7 @@ class Game:
         Args:
             figures (str | None, optional): If None, then a new game will be created. Defaults to None.
             current_player (Colors, optional): Current player. Defaults to Colors.WHITE.
-            cut (list[Pieces], optional): List of cut figures (probably (TODO: check me) the pieces not present in the board). Defaults to [].
+            cut (list[Pieces], optional): List of cut figures (probably the pieces not present in the board, needs to check this). Defaults to [].
         """
         self.board: Board = Board(figures, cut)
         self.current_player: Colors = current_player
@@ -29,13 +29,14 @@ class Game:
     def moves(self):
         return self.board.moves
 
-
     def compute_fen(self):
         return self.board.compute_fen(self.current_player)
 
+    def get_color_board_view(self, color: Colors) -> str:
+        return self.board.get_view(color)
+
     def get_board_view(self, last_player_view: bool = True) -> str:
         """Returns the board view after the last players move.
-        
         """
         color = self.current_player
         if last_player_view:
@@ -94,3 +95,6 @@ class Game:
 
         self.current_player = invert_color(self.current_player)
         return result
+    
+    def get_moves(self):
+        return self.board.moves
