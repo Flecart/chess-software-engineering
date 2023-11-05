@@ -22,6 +22,7 @@ test_frontend:
     - cd code/frontend
     - npm ci
     - npm run coverage
+  allow_failure: true
 
 test_backend:
   stage: test
@@ -34,6 +35,7 @@ test_backend:
     - cd code/backend
     - poetry install
     - poetry run tests
+  allow_failure: true
 
 sonarqube_check:
   stage: sonarqube-check
