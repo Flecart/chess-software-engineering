@@ -11,10 +11,9 @@ type Props = {
     gameId: string;
     boardOrientation: 'white' | 'black';
     style?: React.CSSProperties;
-    gameIsEnded: () => void;
 };
 
-export const Chessboard = ({ gameId, boardOrientation, style, gameIsEnded }: Props) => {
+export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
     const [fen, setFen] = useState(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
     useEffect(() => {
@@ -52,12 +51,9 @@ export const Chessboard = ({ gameId, boardOrientation, style, gameIsEnded }: Pro
                         (boardOrientation === 'white' && piece.startsWith('b'))
                     )
                         return false;
-                    makeMove(gameId, `${from}${to}`)
-                        .then((res) => {
-                            if (res.game_ended) gameIsEnded();
-                            else setFen(res.board.split('\n').reverse().join('/'));
-                        })
-                        .catch((_) => gameIsEnded());
+                    makeMove(gameId, `${from}${to}`).then((res) => {
+                        setFen(res.board.split('\n').reverse().join('/'));
+                    });
                     return true; //TODO: seems like it doesn't matter the return value, investigate
                 }}
             />
