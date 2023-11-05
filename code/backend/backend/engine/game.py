@@ -37,7 +37,6 @@ class Game:
 
     def get_board_view(self, last_player_view: bool = True) -> str:
         """Returns the board view after the last players move.
-        
         """
         color = self.current_player
         if last_player_view:

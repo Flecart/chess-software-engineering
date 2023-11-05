@@ -35,8 +35,12 @@ class ChessGame:
         """Returns the moves of the current game"""
         return self.game.moves
 
-    def get_board_view(self, color: Colors) -> str:
+    def get_board_view(self, color: Colors | None) -> str:
         """Returns the current board view"""
+        # TODO: da eliminare una volta che le vecchie api sono deprecate
+        if color == None:
+            return self.game.get_board_view()
+
         return self.game.get_color_board_view(color)
 
     def get_color_board_view(self, color: Literal["white"] | Literal["black"]) -> str:
@@ -66,8 +70,24 @@ class ChessGame:
         self.player[color] = player
         return color
 
+    def add_move_old(self, move: str) -> bool:
+        # TODO: old version of the move format, remove this
+        # in the next versions (after you have an auth system, and identify the players)
+        start_position = helpers.coors2pos(move[:2])
+        end_position = helpers.coors2pos(move[2:])
 
-    def add_move(self,player:Player, move: str) -> bool:
+        try: 
+            self.game.move(start_position, end_position)
+        except (errors.NotFoundError, errors.WrongFigureError, errors.WrongMoveError):
+            return False
+        except errors.EndGame:
+            # TODO: test what happens when you move even if the game has ended
+            self.has_game_ended = True
+        
+        return True
+
+
+    def add_move(self, player: Player, move: str) -> bool:
         """Adds a move to the current game
         
         Returns:
@@ -84,12 +104,11 @@ class ChessGame:
         start_position = helpers.coors2pos(move[:2])
         end_position = helpers.coors2pos(move[2:])
 
-
         if color != self.game.current_player:
             raise errors.WrongTurnError()
         try: 
             self.game.move(start_position, end_position)
-            #TODO(gio):gestire la fine della partita
+            # TODO(gio):gestire la fine della partita
             next = self.game.current_player
             self.player[next].update_move(self.get_board_view(next))
         except errors.EndGame:

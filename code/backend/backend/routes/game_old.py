@@ -47,8 +47,8 @@ def create_game_routes(app: FastAPI):
             return JSONResponse({
                 "error": "Game not found"
             }, status_code=404)
-        
-        move_successful = game.add_move(move)
+
+        move_successful = game.add_move_old(move)
         if not move_successful:
             return JSONResponse({
                 "error": "Invalid move"
@@ -62,7 +62,7 @@ def create_game_routes(app: FastAPI):
         # return the board representation
         return {
             "game_ended": False,
-            "board": game.get_board_view()
+            "board": game.get_board_view(None)
         }
 
     @app.get(prefix + "/{game_id}/moves", status_code=200)
