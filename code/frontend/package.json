@@ -15,7 +15,6 @@
     },
     "dependencies": {
         "@tanstack/react-router": "^0.0.1-beta.195",
-        "@tanstack/router-devtools": "^0.0.1-beta.204",
         "antd": "^5.10.2",
         "axios": "^1.6.0",
         "chess.js": "^1.0.0-beta.6",
@@ -28,6 +27,7 @@
     },
     "devDependencies": {
         "@commitlint/config-conventional": "^18.1.0",
+        "@tanstack/router-devtools": "^0.0.1-beta.205",
         "@total-typescript/ts-reset": "^0.5.1",
         "@types/node": "^20.8.9",
         "@types/react": "^18.2.15",

@@ -2,8 +2,16 @@ import { Layout } from '@/components/Layout';
 import { RootRoute, Route, Router } from '@tanstack/react-router';
 import { gameRoutes } from './game';
 import { Landing, ToBeImplemented } from '@/features/misc/';
+import { RouterDevtools } from '@/components/RouterDevtools';
 
-export const rootRoute = new RootRoute({ component: Layout });
+export const rootRoute = new RootRoute({
+    component: () => (
+        <>
+            <Layout />
+            <RouterDevtools />
+        </>
+    ),
+});
 
 export const indexRoute = new Route({
     getParentRoute: () => rootRoute,
