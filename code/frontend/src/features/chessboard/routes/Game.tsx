@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { frontendUrl } from '@/config';
 import { UserOutlined } from '@ant-design/icons';
 import { useNavigate } from '@tanstack/react-router';
-import { Avatar, Button, Flex, Typography } from 'antd';
+import { Avatar, Button, Flex, Modal, Typography } from 'antd';
 import { startGame } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 
@@ -16,6 +17,19 @@ export const Game = ({ useParams, useSearch }: Props) => {
     const navigate = useNavigate({ from: '/game' });
     const gameStarted = !!gameId && !!boardOrientation;
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
+    const [gameEnded, setGameEnded] = useState(false);
+
+    const gameIsEnded = () => {
+        setGameEnded(true);
+    };
+    const resetGame = () => {
+        setGameEnded(false);
+    };
+
+    const setUpNewGame = () => {
+        resetGame();
+        navigate({ to: '/game' });
+    };
 
     return (
         <>
@@ -50,7 +64,7 @@ export const Game = ({ useParams, useSearch }: Props) => {
                         <div style={{ width: '100%' }}></div>
                         <div style={{ border: '1px solid', borderRadius: '3px', padding: '3px' }}>Timer</div>
                     </Flex>
-                    <Chessboard gameId={gameId} boardOrientation={boardOrientation} />
+                    <Chessboard gameId={gameId} boardOrientation={boardOrientation} gameIsEnded={gameIsEnded} />
                     <Flex align="center" gap="small">
                         <Avatar shape="square" icon={<UserOutlined />} />
                         <p>{boardOrientation === 'black' ? 'Nero' : 'Bianco'}</p>
@@ -60,6 +74,24 @@ export const Game = ({ useParams, useSearch }: Props) => {
                     </Flex>
                 </Flex>
             )}
+
+            {/* Modal to show when game ends */}
+            <Modal
+                title="La partita è terminata"
+                open={gameEnded}
+                centered
+                footer={[
+                    <Button key="newGame" onClick={() => setUpNewGame()}>
+                        Nuova partita
+                    </Button>,
+                    <Button key="backToHome" onClick={() => navigate({ to: '/' })}>
+                        Torna alla home
+                    </Button>,
+                ]}
+                onCancel={() => setUpNewGame()}
+            >
+                <p>Speriamo che tu ti sia divertito</p>
+            </Modal>
         </>
     );
 };
