@@ -58,9 +58,9 @@ sonarqube_check:
   script:
     - sonar-scanner
   allow_failure: true
-  only:
-    - merge_requests
-    - main
+  # only:
+  #   - merge_requests
+  #   - main
 
 # build_frontend:
 #   stage: build
