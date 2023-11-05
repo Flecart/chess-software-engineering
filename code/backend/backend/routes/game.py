@@ -15,7 +15,7 @@ class JoinGame(BaseModel):
     player_id: uuid.UUID
     color: str
 
-def create_game_routes(app: FastAPI, prefix: str=''):
+def create_game_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/game'
 
     @app.get(prefix + "/create")
