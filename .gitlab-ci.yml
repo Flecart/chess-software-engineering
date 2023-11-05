@@ -49,6 +49,9 @@ sonarqube_check:
     key: '${CI_JOB_NAME}'
     paths:
       - .sonar/cache
+  before_script:
+    - ls -al
+    - ls -l ./code/frontend/coverage
   script:
     - sonar-scanner
   allow_failure: true
