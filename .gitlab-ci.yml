@@ -51,7 +51,7 @@ sonarqube_check:
       - .sonar/cache
   before_script:
     - ls -al
-    - ls -l ./code/frontend/coverage
+    - npm -v
   script:
     - sonar-scanner
   allow_failure: true
