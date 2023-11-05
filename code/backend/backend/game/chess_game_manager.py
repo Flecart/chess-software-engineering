@@ -31,8 +31,8 @@ class ChessGameManager:
         gameInstance = self.get_game(game)
         if gameInstance is None:
             raise ValueError("game not found")
-        color=gameInstance.join(player, color)
-        player.join(game,gameInstance.get_board_view(color),gameInstance.current_player,color)
+        color = gameInstance.join(player, color)
+        player.join(game,gameInstance.get_board_view_fen(color),gameInstance.current_player,color)
  
 
     def create_game(self) -> uuid.UUID:

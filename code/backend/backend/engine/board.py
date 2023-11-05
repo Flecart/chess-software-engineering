@@ -225,7 +225,29 @@ class Board(object):
                 if mask[y][x]:
                     view[y][x] = 'X'
 
-        return '/'.join(''.join(row) for row in reversed(view))
+        return '\n'.join(''.join(row) for row in view[::-1])
+    
+    def compute_obscure_fen(self, view:Colors,current_player: Colors) -> str:
+        endFen = ' '.join(self.compute_fen(current_player).split(' ')[1:])
+        board = self.get_view(view)
+        startFen = ''
+        count = 0
+        def resolveCount(count):
+            if count > 0:
+                return str(count)
+            return ''
+
+        for i in range(len(board)):
+            if  board[i] == '\n':
+                startFen += resolveCount(count)+'/'
+                count = 0
+            elif board[i] == '.':
+                count += 1
+            else:
+                startFen += resolveCount(count)+board[i]
+                count = 0
+
+        return startFen.rstrip()+" "+endFen
 
     def compute_fen(self, current_player: Colors) -> str:
         """ Return the Forsyth-Edwards Notation of the board

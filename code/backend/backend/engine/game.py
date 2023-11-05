@@ -29,6 +29,9 @@ class Game:
     def moves(self):
         return self.board.moves
 
+    def compute_fen_color(self, color: Colors):
+        return self.board.compute_obscure_fen(color,self.current_player)
+
     def compute_fen(self):
         return self.board.compute_fen(self.current_player)
 

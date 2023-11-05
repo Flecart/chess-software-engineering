@@ -7,6 +7,7 @@ class ManualMovePlayer(Player):
     def __init__(self):
         self._id = uuid.uuid4()
         self._last_game_state = None
+        self._is_your_turn = None
         
     @property
     def last_game_state(self):

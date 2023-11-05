@@ -15,3 +15,4 @@ class GameMapper(metaclass=SingletonMeta):
 
     def remove(self, user: str):
         self._games.pop(user)
+

@@ -108,6 +108,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         
         return {
             "game_ended": False,
-            "board": game.get_board_view(player._color)
+            "board": game.get_board_view_fen(player._color)
         }
 
