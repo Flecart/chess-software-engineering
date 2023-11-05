@@ -24,7 +24,8 @@ test_frontend:
     - npm run coverage
   allow_failure: true
   artifacts:
-    - code/frontend/coverage/
+    paths:
+      - "code/frontend/coverage/"
 
 test_backend:
   stage: test
@@ -51,9 +52,6 @@ sonarqube_check:
     key: '${CI_JOB_NAME}'
     paths:
       - .sonar/cache
-  before_script:
-    - ls -al
-    - npm -v
   script:
     - sonar-scanner
   allow_failure: true
