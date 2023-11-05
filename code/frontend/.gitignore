@@ -28,3 +28,6 @@ dist-ssr
 # Tests
 coverage
 .scannerwork
+
+# Package files
+package-lock.json
