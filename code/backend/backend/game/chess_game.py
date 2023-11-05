@@ -97,3 +97,12 @@ class ChessGame:
             self.has_game_ended = True
         
         return True
+
+    def invert_colors(color: Literal["white"] | Literal["black"]) -> Literal["white"] | Literal["black"]:
+        """Inverts the color"""
+        if color == "white":
+            return "black"
+        elif color == "black":
+            return "white"
+        else:
+            raise ValueError("Invalid color")
