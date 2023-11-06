@@ -225,7 +225,7 @@ class Board(object):
                 if mask[y][x]:
                     view[y][x] = 'X'
 
-        return '\n'.join(''.join(row) for row in view)
+        return '/'.join(''.join(row) for row in reversed(view))
 
     def compute_fen(self, current_player: Colors) -> str:
         """ Return the Forsyth-Edwards Notation of the board

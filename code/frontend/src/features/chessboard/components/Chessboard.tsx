@@ -18,11 +18,11 @@ export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
 
     useEffect(() => {
         getBoard(gameId, boardOrientation).then((res) => {
-            setFen(res.board.split('\n').reverse().join('/'));
+            setFen(res.board);
         });
         const pollingBoard = setInterval(() => {
             getBoard(gameId, boardOrientation).then((res) => {
-                if (res.has_enemy_moved) setFen(res.board.split('\n').reverse().join('/'));
+                if (res.has_enemy_moved) setFen(res.board);
             });
         }, 1000);
         return () => {
@@ -52,7 +52,7 @@ export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
                     )
                         return false;
                     makeMove(gameId, `${from}${to}`).then((res) => {
-                        setFen(res.board.split('\n').reverse().join('/'));
+                        setFen(res.board);
                     });
                     return true; //TODO: seems like it doesn't matter the return value, investigate
                 }}
