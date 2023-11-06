@@ -11,8 +11,8 @@ services:
       - 5000:80
     volumes:
       - ../../:/app/deploy
-      - ${GITLABUSER}/.gitconfig:/root/.gitconfig
-      - ${GITLABUSER}/.git-credentials:/root/.git-credentials
+      - ${GITLABUSER}/.gitconfig:/home/nonroot/.gitconfig:ro
+      - ${GITLABUSER}/.git-credentials:/home/nonroot/.git-credentials:ro
       - /usr/libexec/docker:/usr/libexec/docker:ro
       - /usr/bin/docker:/usr/bin/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro

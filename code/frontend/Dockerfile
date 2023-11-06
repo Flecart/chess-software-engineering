@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY . ./
 
+ENV VITE_BACKEND_URL=http://app.t1-check-mates.mooo.com/backend
+ENV VITE_FRONTEND_URL=http://app.t1-check-mates.mooo.com
+
 RUN npm install
 
 RUN npm run build
