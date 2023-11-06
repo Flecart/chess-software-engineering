@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY . ./
 
-ENV VITE_BACKEND_URL=http://app.t1-check-mates.mooo.com:8000
-ENV VITE_FRONTEND_URL=http://app.t1-check-mates.mooo.com:80
+ENV VITE_BACKEND_URL=http://app.t1-check-mates.mooo.com/backend
+ENV VITE_FRONTEND_URL=http://app.t1-check-mates.mooo.com
 
 RUN npm install
 
