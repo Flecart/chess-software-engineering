@@ -8,6 +8,8 @@ services:
       context: ../code/backend/
       dockerfile: Dockerfile
       no_cache: true
+    ports:
+      - 8000:8000
     networks:
       - deploy
 
