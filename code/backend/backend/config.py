@@ -1,5 +1,10 @@
-import yaml
 import os
+
+
+defConfig = {
+    'port': 8000,
+    'host': "127.0.0.1"
+}
 
 class Config():
     config:dict
@@ -16,10 +21,11 @@ class Config():
         return cls.__instance
 
     def __init(self):
-        if os.path.exists('config.yaml'):
-            with open('config.yaml', 'r') as file:
-                self.config = yaml.safe_load(file)
-        else:
-            with open('default_config.yaml', 'r') as file:
-                self.config = yaml.safe_load(file)
+        self.config = defConfig    
+        for key in defConfig.keys():
+            if key in os.environ:
+                if type(defConfig[key]) == int:
+                    self.config[key] = int(os.environ[key])
+                else:
+                    self.config[key] = os.environ[key]
             
