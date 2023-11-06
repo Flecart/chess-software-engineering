@@ -25,6 +25,10 @@ test_frontend:
   artifacts:
     paths:
       - 'code/frontend/coverage/'
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: 'code/frontend/coverage/cobertura-coverage.xml'
 
 test_backend:
   stage: test
