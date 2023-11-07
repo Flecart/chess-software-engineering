@@ -18,7 +18,6 @@ export const Game = ({ useParams, useSearch }: Props) => {
     const [isMyTurn, setIsMyTurn] = useState(boardOrientation === 'white');
     const gameStarted = !!gameId && !!boardOrientation;
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
-    console.log('Game rendered');
 
     return (
         <Flex wrap="wrap">
