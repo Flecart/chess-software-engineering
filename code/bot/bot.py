@@ -122,13 +122,31 @@ def handle_join(message: types.Message):
         bot.register_next_step_handler(message, move)
     
 
+
+
 def move(message: types.Message):
 
     userId = UserMapper().get(message.chat.id)
     gameId = GameMapper().get(userId)
     current_move = message.text
 
-    put_move(gameId, userId, current_move)
+    output = dict() 
+    try: 
+        output = put_move(gameId, userId, current_move)
+    except:
+        output = {'error': 'Invalid move'}
+
+    if "error" in output:
+        bot.send_message(message.chat.id, output['error'])
+        bot.send_message(message.chat.id, "Make a move!")
+        bot.register_next_step_handler(message, move)
+        return 
+    
+    if 'game_ended' in output and output['game_ended']:
+        bot.send_message(message.chat.id, "Game ended")
+        return
+
+
     bot.send_message(message.chat.id, f"Move made,Waiting for the adversary to move")
 
     game_state = ''
@@ -137,7 +155,7 @@ def move(message: types.Message):
         if json['your_turn']:
             game_state = json['game_state']
             break
-
+        
         time.sleep(100)
 
     

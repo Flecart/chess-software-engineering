@@ -30,4 +30,6 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY src/ ./src
 COPY bot.py ./
 
+RUN apt install libffi-dev  # maybe also the cairo package
+
 ENTRYPOINT ["python", "-m", "bot"]
