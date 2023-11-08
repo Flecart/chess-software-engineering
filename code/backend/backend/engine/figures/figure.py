@@ -46,6 +46,7 @@ class Figure:
         raise NotImplementedError
 
     def move(self, x: int, y: int):
+        print("move", str(self), self.getMoves())
         if (x, y) not in self.getMoves():
             raise errors.WrongMoveError
         self.board.move(self, x, y)
