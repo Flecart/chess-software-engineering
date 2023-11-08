@@ -34,6 +34,7 @@ services:
       no_cache: true
     environment:
       - "TELEGRAM_TOKEN=${TELEGRAM_TOKEN}"
+      - "BACKEND_URL=${BACKEND_URL}"
     networks:
       - deploy
 

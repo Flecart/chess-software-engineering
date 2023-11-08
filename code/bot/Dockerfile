@@ -17,10 +17,13 @@ RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
 
 FROM python:3.11-slim-buster as runtime
 
+WORKDIR /app
+
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
 ENV TELEGRAM_TOKEN=""
+ENV BACKEND_URL=""
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
