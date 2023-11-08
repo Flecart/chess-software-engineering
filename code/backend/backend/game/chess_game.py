@@ -50,13 +50,14 @@ class ChessGame:
     def has_moved(self, color: Literal["white"] | Literal["black"]) -> bool:
         """Returns True if the player with that color has moved, False otherwise"""
         return self.game.has_moved(color)
+    def get_board_view_fen(self,color:Colors) -> str:
+        return self.game.compute_fen_color(color)
 
     def has_ended(self) -> bool:
         """Returns True if the game has ended, False otherwise"""
         return self.has_game_ended
 
     def get_color_from_player(self,player:Player) -> Colors|None:
-
         for color in [Colors.BLACK,Colors.WHITE]:
             if player.getId() == self.player[color].getId():
                 return color
@@ -110,7 +111,7 @@ class ChessGame:
             self.game.move(start_position, end_position)
             # TODO(gio):gestire la fine della partita
             next = self.game.current_player
-            self.player[next].update_move(self.get_board_view(next))
+            self.player[next].update_move(self.get_board_view_fen(next))
         except errors.EndGame:
             # TODO: test what happens when you move even if the game has ended
             self.has_game_ended = True

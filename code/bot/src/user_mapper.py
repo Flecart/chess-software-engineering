@@ -1,4 +1,3 @@
-
 from .singleton import SingletonMeta
 
 class UserMapper(metaclass=SingletonMeta):
@@ -17,3 +16,4 @@ class UserMapper(metaclass=SingletonMeta):
 
     def remove(self, user: str):
         self._paired_users.pop(user)
+

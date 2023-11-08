@@ -15,7 +15,7 @@ class JoinGame(BaseModel):
     player_id: uuid.UUID
     color: str
 
-def create_game_routes(app: FastAPI, prefix: str=''):
+def create_game_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/game'
 
     @app.get(prefix + "/create")
@@ -83,11 +83,6 @@ def create_game_routes(app: FastAPI, prefix: str=''):
                 "error": "Invalid move format"
             }
 
-        if player != "white" and player != "black":
-            return JSONResponse({
-                "error": "Invalid player"
-            }, status_code=400)
-
         game = ChessGameManager().get_game(session_id)
         if game is None:
             return {
@@ -108,6 +103,6 @@ def create_game_routes(app: FastAPI, prefix: str=''):
         
         return {
             "game_ended": False,
-            "board": game.get_board_view(player._color)
+            "board": game.get_board_view_fen(player._color)
         }
 

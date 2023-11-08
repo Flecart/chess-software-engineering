@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.11"
 pytelegrambotapi = "^4.14.0"
 python-dotenv = "^1.0.0"
+python-chess = "^1.999"
+cairosvg = "^2.7.1"
 
 [tool.poetry.scripts]
 start = "bot:start"

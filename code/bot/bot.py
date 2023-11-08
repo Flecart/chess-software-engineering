@@ -8,29 +8,35 @@ Requirements of the bot:
 
 """
 
-from src.UserMapper import UserMapper
-from src.GameMapper import GameMapper
+from api_utils import create_game_api, get_user_status, add_bot,put_move
+from display_board import custom_fen_to_svg
+from src.user_mapper import UserMapper
+from src.game_mapper import GameMapper
 import telebot
 import telebot.types as types
 import requests
 import time
-
+import logging
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
-bot = telebot.TeleBot(os.getenv("TELEGRAM_TOKEN"))
-backend = os.getenv("BACKEND_URL")
+from config import backend,API_TOKEN,DEBUG
+
+logger = telebot.logger
+
+if DEBUG:
+    telebot.logger.setLevel(logging.DEBUG)
+
+bot = telebot.TeleBot(API_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def handle_start(message: types.Message):
-    bot.send_message(message.from_user.id, "Welcome to the game! \n\
+    bot.send_message(message.chat.id, "Welcome to the game! \n\
         I'm a bot that let's you play Dark chess with your friends! \n\
         Using the current version you will have a text version of the game, \n\
         Run /legend to see the legend of the game. \n\
         Run /rules to see the rules of dark chess game. \n\
         Run /register to register to the game. \n\
-        Run /createGame to create a new game and start playing!")
+        Run /createGameAgainstBot to create a new game and start playing!")
     
 @bot.message_handler(commands=['help'])
 def handle_help(message: types.Message):
@@ -50,7 +56,7 @@ P is pawn
 . is empty square
 X is not visible square
 """
-    bot.send_message(message.from_user.id, legend_text)
+    bot.send_message(message.chat.id, legend_text)
 
 @bot.message_handler(commands=['rules'])
 def handle_rules(message: types.Message):
@@ -66,39 +72,32 @@ The squares that are visible to the player must follow one of these conditions:
 - The square is directly in front of one of player's pawns or it is an adjacent forward diagonal from one of player's pawns.
 See https://brainking.com/en/GameRules for more information
 """
-    bot.send_message(message.from_user.id, rules_text)
+    bot.send_message(message.chat.id, rules_text)
 
-@bot.message_handler(commands=['register'])
-def handle_register(message: types.Message):
-    userId = UserMapper().get(message.from_user.id)
-    if userId is not None:
-        bot.reply_to(message, "You are already registered!")
-        return
-
-    json = requests.get(backend + "/user/new").json()
-    userId = json['id']
-
-    UserMapper().add(message.from_user.id, userId)
-
-
-    bot.reply_to(message, f"Welcome to the game!, your user id is '{userId}'.")
-    bot.send_message(message.from_user.id, "Create a new Game")
 
 @bot.message_handler(commands=['createGame'])
-def create_bot(message:types.Message):
-    id = requests.get(backend+'/game/create').json()['game_id']
+def create_game(message:types.Message):
 
-    userId = UserMapper().get(message.from_user.id)
-    if userId is None:
-        bot.reply_to(message, "You are not registered, remember to use /start")
+    game_id =  create_game_api(message) 
+    if game_id is None:
+        bot.reply_to(message, "You are already in a game!")
         return
 
-    GameMapper().add(userId,id)
+    bot.send_message(message.chat.id,'Invite id is: '+game_id)
+    pass
 
-    requests.get(backend+f'/game/join/{id}/{userId}/white')
-    requests.get(backend+f'/game/add-bot/{id}/')
 
-    bot.send_message(message.from_user.id,'Make a move')
+@bot.message_handler(commands=['createGameAgainstBot'])
+def create_bot(message:types.Message):
+    game_id =  create_game_api(message) 
+    if game_id is None:
+        bot.reply_to(message, "You are already in a game!")
+        return
+
+    add_bot(game_id)
+
+    
+    bot.send_message(message.chat.id,'Make a move')
     bot.register_next_step_handler(message,move)
 
 
@@ -112,7 +111,7 @@ def handle_join(message: types.Message):
     Or the creator of the game should share the game id.
     """
 
-    userId = UserMapper().get(message.from_user.id)
+    userId = UserMapper().get(message.chat.id)
     GameMapper().add(userId, message.text)
 
     id = requests.get(backend + f"/game/{message.text}/").json()['game_id']
@@ -125,27 +124,28 @@ def handle_join(message: types.Message):
 
 def move(message: types.Message):
 
-    userId = UserMapper().get(message.from_user.id)
+    userId = UserMapper().get(message.chat.id)
     gameId = GameMapper().get(userId)
     current_move = message.text
 
-    requests.get(backend + f"/game/move/{gameId}/{userId}/{current_move}").json()
-    bot.send_message(message.from_user.id, f"Move made,Waiting for the adversary to move")
+    put_move(gameId, userId, current_move)
+    bot.send_message(message.chat.id, f"Move made,Waiting for the adversary to move")
 
     game_state = ''
     while True:
-        json = requests.get(backend + f"/user/status/{userId}").json()
-
+        json = get_user_status(userId)
         if json['your_turn']:
             game_state = json['game_state']
             break
 
         time.sleep(100)
 
+    
+    bot.send_photo(message.chat.id, custom_fen_to_svg(game_state)) 
     bot.reply_to(message, '```\n'+game_state+"```", parse_mode="Markdown")
 
     #TODO adding wrong move handling, finish handling and exit
-    bot.send_message(message.from_user.id, "Make a move!")
+    bot.send_message(message.chat.id, "Make a move!")
     bot.register_next_step_handler(message, move)
 
 
