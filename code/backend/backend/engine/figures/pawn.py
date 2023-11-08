@@ -52,7 +52,6 @@ class Pawn(Figure):
                     result.append((x, y - 1))
 
         self._moves = result
-        print(str(self), self._moves)
 
     def getVisibleCells(self) -> list[tuple[int, int]]:
         all_moves = self.getMoves()

@@ -33,10 +33,8 @@ class Figure:
         return self._moved
 
     def getMoves(self):
-        print("get moves called", str(self), self._moves)
         if self._moves is None:
             self.updateMoves()
-            print("updated moves", self._moves)
         return self._moves
 
     @abstractmethod
