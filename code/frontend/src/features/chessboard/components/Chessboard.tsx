@@ -10,10 +10,11 @@ const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/')
 type Props = {
     gameId: string;
     boardOrientation: 'white' | 'black';
+    setIsMyTurn: React.Dispatch<React.SetStateAction<boolean>>;
     style?: React.CSSProperties;
 };
 
-export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
+export const Chessboard = ({ gameId, boardOrientation, setIsMyTurn, style }: Props) => {
     const [fen, setFen] = useState(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
     useEffect(() => {
@@ -22,6 +23,7 @@ export const Chessboard = ({ gameId, boardOrientation, style }: Props) => {
         });
         const pollingBoard = setInterval(() => {
             getBoard(gameId, boardOrientation).then((res) => {
+                setIsMyTurn(res.has_enemy_moved);
                 if (res.has_enemy_moved) setFen(res.board);
             });
         }, 1000);
