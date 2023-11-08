@@ -23,7 +23,8 @@ ENV VIRTUAL_ENV=/app/.venv \
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
 COPY backend/ ./backend
-COPY default_config.yaml ./
+
+ENV host=0.0.0.0
 
 EXPOSE 8000
 
