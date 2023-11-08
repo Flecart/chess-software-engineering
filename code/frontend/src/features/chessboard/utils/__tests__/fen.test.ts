@@ -2,41 +2,45 @@ import { describe, expect, it } from 'vitest';
 import { generateFogObject, generateStandardFen } from '../fen';
 import type { CustomSquareStyles } from 'react-chessboard/dist/chessboard/types';
 
+const compareFen = (customFen: string, expectedFen: string) => () => {
+    const result = generateStandardFen(customFen);
+    expect(result).toEqual(expectedFen);
+};
+
 describe('generateStandardFen', () => {
-    it('should generate a standard FEN string from a already standard FEN string', () => {
-        const customFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
-        const expectedFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
-        const result = generateStandardFen(customFen);
-        expect(result).toEqual(expectedFen);
-    });
+    it(
+        'should generate a standard FEN string from a already standard FEN string',
+        compareFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'),
+    );
 
-    it('should handle "X" and the "." characters in the custom FEN string', () => {
-        const customFen = 'XXXX.XXX/XXXXXXXX/......../......../......../......../PPPPPPPP/RNBQKBNR';
-        const expectedFen = '8/8/8/8/8/8/PPPPPPPP/RNBQKBNR';
-        const result = generateStandardFen(customFen);
-        expect(result).toEqual(expectedFen);
-    });
+    it(
+        'should handle "X" and the "." characters in the custom FEN string',
+        compareFen(
+            'XXXX.XXX/XXXXXXXX/......../......../......../......../PPPPPPPP/RNBQKBNR',
+            '8/8/8/8/8/8/PPPPPPPP/RNBQKBNR',
+        ),
+    );
 
-    it('should handle spaces as numbers in the custom FEN string', () => {
-        const customFen = 'rnbqkbnr/XXXXXXXX/8/8/8/3P4/PPP1PPPP/RNBQKBNR';
-        const expectedFen = 'rnbqkbnr/8/8/8/8/3P4/PPP1PPPP/RNBQKBNR';
-        const result = generateStandardFen(customFen);
-        expect(result).toEqual(expectedFen);
-    });
+    it(
+        'should handle spaces as numbers in the custom FEN string',
+        compareFen('rnbqkbnr/XXXXXXXX/8/8/8/3P4/PPP1PPPP/RNBQKBNR', 'rnbqkbnr/8/8/8/8/3P4/PPP1PPPP/RNBQKBNR'),
+    );
 
-    it('should handle a string with the last row empty in the custom FEN string', () => {
-        const customFen = 'XXXX.XXX/XXXXXXXX/......../......../......../PPPPPPPP/RNBQKBNR/........';
-        const expectedFen = '8/8/8/8/8/PPPPPPPP/RNBQKBNR/8';
-        const result = generateStandardFen(customFen);
-        expect(result).toEqual(expectedFen);
-    });
+    it(
+        'should handle a string with the last row empty in the custom FEN string',
+        compareFen(
+            'XXXX.XXX/XXXXXXXX/......../......../......../PPPPPPPP/RNBQKBNR/........',
+            '8/8/8/8/8/PPPPPPPP/RNBQKBNR/8',
+        ),
+    );
 
-    it('should handle a string with . mixed with X and numbers in the custom FEN string', () => {
-        const customFen = 'XXXXXX.X/XXnXXX.X/XX.p1p2/XX3P.X/pp1PNB2/3X.X.P/PP5Q/K1R3R1';
-        const expectedFen = '8/2n5/3p1p2/5P2/pp1PNB2/7P/PP5Q/K1R3R1';
-        const result = generateStandardFen(customFen);
-        expect(result).toEqual(expectedFen);
-    });
+    it(
+        'should handle a string with . mixed with X and numbers in the custom FEN string',
+        compareFen(
+            'XXXXXX.X/XXnXXX.X/XX.p1p2/XX3P.X/pp1PNB2/3X.X.P/PP5Q/K1R3R1',
+            '8/2n5/3p1p2/5P2/pp1PNB2/7P/PP5Q/K1R3R1',
+        ),
+    );
 });
 
 const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
