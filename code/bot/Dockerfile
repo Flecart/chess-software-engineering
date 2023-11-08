@@ -31,6 +31,6 @@ COPY src/ ./src
 COPY *.py ./
 
 RUN apt update
-RUN apt install libffi-dev  # maybe also the cairo package
+RUN apt install -y libffi-dev libcairo2
 
 ENTRYPOINT ["python", "-m", "bot"]
