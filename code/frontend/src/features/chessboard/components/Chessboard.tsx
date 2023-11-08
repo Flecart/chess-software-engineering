@@ -60,7 +60,9 @@ export const Chessboard = ({ gameId, boardOrientation, setIsMyTurn, style, gameI
                             if (res.game_ended === true) gameIsEnded();
                             else setFen(res.board);
                         })
-                        .catch((_) => gameIsEnded());
+                        .catch((_) => {
+                            // TODO: handle errors
+                        });
                     return true; //TODO: seems like it doesn't matter the return value, investigate
                 }}
             />
