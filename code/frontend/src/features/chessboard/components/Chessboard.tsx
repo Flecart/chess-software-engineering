@@ -56,7 +56,6 @@ export const Chessboard = ({ gameId, boardOrientation, setIsMyTurn, style, gameI
                         return false;
                     makeMove(gameId, `${from}${to}`)
                         .then((res) => {
-                            console.log(res);
                             if (res.game_ended === true) gameIsEnded();
                             else setFen(res.board);
                         })
