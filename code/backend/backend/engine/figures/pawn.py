@@ -51,8 +51,8 @@ class Pawn(Figure):
                 else:
                     result.append((x, y - 1))
 
-        print(str(self), result)
         self._moves = result
+        print(str(self), self._moves)
 
     def getVisibleCells(self) -> list[tuple[int, int]]:
         all_moves = self.getMoves()
@@ -63,11 +63,12 @@ class Pawn(Figure):
             front_moves = [(self.x - 1, self.y - 1), (self.x, self.y - 1), (self.x + 1, self.y - 1)]
         front_moves = [(x, y) for x, y in front_moves if onBoard(x, y)]
 
+        new_positions = [] # can't change all_moves
         for position in front_moves:
             if position not in all_moves:
-                all_moves.append(position)
+                new_positions.append(position)
         
-        return all_moves
+        return all_moves + new_positions
 
     def move(self, x: int, y: int):
         if self.color == Colors.WHITE and self.y == 2 and y == 4:
