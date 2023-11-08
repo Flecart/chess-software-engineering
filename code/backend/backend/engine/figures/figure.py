@@ -7,11 +7,7 @@ from ..helpers import pos2coors
 class Figure:
     color: Colors | None = None
     kind: Pieces = None
-    x: int = 0
-    y: int = 0
     _symbol: str = '?'
-    _moves: None | list[tuple[int, int]] = None
-    _moved: bool = False
 
     def __init__(self, x: int, y: int, color: Colors, board):
         from ..board import Board # just for type hinting, needs to be here for circular imports.
@@ -20,6 +16,8 @@ class Figure:
         self.y: int = y
         self.color: Colors = color
         self.board: Board = board
+        self._moves: None | list[tuple[int, int]] = None
+        self._moved: bool = False
 
     def __str__(self):
         return '{}{}'.format(self.symbol, pos2coors(self.x, self.y))
@@ -35,8 +33,10 @@ class Figure:
         return self._moved
 
     def getMoves(self):
+        print("get moves called", str(self), self._moves)
         if self._moves is None:
             self.updateMoves()
+            print("updated moves", self._moves)
         return self._moves
 
     @abstractmethod
@@ -46,6 +46,7 @@ class Figure:
         raise NotImplementedError
 
     def move(self, x: int, y: int):
+        print("move", str(self), self.getMoves())
         if (x, y) not in self.getMoves():
             raise errors.WrongMoveError
         self.board.move(self, x, y)

@@ -9,19 +9,18 @@ class Pawn(Figure):
     en_passant = False
 
     def updateMoves(self):
-        result, moves = [], []
+        result = []
+        moves = []
         if self.color == Colors.WHITE:
+            moves.append((self.x, self.y + 1))
             if self.y == 2:
-                moves += [(self.x, 3), (self.x, 4)]
-            elif self.y < 8:
-                moves.append((self.x, self.y + 1))
-            cutMoves = (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)
+                moves.append((self.x, self.y + 2))
+            cut_moves = (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)
         else:
+            moves.append((self.x, self.y - 1))
             if self.y == 7:
-                moves += [(self.x, 6), (self.x, 5)]
-            elif self.y > 1:
-                moves.append((self.x, self.y - 1))
-            cutMoves = (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)
+                moves.append((self.x, self.y - 2))
+            cut_moves = (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)
         en_passant_squares = (self.x - 1, self.y), (self.x + 1, self.y)
 
         for x, y in moves:
@@ -29,16 +28,16 @@ class Pawn(Figure):
                 fig = self.board.cell2Figure(x, y)
             except OutOfBoardError:
                 break
-            if fig:
-                break
+            if fig is not None:
+                break # this should work also with the first  move
             result.append((x, y))
 
-        for x, y in cutMoves:
+        for x, y in cut_moves:
             try:
                 fig = self.board.cell2Figure(x, y)
             except OutOfBoardError:
                 continue
-            if fig and self.isEnemy(fig):
+            if fig is not None and self.isEnemy(fig):
                 result.append((x, y))
 
         for x, y in en_passant_squares:
@@ -46,12 +45,14 @@ class Pawn(Figure):
                 fig = self.board.cell2Figure(x, y)
             except OutOfBoardError:
                 continue
-            if fig and self.isEnemy(fig) and isinstance(fig, Pawn) and fig.en_passant:
+            if fig is not None and self.isEnemy(fig) and isinstance(fig, Pawn) and fig.en_passant:
                 if self.color == Colors.WHITE:
                     result.append((x, y + 1))
                 else:
                     result.append((x, y - 1))
+
         self._moves = result
+        print(str(self), self._moves)
 
     def getVisibleCells(self) -> list[tuple[int, int]]:
         all_moves = self.getMoves()
@@ -62,11 +63,12 @@ class Pawn(Figure):
             front_moves = [(self.x - 1, self.y - 1), (self.x, self.y - 1), (self.x + 1, self.y - 1)]
         front_moves = [(x, y) for x, y in front_moves if onBoard(x, y)]
 
+        new_positions = [] # can't change all_moves
         for position in front_moves:
             if position not in all_moves:
-                all_moves.append(position)
+                new_positions.append(position)
         
-        return all_moves
+        return all_moves + new_positions
 
     def move(self, x: int, y: int):
         if self.color == Colors.WHITE and self.y == 2 and y == 4:
