@@ -83,11 +83,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                 "error": "Invalid move format"
             }
 
-        if player != "white" and player != "black":
-            return JSONResponse({
-                "error": "Invalid player"
-            }, status_code=400)
-
         game = ChessGameManager().get_game(session_id)
         if game is None:
             return {
