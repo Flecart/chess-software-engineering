@@ -225,7 +225,7 @@ class Board(object):
                 if mask[y][x]:
                     view[y][x] = 'X'
 
-        return '\n'.join(''.join(row) for row in view[::-1])
+        return '/'.join(''.join(row) for row in reversed(view))
     
     def compute_obscure_fen(self, view:Colors,current_player: Colors) -> str:
         endFen = ' '.join(self.compute_fen(current_player).split(' ')[1:])
