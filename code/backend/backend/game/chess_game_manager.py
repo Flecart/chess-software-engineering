@@ -34,7 +34,6 @@ class ChessGameManager:
         color = gameInstance.join(player, color)
         player.join(game,gameInstance.get_board_view_fen(color),gameInstance.current_player,color)
  
-
     def create_game(self) -> uuid.UUID:
         game_id = uuid.uuid4()
         while (game_id in self.games):
@@ -42,4 +41,3 @@ class ChessGameManager:
         game = ChessGame()
         self.games[game_id] = game
         return game_id
-

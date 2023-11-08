@@ -35,6 +35,14 @@ def create_game_api(message: types.Message) ->str|None:
 
     return id
 
+def leave_game(message: types.Message) -> str|None:
+    """This function leaves a game
+    TODO: should handle the backend side too
+    """
+    userId = get_user(message.chat.id)
+    user = GameMapper().remove(userId)
+    return user
+
 add_bot = lambda id: requests.get(backend+f'/game/add-bot/{id}/')
 
 get_user_status = lambda userId: requests.get(backend + f"/user/status/{userId}").json()

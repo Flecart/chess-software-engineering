@@ -1,14 +1,4 @@
-"""
-Requirements of the bot:
-
-1. A single channel should have at most one game playing at a time (in mob playing)
-2. A game should have at least 2 players if it's not a solo game.
-3. Only the two designated persons should be able to play (people that started and the other that joined the game
-4. If it's a bot game, there is only one player against the bot.
-
-"""
-
-from api_utils import create_game_api, get_user_status, add_bot,put_move
+from api_utils import create_game_api, get_user_status, add_bot, put_move, leave_game
 from display_board import custom_fen_to_svg
 from src.user_mapper import UserMapper
 from src.game_mapper import GameMapper
@@ -17,7 +7,6 @@ import telebot.types as types
 import requests
 import time
 import logging
-import os
 
 from config import backend,API_TOKEN,DEBUG
 
@@ -33,30 +22,14 @@ def handle_start(message: types.Message):
     bot.send_message(message.chat.id, "Welcome to the game! \n\
         I'm a bot that let's you play Dark chess with your friends! \n\
         Using the current version you will have a text version of the game, \n\
-        Run /legend to see the legend of the game. \n\
         Run /rules to see the rules of dark chess game. \n\
-        Run /register to register to the game. \n\
+        Run /leave to be able to start a new game after the current ended. You can leave the room only if the game finished. \n\
+        Run /legend to see the legend of the FEN format for the game. \n\
         Run /createGameAgainstBot to create a new game and start playing!")
     
 @bot.message_handler(commands=['help'])
 def handle_help(message: types.Message):
     handle_start(message)
-
-@bot.message_handler(commands=['legend'])
-def handle_legend(message: types.Message):
-    legend_text = """
-Upper case is white player
-Lower case is black player
-K is king
-Q is queen
-R is rook
-B is bishop
-N is knight
-P is pawn
-. is empty square
-X is not visible square
-"""
-    bot.send_message(message.chat.id, legend_text)
 
 @bot.message_handler(commands=['rules'])
 def handle_rules(message: types.Message):
@@ -74,6 +47,22 @@ See https://brainking.com/en/GameRules for more information
 """
     bot.send_message(message.chat.id, rules_text)
 
+@bot.message_handler(commands=['legend'])
+def handle_legend(message: types.Message):
+    legend_text = """
+Upper case is white player
+Lower case is black player
+K is king
+Q is queen
+R is rook
+B is bishop
+N is knight
+P is pawn
+. is empty square
+X is not visible square
+"""
+    bot.send_message(message.chat.id, legend_text)
+
 
 @bot.message_handler(commands=['createGame'])
 def create_game(message:types.Message):
@@ -89,7 +78,7 @@ def create_game(message:types.Message):
 
 @bot.message_handler(commands=['createGameAgainstBot'])
 def create_bot(message:types.Message):
-    game_id =  create_game_api(message) 
+    game_id = create_game_api(message) 
     if game_id is None:
         bot.reply_to(message, "You are already in a game!")
         return
@@ -98,8 +87,20 @@ def create_bot(message:types.Message):
 
     
     bot.send_message(message.chat.id,'Make a move')
-    bot.register_next_step_handler(message,move)
+    bot.register_next_step_handler(message, move)
 
+@bot.message_handler(commands=['leave'])
+def leave(message: types.Message):
+    """This function leaves a game
+    TODO: this is just temporary fix, the backend should handle this too,
+    in this current use case it is a quick way to allow the user to start new games
+    """
+    user = leave_game(message)
+    if user is None:
+        bot.reply_to(message, "You are not in a game!")
+        return
+
+    bot.reply_to(message, "You left the game!")
 
 @bot.message_handler(commands=['join'])
 def handle_join(message: types.Message):
@@ -122,8 +123,6 @@ def handle_join(message: types.Message):
         bot.register_next_step_handler(message, move)
     
 
-
-
 def move(message: types.Message):
 
     userId = UserMapper().get(message.chat.id)
@@ -132,7 +131,7 @@ def move(message: types.Message):
 
     output = dict() 
     try: 
-        output = put_move(gameId, userId, current_move)
+        output = put_move(gameId, userId, current_move)  # TODO: 
     except:
         output = {'error': 'Invalid move'}
 
@@ -147,7 +146,7 @@ def move(message: types.Message):
         return
 
 
-    bot.send_message(message.chat.id, f"Move made,Waiting for the adversary to move")
+    # bot.send_message(message.chat.id, f"Move made,Waiting for the adversary to move")
 
     game_state = ''
     while True:
@@ -162,7 +161,7 @@ def move(message: types.Message):
     bot.send_photo(message.chat.id, custom_fen_to_svg(game_state)) 
     bot.reply_to(message, '```\n'+game_state+"```", parse_mode="Markdown")
 
-    #TODO adding wrong move handling, finish handling and exit
+    # TODO adding wrong move handling, finish handling and exit
     bot.send_message(message.chat.id, "Make a move!")
     bot.register_next_step_handler(message, move)
 
