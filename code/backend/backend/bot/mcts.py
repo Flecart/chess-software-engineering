@@ -23,8 +23,6 @@ from absl import flags
 import numpy as np
 
 from open_spiel.python.algorithms import mcts
-from open_spiel.python.algorithms.alpha_zero import evaluator as az_evaluator
-from open_spiel.python.algorithms.alpha_zero import model as az_model
 from open_spiel.python.bots import gtp
 from open_spiel.python.bots import human
 from open_spiel.python.bots import uniform_random
@@ -44,9 +42,6 @@ _KNOWN_PLAYERS = [
     # Requires the gtp_path flag.
     "gtp",
 
-    # Run an alpha_zero checkpoint with MCTS. Uses the specified UCT/sims.
-    # Requires the az_path flag.
-    "az"
 ]
 
 flags.DEFINE_string("game", "tic_tac_toe", "Name of the game.")
@@ -54,8 +49,6 @@ flags.DEFINE_enum("player1", "mcts", _KNOWN_PLAYERS, "Who controls player 1.")
 flags.DEFINE_enum("player2", "random", _KNOWN_PLAYERS, "Who controls player 2.")
 flags.DEFINE_string("gtp_path", None, "Where to find a binary for gtp.")
 flags.DEFINE_multi_string("gtp_cmd", [], "GTP commands to run at init.")
-flags.DEFINE_string("az_path", None,
-                    "Path to an alpha_zero checkpoint. Needed by an az player.")
 flags.DEFINE_integer("uct_c", 2, "UCT's exploration constant.")
 flags.DEFINE_integer("rollout_count", 1, "How many rollouts to do.")
 flags.DEFINE_integer("max_simulations", 1000, "How many simulations to run.")
@@ -87,18 +80,6 @@ def _init_bot(bot_type, game, player_id):
         random_state=rng,
         solve=FLAGS.solve,
         verbose=FLAGS.verbose)
-  if bot_type == "az":
-    model = az_model.Model.from_checkpoint(FLAGS.az_path)
-    evaluator = az_evaluator.AlphaZeroEvaluator(game, model)
-    return mcts.MCTSBot(
-        game,
-        FLAGS.uct_c,
-        FLAGS.max_simulations,
-        evaluator,
-        random_state=rng,
-        child_selection_fn=mcts.SearchNode.puct_value,
-        solve=FLAGS.solve,
-        verbose=FLAGS.verbose)
   if bot_type == "random":
     return uniform_random.UniformRandomBot(player_id, rng)
   if bot_type == "human":
@@ -121,6 +102,7 @@ def _get_action(state, action_str):
 def _play_game(game, bots, initial_actions):
   """Plays one game."""
   state = game.new_initial_state()
+  breakpoint()
   _opt_print("Initial state:\n{}".format(state))
 
   history = []
@@ -185,7 +167,8 @@ def _play_game(game, bots, initial_actions):
 
 
 def main(argv):
-  game = pyspiel.load_game(FLAGS.game)
+  # in our case is only dark_chess
+  game = pyspiel.load_game("dark_chess")
   if game.num_players() > 2:
     sys.exit("This game requires more players than the example can handle.")
   bots = [
