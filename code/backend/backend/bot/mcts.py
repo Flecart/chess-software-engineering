@@ -1,201 +1,167 @@
-# Copyright 2019 DeepMind Technologies Limited
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""MCTS example."""
-
-import collections
-import random
-import sys
-
-from absl import app
-from absl import flags
+import chess
 import numpy as np
 
 from open_spiel.python.algorithms import mcts
-from open_spiel.python.bots import gtp
 from open_spiel.python.bots import human
 from open_spiel.python.bots import uniform_random
 import pyspiel
 
-_KNOWN_PLAYERS = [
-    # A generic Monte Carlo Tree Search agent.
-    "mcts",
 
-    # A generic random agent.
-    "random",
+from dataclasses import dataclass
+from enum import StrEnum
 
-    # You'll be asked to provide the moves.
-    "human",
+class GameType(StrEnum):
+  CHESS = 'chess'
+  DARK_CHESS = 'dark_chess'
 
-    # Run an external program that speaks the Go Text Protocol.
-    # Requires the gtp_path flag.
-    "gtp",
+class Actions(StrEnum):
+  MAKE_BEST_MOVE = "make_best_move" 
+  LIST_MOVE = "list_move"
+  MOVE = "move"
 
-]
-
-flags.DEFINE_string("game", "tic_tac_toe", "Name of the game.")
-flags.DEFINE_enum("player1", "mcts", _KNOWN_PLAYERS, "Who controls player 1.")
-flags.DEFINE_enum("player2", "random", _KNOWN_PLAYERS, "Who controls player 2.")
-flags.DEFINE_string("gtp_path", None, "Where to find a binary for gtp.")
-flags.DEFINE_multi_string("gtp_cmd", [], "GTP commands to run at init.")
-flags.DEFINE_integer("uct_c", 2, "UCT's exploration constant.")
-flags.DEFINE_integer("rollout_count", 1, "How many rollouts to do.")
-flags.DEFINE_integer("max_simulations", 1000, "How many simulations to run.")
-flags.DEFINE_integer("num_games", 1, "How many games to play.")
-flags.DEFINE_integer("seed", None, "Seed for the random number generator.")
-flags.DEFINE_bool("random_first", False, "Play the first move randomly.")
-flags.DEFINE_bool("solve", True, "Whether to use MCTS-Solver.")
-flags.DEFINE_bool("quiet", False, "Don't show the moves as they're played.")
-flags.DEFINE_bool("verbose", False, "Show the MCTS stats of possible moves.")
-
-FLAGS = flags.FLAGS
+@dataclass
+class GameStateInput:
+  game_type:GameType
+  fen: str
+  action:list[str]
+  parameters:str|None
 
 
-def _opt_print(*args, **kwargs):
-  if not FLAGS.quiet:
-    print(*args, **kwargs)
+class GameStateOutput:
+  white_view:str
+  black_view:str
+  possible_moves: list[str]|None
+  best_move:str|None
+  fen:str
 
 
-def _init_bot(bot_type, game, player_id):
+
+
+def _init_bot(bot_type, game):
   """Initializes a bot by type."""
-  rng = np.random.RandomState(FLAGS.seed)
+  rng = np.random.RandomState(None)
   if bot_type == "mcts":
-    evaluator = mcts.RandomRolloutEvaluator(FLAGS.rollout_count, rng)
+    evaluator = mcts.RandomRolloutEvaluator(1, rng)# How many rollouts to do.
     return mcts.MCTSBot(
         game,
-        FLAGS.uct_c,
-        FLAGS.max_simulations,
+        2, # UTC exploration constant
+        1000, # max number of simulations
         evaluator,
         random_state=rng,
-        solve=FLAGS.solve,
-        verbose=FLAGS.verbose)
+        solve=True, # use MCTS-Solver
+        verbose=False)
   if bot_type == "random":
-    return uniform_random.UniformRandomBot(player_id, rng)
+    return uniform_random.UniformRandomBot(1, rng)
   if bot_type == "human":
     return human.HumanBot()
-  if bot_type == "gtp":
-    bot = gtp.GTPBot(game, FLAGS.gtp_path)
-    for cmd in FLAGS.gtp_cmd:
-      bot.gtp_cmd(cmd)
-    return bot
   raise ValueError("Invalid bot type: %s" % bot_type)
 
 
-def _get_action(state, action_str):
-  for action in state.legal_actions():
-    if action_str == state.action_to_string(state.current_player(), action):
-      return action
-  return None
+def _best_move(game, state):
+  bot = _init_bot('mcts',game)
+  current_player = state.current_player()
+  if state.is_chance_node():
+    outcomes = state.chance_outcomes()
+    action_list, prob_list = zip(*outcomes)
+    action = np.random.choice(action_list, p=prob_list)
+  elif state.is_simultaneous_node():
+    raise ValueError("Game cannot have simultaneous nodes.")
+  else:
+    action = bot.step(state)
+
+  return action,state.action_to_string(current_player,action)
 
 
-def _play_game(game, bots, initial_actions):
-  """Plays one game."""
-  state = game.new_initial_state()
-  breakpoint()
-  _opt_print("Initial state:\n{}".format(state))
+def _create_state(game_name, fen=None):
+  # it use undocumented new_initial_state(fen)
+  # to generate from the fen in the case of chess
+  # other variant use the fen parameter
+  isChess = game_name == "chess"
+  isValidFEN =  fen is not None
+  params = {}
+  if not isChess and isValidFEN:
+    params["fen"] = fen
+  game = pyspiel.load_game(game_name, params)
+  state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
+  return game,state
 
-  history = []
+  
+def _legal_action_uci(game_type,state,fen):
+  # This code is difficult because it relay on the specific implementation
+  # of the libraries rather than the actual api
+  board = chess.Board(fen)
+  
+  # transform the san to uci
+  transform = lambda x: board.parse_san(state.action_to_string(x)).uci() 
 
-  if FLAGS.random_first:
-    assert not initial_actions
-    initial_actions = [state.action_to_string(
-        state.current_player(), random.choice(state.legal_actions()))]
-
-  for action_str in initial_actions:
-    action = _get_action(state, action_str)
-    if action is None:
-      sys.exit("Invalid action: {}".format(action_str))
-
-    history.append(action_str)
-    for bot in bots:
-      bot.inform_action(state, state.current_player(), action)
-    state.apply_action(action)
-    _opt_print("Forced action", action_str)
-    _opt_print("Next state:\n{}".format(state))
-
-  while not state.is_terminal():
-    current_player = state.current_player()
-    # The state can be three different types: chance node,
-    # simultaneous node, or decision node
-    if state.is_chance_node():
-      # Chance node: sample an outcome
-      outcomes = state.chance_outcomes()
-      num_actions = len(outcomes)
-      _opt_print("Chance node, got " + str(num_actions) + " outcomes")
-      action_list, prob_list = zip(*outcomes)
-      action = np.random.choice(action_list, p=prob_list)
-      action_str = state.action_to_string(current_player, action)
-      _opt_print("Sampled action: ", action_str)
-    elif state.is_simultaneous_node():
-      raise ValueError("Game cannot have simultaneous nodes.")
-    else:
-      # Decision node: sample action for the single current player
-      bot = bots[current_player]
-      action = bot.step(state)
-      action_str = state.action_to_string(current_player, action)
-      _opt_print("Player {} sampled action: {}".format(current_player,
-                                                       action_str))
-
-    for i, bot in enumerate(bots):
-      if i != current_player:
-        bot.inform_action(state, current_player, action)
-    history.append(action_str)
-    state.apply_action(action)
-
-    _opt_print("Next state:\n{}".format(state))
-
-  # Game is now done. Print return for each player
-  returns = state.returns()
-  print("Returns:", " ".join(map(str, returns)), ", Game actions:",
-        " ".join(history))
-
-  for bot in bots:
-    bot.restart()
-
-  return returns, history
-
-
-def main(argv):
-  # in our case is only dark_chess
-  game = pyspiel.load_game("dark_chess")
-  if game.num_players() > 2:
-    sys.exit("This game requires more players than the example can handle.")
-  bots = [
-      _init_bot(FLAGS.player1, game, 0),
-      _init_bot(FLAGS.player2, game, 1),
-  ]
-  histories = collections.defaultdict(int)
-  overall_returns = [0, 0]
-  overall_wins = [0, 0]
-  game_num = 0
+  # kriegspiel is already in uci
+  if game_type == 'kriegspiel':
+    transform = lambda x:state.action_to_string(x)
   try:
-    for game_num in range(FLAGS.num_games):
-      returns, history = _play_game(game, bots, argv[1:])
-      histories[" ".join(history)] += 1
-      for i, v in enumerate(returns):
-        overall_returns[i] += v
-        if v > 0:
-          overall_wins[i] += 1
-  except (KeyboardInterrupt, EOFError):
-    game_num -= 1
-    print("Caught a KeyboardInterrupt, stopping early.")
-  print("Number of games played:", game_num + 1)
-  print("Number of distinct games played:", len(histories))
-  print("Players:", FLAGS.player1, FLAGS.player2)
-  print("Overall wins", overall_wins)
-  print("Overall returns", overall_returns)
+    return list(map(transform,state.legal_actions()))
+  except:
+    # It changes the function which generate the move, to accept illegals moves 
+    board.generate_legal_moves = board.generate_pseudo_legal_moves
+    return list(map(transform,state.legal_actions()))
+
+def _parse_action(state,action):
+  pass
 
 
-if __name__ == "__main__":
-  app.run(main)
+def _fen(state,game_type):
+  if game_type == GameType.CHESS:
+    return state.observation_string()
+  else:
+    return state.to_string()
+
+
+def find(val,iter) -> int:
+  for i,k in enumerate(iter):
+    if k == val:
+      return i
+  return -1
+
+def dispatch(input:GameStateInput) -> GameStateOutput:
+  fen = input.fen
+  game,state = _create_state(input.game_type,fen)
+  out= GameStateOutput()
+  if Actions.MOVE in input.action:
+    ind = find(input.parameters,_legal_action_uci(input.game_type,state,fen))
+    if ind ==-1:
+      raise ValueError('Invalid Move')
+    state.apply_action(state.legal_actions()[ind])
+    fen =  _fen(state,input.game_type)
+  if Actions.MAKE_BEST_MOVE in input.action:
+    action,_ = _best_move(game,state) 
+    state.apply_action(action)
+    fen =  _fen(state,input.game_type)
+  if Actions.LIST_MOVE in input.action:
+    print(fen)
+    out.possible_moves = _legal_action_uci(input.game_type,state,fen)
+
+  out.white_view = state.observation_string(0)
+  out.black_view = state.observation_string(1)
+  out.fen =_fen(state,input.game_type) 
+  return out
+
+
+
+
+
+def main():
+  game = GameStateInput("", "",[],None)
+  game.fen = 'rnbqkbnr/ppp1pppp/8/1B1p4/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 0'
+  game.game_type= 'dark_chess'
+  game.action = [Actions.MAKE_BEST_MOVE,Actions.LIST_MOVE]
+  game.game_type= 'kriegspiel'
+  val = dispatch(game)
+  print(vars(val))
+  val = dispatch(game)
+  print(vars(val))
+  game.game_type= 'chess'
+  val = dispatch(game)
+  print(vars(val))
+  
+
+if __name__ == '__main__':
+  main()

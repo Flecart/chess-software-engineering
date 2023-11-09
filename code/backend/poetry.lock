@@ -182,6 +182,17 @@ files = [
 ]
 
 [[package]]
+name = "chess"
+version = "1.10.0"
+description = "A chess library with move generation and validation, Polyglot opening book probing, PGN reading and writing, Gaviota tablebase probing, Syzygy tablebase probing, and XBoard/UCI engine communication."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "chess-1.10.0-py3-none-any.whl", hash = "sha256:48ff7c084a370811819cfc753c2ee159942356ada70824666bd01ee3fca170d0"},
+    {file = "chess-1.10.0.tar.gz", hash = "sha256:bccde105f54aa436e899f92b4ba953731c65012a863fd9235683d0e2863ccd54"},
+]
+
+[[package]]
 name = "click"
 version = "8.1.7"
 description = "Composable command line interface toolkit"
@@ -611,6 +622,20 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
+name = "python-chess"
+version = "1.999"
+description = "A chess library with move generation, move validation, and support for common formats."
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-chess-1.999.tar.gz", hash = "sha256:8cad0388c42242d890ac6368ad64def15cd0165db033df0ad479492e266e5e6c"},
+    {file = "python_chess-1.999-py3-none-any.whl", hash = "sha256:93b562f8f1124cb7bf56fb095e18743758e69dc6a028ccda0badcaa5c59d88c8"},
+]
+
+[package.dependencies]
+chess = ">=1,<2"
+
+[[package]]
 name = "pyyaml"
 version = "6.0.1"
 description = "YAML parser and emitter for Python"
@@ -820,4 +845,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "e738fe066c7be4a2e96b8e419fc739a256927149eac620c4010d5b8e7190240f"
+content-hash = "194def9a87e5b276544987cb384abd9a1423408ab08ca1c487d3f0b00b9334cd"
