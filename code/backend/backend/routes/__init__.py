@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from backend.routes.game import create_game_routes
-from backend.routes.user import create_user_routes
-from backend.routes.game_old import create_game_routes as create_game_routes_old
+# from .old.game import create_game_routes
+# from .old.user import create_user_routes
+# from .old.game_old import create_game_routes as create_game_routes_old
+from .game.game import create_game_routes
 
 app = FastAPI()
 app.add_middleware(
@@ -22,8 +23,6 @@ app.add_middleware(
 logging.getLogger('main').info('Creating routes')
 """ adding routes  """
 
-create_game_routes_old(app)
-create_game_routes(app,'/dev')
-create_user_routes(app,'/dev')
-logging.getLogger('main').info('Create routes')
+create_game_routes(app,prefix='/api/v1')
+logging.getLogger('main').info('Createe routes')
 
