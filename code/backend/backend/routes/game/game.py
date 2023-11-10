@@ -1,26 +1,18 @@
-from fastapi import  FastAPI, HTTPException
+from fastapi import  FastAPI, HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uuid
 import logging
 
 from typing import Annotated
+
+from backend.routes.exception import JSONException
+from .data import CreateGameRequest,GameStatusResponse
     
-
-
-
-
-
 
 def create_game_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/game'
 
-    @app.exception_handler()
-    async def unicorn_exception_handler(request: Request, exc: JoinException):
-        return JSONResponse(
-            status_code=418,
-
-        )
     @app.post(prefix + "/create")
     def create_game(req: CreateGameRequest) -> int:
         """
@@ -43,15 +35,23 @@ def create_game_routes(app: FastAPI,prefix:str=''):
             raise HTTPException(status_code=401, detail="Item not found")
         return GameStatusResponse(fen='fen',finish=False,view='view')
     
+    @app.websocket(prefix + "/ws/{game_id}")
+    async def web_socket(game_id:int, websocket:WebSocket):
+        await websocket.accept()
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Message text was: {data}")
+    
     @app.get(prefix + "/status/{id}")
     def status_game(id:int)-> GameStatusResponse:
         """
         Get the status of a game.
         """
 
-    @app.post(prefix + "/status/{id}")
+    @app.post(prefix + "/move/{id}")
     def move(id:int)-> GameStatusResponse:
         """
         Get the status of a game.
         """
+        raise JSONException(error={'error':'error'}) 
 

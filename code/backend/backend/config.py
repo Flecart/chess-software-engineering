@@ -24,8 +24,5 @@ class Config():
         self.config = defConfig    
         for key in defConfig.keys():
             if key in os.environ:
-                if type(defConfig[key]) == int:
-                    self.config[key] = int(os.environ[key])
-                else:
-                    self.config[key] = os.environ[key]
+                self.config[key] = os.environ[key]
             

@@ -1,4 +1,4 @@
-
+from pydantic import BaseModel
 
 class CreateGameRequest(BaseModel):
     against_bot: bool = True
