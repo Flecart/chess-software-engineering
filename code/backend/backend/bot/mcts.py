@@ -9,26 +9,14 @@ import pyspiel
 from backend.bot.data.enums import GameType,Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
-
-def _create_state(game_name, fen=None):
-  # it use undocumented new_initial_state(fen)
-  # to generate from the fen in the case of chess
-  # other variant use the fen parameter
-  isChess = game_name == "chess"
-  isValidFEN =  fen is not None
-  params = {}
-  if not isChess and isValidFEN:
-    params["fen"] = fen
-  game = pyspiel.load_game(game_name, params)
-  state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
-  return game,state
+from backend.bot.data.MCST_player_config import MCSTPlayerConfig
 
 
 def _init_bot(bot_type, game,config):
   """Initializes a bot by type."""
   rng = np.random.RandomState(None)
   if bot_type == "mcts":
-    evaluator = mcts.RandomRolloutEvaluator(config.roll_out, rng)# How many rollouts to do.
+    evaluator = mcts.RandomRolloutEvaluator(config.roll_outs, rng)# How many rollouts to do.
     return mcts.MCTSBot(
         game,
         config.utc, # UTC exploration constant
@@ -45,7 +33,7 @@ def _init_bot(bot_type, game,config):
 
 
 def _get_best_move(game, state):
-  bot = _init_bot('mcts',game)
+  bot = _init_bot('mcts',game,MCSTPlayerConfig())
   if state.is_chance_node():
     outcomes = state.chance_outcomes()
     action_list, prob_list = zip(*outcomes)
@@ -57,6 +45,19 @@ def _get_best_move(game, state):
 
   return action
 
+
+def _create_state(game_name, fen=None):
+  # it use undocumented new_initial_state(fen)
+  # to generate from the fen in the case of chess
+  # other variant use the fen parameter
+  isChess = game_name == "chess"
+  isValidFEN =  fen is not None
+  params = {}
+  if not isChess and isValidFEN:
+    params["fen"] = fen
+  game = pyspiel.load_game(game_name, params)
+  state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
+  return game,state
 
 
 
@@ -105,13 +106,13 @@ def dispatch(input:GameStateInput) -> GameStateOutput:
   out= GameStateOutput()
 
   def check_finish_save_state():
-    if state.terminal():
-      return False
+    if state.is_terminal():
+      return True
     out.finish = state.is_terminal()
     out.white_view = state.observation_string(0)
     out.black_view = state.observation_string(1)
     out.fen =_fen(state,input.game_type) 
-    return True
+    return False
 
   if Actions.MOVE in input.action:
     ind = find(input.parameters,_legal_action_to_uci(input.game_type,state,fen))
@@ -138,4 +139,29 @@ def dispatch(input:GameStateInput) -> GameStateOutput:
 
 
 
+def _print_game_state_output(out:GameStateOutput):
+  print('white_view',out.white_view)
+  print('black_view',out.black_view)
+  print('possible_moves',out.possible_moves)
+  print('best_move',out.best_move)
+  print('fen',out.fen)
 
+
+def main():
+  game = GameStateInput("", "",[],None)
+  game.fen = 'rnbqkbnr/ppp1pppp/8/1B1p4/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 0'
+  game.game_type= 'dark_chess'
+  game.parameters="c8d7"
+  game.action = [Actions.MOVE,Actions.MAKE_BEST_MOVE,Actions.LIST_MOVE]
+  val = dispatch(game)
+  _print_game_state_output(val)
+  game.game_type= 'kriegspiel'
+  val = dispatch(game)
+  _print_game_state_output(val)
+  game.game_type= 'chess'
+  val = dispatch(game)
+  _print_game_state_output(val)
+  
+
+if __name__ == '__main__':
+  main()

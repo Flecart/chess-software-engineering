@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import GameType
+from .enums import GameType
 
 @dataclass
 class GameStateInput:
