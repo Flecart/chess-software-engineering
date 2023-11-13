@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from .enums import GameType
+from .enums import GameType,Actions
 
 @dataclass
 class GameStateInput:
   game_type:GameType
   fen: str
-  action:list[str]
+  action:Actions
   move:str|None
+  
   

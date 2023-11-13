@@ -100,43 +100,33 @@ def find(val,iter) -> int:
       return i
   return -1
 
-def dispatch(input:GameStateInput) -> GameStateOutput:
-  fen = input.fen
-  game,state = _create_state(input.game_type,fen)
+def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
+  fen = game_state_input.fen
+  game,state = _create_state(game_state_input.game_type,fen)
   out= GameStateOutput()
 
-  def check_finish_save_state():
-    if state.is_terminal():
-      return True
-    out.finish = state.is_terminal()
-    out.white_view = state.observation_string(0)
-    out.black_view = state.observation_string(1)
-    out.fen =_fen(state,input.game_type) 
-    return False
+  match game_state_input.action:
+    case Actions.MOVE:
+      ind = find(game_state_input.parameters,_legal_action_to_uci(game_state_input.game_type,state,fen))
+      if ind ==-1:
+        raise ValueError('Invalid Move')
+      state.apply_action(state.legal_actions()[ind])
+      fen =  _fen(state,game_state_input.game_type)
 
-  if Actions.MOVE in input.action:
-    ind = find(input.parameters,_legal_action_to_uci(input.game_type,state,fen))
-    if ind ==-1:
-      raise ValueError('Invalid Move')
-    state.apply_action(state.legal_actions()[ind])
-    fen =  _fen(state,input.game_type)
-  
-  if check_finish_save_state(): return out 
-
-  if Actions.MAKE_BEST_MOVE in input.action:
-    action = _get_best_move(game,state) 
-    out.best_move = action_to_uci(input.game_type,state,fen,action)
-    state.apply_action(action)
-    fen =  _fen(state,input.game_type)
-
-  if check_finish_save_state(): return out 
-
-  if Actions.LIST_MOVE in input.action:
-    out.possible_moves = _legal_action_to_uci(input.game_type,state,fen)
-
-  check_finish_save_state() 
+    case Actions.MAKE_BEST_MOVE:
+      action = _get_best_move(game,state) 
+      out.best_move = action_to_uci(game_state_input.game_type,state,fen,action)
+      state.apply_action(action)
+      fen =  _fen(state,game_state_input.game_type)
+    
+    case Actions.LIST_MOVE:
+      out.possible_moves = _legal_action_to_uci(game_state_input.game_type,state,fen)
+    
+  out.finish = state.is_terminal()
+  out.white_view = state.observation_string(0)
+  out.black_view = state.observation_string(1)
+  out.fen =_fen(state,game_state_input.game_type) 
   return out
-
 
 
 def _print_game_state_output(out:GameStateOutput):
@@ -152,7 +142,7 @@ def main():
   game.fen = 'rnbqkbnr/ppp1pppp/8/1B1p4/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 0'
   game.game_type= 'dark_chess'
   game.parameters="c8d7"
-  game.action = [Actions.MOVE,Actions.MAKE_BEST_MOVE,Actions.LIST_MOVE]
+  game.action = Actions.MOVE
   val = dispatch(game)
   _print_game_state_output(val)
   game.game_type= 'kriegspiel'
