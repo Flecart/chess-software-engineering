@@ -10,7 +10,7 @@ class CreateGameRequest(BaseModel):
     
 class GameStatusResponse(BaseModel):
     fen:str
-    finish:bool
+    finished:bool
     possible_moves: list[str]|None = None
     best_move:str|None = None
     view:str
