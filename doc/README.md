@@ -1,5 +1,9 @@
+# Per il professore
+
+Gli elementi di consegna per lo sprint-1 sono presenti a [questo link](http://gitlab.t1-check-mates.mooo.com/t1-check-mates/monorepo/-/wikis/consegne/deliverables_1)
 
 
+# README
 
 La documentazione principale è tutta messa sulla wiki del nostro gitlab presente a questo link:
 
@@ -24,11 +28,7 @@ E ora si può iniziare a modificare la wiki in local.
 Quando si è fatto si può pushare come se fosse una repository git normale.
 Se si hanno problemi, chiedere sulla sezione supporto tecnico su mattermost.
 
-
 # Docs
-
-Questa directory contiene alcuni documenti importanti come
-- Deliverables per il progetto
 
 ## Sprint-0
 
