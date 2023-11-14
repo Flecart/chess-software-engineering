@@ -9,6 +9,7 @@ from backend.routes.user.user import create_user_routes
 # from .old.game_old import create_game_routes as create_game_routes_old
 from .game.game import create_game_routes
 from .exception import install_exception_handler
+from backend.database.database import engine, Base
 
 app = FastAPI()
 app.add_middleware(
@@ -21,7 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# TODO(gio): initialize db connection
+
+Base.metadata.create_all(bind=engine)
+
 
 logging.getLogger('main').info('Creating routes')
 """ adding routes  """

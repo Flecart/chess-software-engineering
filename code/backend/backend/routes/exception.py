@@ -9,7 +9,6 @@ class JSONException(Exception):
 
 
 
-
 def install_exception_handler(app):
     @app.exception_handler(JSONException)
     async def exception_handler(r,exec):
