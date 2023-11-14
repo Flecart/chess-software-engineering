@@ -53,12 +53,6 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         """
         return token
 
-    @app.post(prefix + "/logout")
-    def logout() -> None:
-        """
-        Logout a user
-        """
-        return None
 
     @app.post(prefix + "/games/")
     def get_games() -> list[int]:

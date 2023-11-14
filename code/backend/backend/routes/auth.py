@@ -32,7 +32,6 @@ def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        breakpoint()
         if username is None:
             raise credentials_exception
     except JWTError:
