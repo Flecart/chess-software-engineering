@@ -102,7 +102,7 @@ def _actions_to_uci(game_type,state,fen,actions=None):
       except:
         return _check_castling(state.action_to_string(action))
 
-    return list(map(transform,actions))
+    return list(map(_handle_check_castling,actions))
 
 
 def _fen(state,game_type):
@@ -141,8 +141,8 @@ def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
       out.possible_moves = _legal_action_to_uci(game_state_input.game_type,state,fen)
     
   out.finish = state.is_terminal()
-  out.white_view = state.observation_string(0)
-  out.black_view = state.observation_string(1)
+  out.white_view = state.observation_string(1)
+  out.black_view = state.observation_string(0)
   out.fen =_fen(state,game_state_input.game_type) 
   return out
 
@@ -157,7 +157,7 @@ def _print_game_state_output(out:GameStateOutput):
 
 def main():
   game = GameStateInput("", "",[],None)
-  game.fen = '4r1k1/8/8/8/8/8/8/R3K2R w KQ - 0 1'
+  game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
   game.game_type= 'dark_chess'
   game.parameters="c8d7"
   game.action = Actions.LIST_MOVE
