@@ -67,6 +67,19 @@ def _legal_action_to_uci(game_type,state,fen):
 def action_to_uci(game_type,state,fen,action):
   return _actions_to_uci(game_type,state,fen,[action])
 
+
+def _check_castling(state):
+  match state:
+    case 'O-O':
+      return 'e1g1'
+    case 'O-O-O':
+      return 'e1c1'
+    case 'o-o':
+      return 'e8g8'
+    case 'o-o-o':
+      return 'e8c8'
+  raise ValueError('Invalid Move')
+
   
 def _actions_to_uci(game_type,state,fen,actions=None):
   # This code is difficult because it relay on the specific implementation
@@ -74,8 +87,13 @@ def _actions_to_uci(game_type,state,fen,actions=None):
   board = chess.Board(fen)
   
   # transform the san to uci
-  transform = lambda x: board.parse_san(state.action_to_string(x)).uci() 
 
+  def transform(x):
+    state = state.action_to_string(x)
+    try:
+      return board.parse_san(state).uci() 
+    except:
+      return _check_castling(state)
   # kriegspiel is already in uci
   if game_type == 'kriegspiel':
     transform = lambda x:state.action_to_string(x)
@@ -139,16 +157,10 @@ def _print_game_state_output(out:GameStateOutput):
 
 def main():
   game = GameStateInput("", "",[],None)
-  game.fen = 'rnbqkbnr/ppp1pppp/8/1B1p4/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 0'
+  game.fen = '4r1k1/8/8/8/8/8/8/R3K2R w KQ - 0 1'
   game.game_type= 'dark_chess'
   game.parameters="c8d7"
-  game.action = Actions.MOVE
-  val = dispatch(game)
-  _print_game_state_output(val)
-  game.game_type= 'kriegspiel'
-  val = dispatch(game)
-  _print_game_state_output(val)
-  game.game_type= 'chess'
+  game.action = Actions.LIST_MOVE
   val = dispatch(game)
   _print_game_state_output(val)
   
