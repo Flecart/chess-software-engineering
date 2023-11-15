@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { frontendUrl } from '@/config';
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
-import { startGame } from '../api/game';
+import { useState } from 'react';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 
@@ -14,9 +13,10 @@ type Props = {
 export const Game = ({ useParams, useSearch }: Props) => {
     const { gameId } = useParams();
     const { boardOrientation } = useSearch();
-    const navigate = useNavigate({ from: '/game' });
+    if (!gameId) throw new Error('gameId is required');
+    if (!boardOrientation) throw new Error('boardOrientation is required');
+    const navigate = useNavigate({ from: '/game/$gameId' });
     const [isMyTurn, setIsMyTurn] = useState(boardOrientation === 'white');
-    const gameStarted = !!gameId && !!boardOrientation;
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
     const [gameEnded, setGameEnded] = useState(false);
 
@@ -36,46 +36,28 @@ export const Game = ({ useParams, useSearch }: Props) => {
     return (
         <Flex wrap="wrap">
             <section style={{ width: '25%' }}>
-                <h1>Game started: {String(gameStarted)}</h1>
-                <Button
-                    disabled={gameStarted}
-                    onClick={async () => {
-                        const res = await startGame();
-                        navigate({
-                            to: '/game/$gameId',
-                            params: { gameId: res['game-id'] },
-                            search: { boardOrientation: 'white' },
-                        });
+                <Typography.Paragraph
+                    copyable={{
+                        text: `${frontendUrl}/game/${gameId}?boardOrientation=${opponentBoardOrientation}`,
                     }}
                 >
-                    Start Game
-                </Button>
-
-                {gameStarted && (
-                    <Typography.Paragraph
-                        copyable={{
-                            text: `${frontendUrl}/game/${gameId}?boardOrientation=${opponentBoardOrientation}`,
-                        }}
-                    >
-                        Copia il link per invitare qualcuno
-                    </Typography.Paragraph>
-                )}
+                    Copia il link per invitare qualcuno
+                </Typography.Paragraph>
             </section>
-            {gameStarted && (
-                <Flex vertical gap="small">
-                    <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
-                        {isMyTurn ? 'È il tuo turno' : "È il turno dell'avversario"}
-                    </Typography.Title>
-                    <PlayerInfo color={opponentBoardOrientation} myTurn={!isMyTurn} opponent />
-                    <Chessboard
-                        gameId={gameId}
-                        boardOrientation={boardOrientation}
-                        setIsMyTurn={setIsMyTurn}
-                        gameIsEnded={gameIsEnded}
-                    />
-                    <PlayerInfo color={boardOrientation} myTurn={isMyTurn} />
-                </Flex>
-            )}
+
+            <Flex vertical gap="small">
+                <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
+                    {isMyTurn ? 'È il tuo turno' : "È il turno dell'avversario"}
+                </Typography.Title>
+                <PlayerInfo color={opponentBoardOrientation} myTurn={!isMyTurn} opponent />
+                <Chessboard
+                    gameId={gameId}
+                    boardOrientation={boardOrientation}
+                    setIsMyTurn={setIsMyTurn}
+                    gameIsEnded={gameIsEnded}
+                />
+                <PlayerInfo color={boardOrientation} myTurn={isMyTurn} />
+            </Flex>
 
             {/* Modal to show when game ends */}
             <Modal
