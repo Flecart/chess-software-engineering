@@ -68,16 +68,15 @@ def action_to_uci(game_type,state,fen,action):
   return _actions_to_uci(game_type,state,fen,[action])
 
 
-def _check_castling(state):
-  match state:
-    case 'O-O':
-      return 'e1g1'
-    case 'O-O-O':
-      return 'e1c1'
-    case 'o-o':
-      return 'e8g8'
-    case 'o-o-o':
-      return 'e8c8'
+def _check_castling(state:str):
+  if state.startswith('O-O-O'):
+    return 'e1c1'
+  if state.startswith('O-O'):
+    return 'e1g1'
+  if state.startswith('o-o-o'):
+    return 'e8c8'
+  if state.startswith('o-o'):
+    return 'e8g8'
   raise ValueError('Invalid Move')
 
   
@@ -88,12 +87,7 @@ def _actions_to_uci(game_type,state,fen,actions=None):
   
   # transform the san to uci
 
-  def transform(x):
-    state = state.action_to_string(x)
-    try:
-      return board.parse_san(state).uci() 
-    except:
-      return _check_castling(state)
+  transform = lambda x:board.parse_san(state.action_to_string(x)).uci()
   # kriegspiel is already in uci
   if game_type == 'kriegspiel':
     transform = lambda x:state.action_to_string(x)
@@ -102,6 +96,12 @@ def _actions_to_uci(game_type,state,fen,actions=None):
   except:
     # It changes the function which generate the move, to accept illegals moves 
     board.generate_legal_moves = board.generate_pseudo_legal_moves
+    def _handle_check_castling(action):
+      try:
+        return transform(action)
+      except:
+        return _check_castling(state.action_to_string(action))
+
     return list(map(transform,actions))
 
 
