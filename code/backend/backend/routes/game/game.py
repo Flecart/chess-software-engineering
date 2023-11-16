@@ -1,10 +1,5 @@
 from fastapi import  FastAPI,  WebSocket
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-import uuid
-import logging
-
-from typing import Annotated
+from 
 
 from backend.routes.exception import JSONException
 from .data import CreateGameRequest,GameStatusResponse
@@ -20,11 +15,13 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         Is't important to notice that the player
         how create the game needs to call join.
         """
+
+
         return 42
 
 
     @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id:int, websocket:WebSocket):
+    async def web_socket(game_id: int, websocket:WebSocket):
         """
         this web socket should be joined by a user ho play
 
