@@ -5,9 +5,10 @@ from dotenv import load_dotenv
 defConfig = {
     'port': 8000,
     'host': "127.0.0.1",
+    'db_local': 'True',
     'db_password': 'password',
     'db_user': 'root',
-    'db_url': 'localhost',
+    'db_url': 'localhost'
 }
 
 class Config():

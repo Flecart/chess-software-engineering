@@ -4,12 +4,14 @@ import logging
 
 from backend.routes.user.user import create_user_routes
 
-# from .old.game import create_game_routes
-# from .old.user import create_user_routes
-# from .old.game_old import create_game_routes as create_game_routes_old
 from .game.game import create_game_routes
 from .exception import install_exception_handler
 from backend.database.database import engine, Base
+
+# TODO(ang): delete these after frontend and telegram is updated
+from .old.game import  create_game_routes as oldgameroute
+from .old.game_old import create_game_routes as oldroute
+from .old.user import create_user_routes as olduser
 
 app = FastAPI()
 app.add_middleware(
@@ -33,6 +35,13 @@ install_exception_handler(app)
 
 create_game_routes(app,prefix='/api/v1')
 create_user_routes(app,prefix='/api/v1')
+
+
+# TODO OLD TO DELETE AS SOON AS THE PORTING IS DONE
+oldroute(app)
+oldgameroute(app,prefix='/dev')
+olduser(app,prefix='/dev')
+
 
 logging.getLogger('main').info('Createe routes')
 
