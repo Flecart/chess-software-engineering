@@ -5,7 +5,6 @@ import uuid
 from backend.game.interactive_player_manager import InteractivePlayerManager
 from backend.game.players.manual_move_player import ManualMovePlayer
 
-
 class ReturnUser(BaseModel):
     id: uuid.UUID
 
@@ -42,4 +41,3 @@ def create_user_routes(app:FastAPI,prefix:str=''):
             }
         else:
             return GameState(your_turn=user.is_your_turn, game_state=user.last_game_state)
-

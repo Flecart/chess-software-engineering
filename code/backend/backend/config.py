@@ -1,9 +1,14 @@
 import os
+from dotenv import load_dotenv
 
 
 defConfig = {
     'port': 8000,
-    'host': "127.0.0.1"
+    'host': "127.0.0.1",
+    'db_local': 'True',
+    'db_password': 'password',
+    'db_user': 'root',
+    'db_url': 'localhost'
 }
 
 class Config():
@@ -11,7 +16,9 @@ class Config():
     __instance = None
 
     def __getitem__(self,name):
-        return self.config[name]
+        if name in self.config:
+            return self.config[name]
+        return None
 
 
     def __new__(cls):
@@ -21,11 +28,9 @@ class Config():
         return cls.__instance
 
     def __init(self):
+        load_dotenv()
         self.config = defConfig    
         for key in defConfig.keys():
             if key in os.environ:
-                if type(defConfig[key]) == int:
-                    self.config[key] = int(os.environ[key])
-                else:
-                    self.config[key] = os.environ[key]
+                self.config[key] = os.environ[key]
             

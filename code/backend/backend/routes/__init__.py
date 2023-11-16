@@ -2,9 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from backend.routes.game import create_game_routes
-from backend.routes.user import create_user_routes
-from backend.routes.game_old import create_game_routes as create_game_routes_old
+from backend.routes.user.user import create_user_routes
+
+from .game.game import create_game_routes
+from .exception import install_exception_handler
+from backend.database.database import engine, Base
+
+# TODO(ang): delete these after frontend and telegram is updated
+from .old.game import  create_game_routes as oldgameroute
+from .old.game_old import create_game_routes as oldroute
+from .old.user import create_user_routes as olduser
 
 app = FastAPI()
 app.add_middleware(
@@ -17,13 +24,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# TODO(gio): initialize db connection
+
+Base.metadata.create_all(bind=engine)
+
 
 logging.getLogger('main').info('Creating routes')
 """ adding routes  """
 
-create_game_routes_old(app)
-create_game_routes(app,'/dev')
-create_user_routes(app,'/dev')
-logging.getLogger('main').info('Create routes')
+install_exception_handler(app)
+
+create_game_routes(app,prefix='/api/v1')
+create_user_routes(app,prefix='/api/v1')
+
+
+# TODO OLD TO DELETE AS SOON AS THE PORTING IS DONE
+oldroute(app)
+oldgameroute(app,prefix='/dev')
+olduser(app,prefix='/dev')
+
+
+logging.getLogger('main').info('Createe routes')
 
