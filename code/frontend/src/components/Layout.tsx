@@ -1,8 +1,7 @@
-import { Layout as LibLayout, Menu } from 'antd';
+import { Layout as LibLayout, Menu, Flex, type MenuProps } from 'antd';
 import { Link, Outlet } from '@tanstack/react-router';
-import { PlayCircleOutlined, RobotOutlined, TrophyOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined, RobotOutlined, TrophyOutlined, FormOutlined } from '@ant-design/icons';
 import ChessLogo from '/colored_knight.svg';
-import type { MenuProps } from 'antd';
 
 const { Sider, Content } = LibLayout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -27,6 +26,8 @@ const menuItems: MenuProps['items'] = [
     getItem(<Link to="/game">Gioca</Link>, 'online', <PlayCircleOutlined />),
     getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
     getItem(<Link to="/404">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
+    { type: 'divider' },
+    getItem(<Link to="/auth/register">Registrati</Link>, 'auth', <FormOutlined />),
 ];
 
 export const Layout = () => {
@@ -38,7 +39,9 @@ export const Layout = () => {
                         <img src={ChessLogo} alt="Check Mates Logo" width={50} />
                     </Link>
                 </div>
-                <Menu theme="dark" mode="inline" items={menuItems} />
+                <Flex vertical justify="space-between" style={{ height: '80%' }}>
+                    <Menu theme="dark" mode="inline" items={menuItems} />
+                </Flex>
             </Sider>
             <LibLayout style={{ marginLeft: 'min(1vw,20px)' }}>
                 <Content>
