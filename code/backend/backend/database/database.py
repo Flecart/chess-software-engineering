@@ -12,8 +12,6 @@ DATABASE_URL = f"postgresql://{_config['db_user']}:{_config['db_password']}@{_co
 
 if _config['db_local'] == 'True':
     DATABASE_URL = 'sqlite:///./sql_app.db'
-    
-
 
 engine = create_engine(
     DATABASE_URL

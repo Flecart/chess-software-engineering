@@ -33,13 +33,13 @@ def create_game_routes(app: FastAPI,prefix:str=''):
             await websocket.send_text(f"{data}")
     
     @app.put(prefix + "/{game_id}/join/")
-    def join_game(game_id:int,) -> GameStatusResponse:
+    def join_game(game_id: int) -> GameStatusResponse:
         """
         Join a game with a user.
-        TODO in the future this call is best suited for post, i got some
+        TODO in the future this call is best suited for post, i(gio) got some
         problems with the processing of the body
         """ 
-        return GameStatusResponse(fen='fen',finish=False,view='view')
+        return GameStatusResponse(fen='fen', finish=False, view='view')
     
     
     @app.get(prefix + "/{game_id}")
