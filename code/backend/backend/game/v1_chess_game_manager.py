@@ -1,10 +1,12 @@
 """
 Game manager for the new version of api games
 """
+from fastapi import WebSocket
 
 from backend.routes.game.data import CreateGameRequest
 from backend.game.v1_chess_game import ChessGame
 from backend.game.utils import Color
+from backend.routes.auth import decode_access_token
 
 class ChessGameManager:
     """
@@ -78,3 +80,21 @@ class ChessGameManager:
         
     def get_moves(self, game_id: int) -> list[str]:
         return self.__games[game_id].get_moves()
+    
+    def join_socket(self, socket: WebSocket, token: str) -> None:
+        data = decode_access_token(token)
+        # TODO: handle decode errors, it is not done in websockets.
+        
+        # TODO: use data to retrieve correct user id for the game, or other game id...
+        user_id = data.get("user") # database query, get correct id here
+
+        game_id = self.__white_games.get(user_id)
+        color = Color.WHITE
+        if game_id is None:
+            game_id = self.__black_games.get(user_id)
+            color = Color.BLACK
+
+        if game_id is None:
+            raise ValueError("user not joined a game")
+        game = self.__games[game_id]
+        game.join(socket, color)

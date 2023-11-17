@@ -28,7 +28,6 @@ def _create_access_token(data: dict, expires_delta: timedelta | None = None)->st
 
 
 def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
-    print("decode access", token)
     credentials_exception = JSONException(status_code=401, error={"message": "Could not validate jwt"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

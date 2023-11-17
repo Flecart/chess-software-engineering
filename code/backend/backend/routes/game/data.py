@@ -10,11 +10,11 @@ class CreateGameRequest(BaseModel):
 
     
 class GameStatusResponse(BaseModel):
-    fen:str
-    finished:bool
-    possible_moves: list[str]|None = None
+    fen: str
+    finished: bool
+    possible_moves: list[str] | None = None
     view:str
-    move_made:str|None
+    move_made: str | None
     # time_white: datetime.deltatime|None  #should also be added from when
     # time_balck: datetime.deltatime|None
 
