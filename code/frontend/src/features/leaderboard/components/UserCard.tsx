@@ -23,6 +23,7 @@ export const Usercard = ({ user, first, second, third }: Props) => {
         <Flex
             style={{
                 padding: '20px',
+                margin: '10px',
                 backgroundColor: '#DFDFDF',
                 border: '1px solid black',
                 borderRadius: '8px',
