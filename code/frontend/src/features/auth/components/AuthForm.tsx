@@ -13,7 +13,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
 
     return (
         <>
-            <Form name="basic-auth" wrapperCol={{ span: 16 }} style={{ maxWidth: 600 }}>
+            <Form name="basic-auth" wrapperCol={{ span: 16 }} style={{ maxWidth: 600 }} onFinish={execAction}>
                 <Form.Item<AuthPayload>
                     label="Username"
                     name="username"
@@ -31,7 +31,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ span: 16 }}>
-                    <Button type="primary" htmlType="submit" onClick={execAction}>
+                    <Button type="primary" htmlType="submit">
                         Conferma
                     </Button>
                 </Form.Item>
