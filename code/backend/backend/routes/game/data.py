@@ -11,7 +11,7 @@ class CreateGameRequest(BaseModel):
 
     
 class GameStatusResponse(BaseModel):
-    finished: bool
+    ended: bool
     possible_moves: list[str] | None = None
     view: str
     move_made: str | None

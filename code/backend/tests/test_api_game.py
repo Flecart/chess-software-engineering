@@ -5,7 +5,7 @@ import requests
 from backend.config import Config
 import json
 import asyncio
-import websockets
+from websockets.sync.client import connect
 
 def _auth(jwt:str) -> requests:
     return {'Authorization':  f'{jwt}'}
@@ -16,16 +16,16 @@ def default_game_body()-> dict:
     "type": "dark_chess"
     }
 
-async def on_open(event):
+def on_open(event):
     print('WebSocket connection opened:', event)
 
-async def on_message(event):
+def on_message(event):
     print('Message from server:', event)
 
-async def on_error(event):
+def on_error(event):
     print('WebSocket error:', event)
 
-async def on_close(event):
+def on_close(event):
     print('WebSocket connection closed:', event)
 
 
@@ -53,29 +53,38 @@ class TestApiGame(unittest.TestCase):
 
         server_url = f"ws://{self.host}/api/v1/game/{game_id}/ws"
 
-        async def first_player(auth_token):
+        def first_player(auth_token):
             headers = [('Authorization', auth_token)]
 
-            async with websockets.connect(server_url, extra_headers=headers) as websocket:
-                await on_open(websocket)
-                await websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
-                async for message in websocket:
-                    await on_message(message)
+            with connect(server_url, additional_headers=headers) as websocket:
+                on_open(websocket)
+                websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
+                message = websocket.recv()
                     
-                await on_close(websocket)
+                on_close(websocket)
 
-        async def second_player(auth_token):
+        def second_player(auth_token):
             headers = [('Authorization', auth_token)]
 
-            async with websockets.connect(server_url, extra_headers=headers) as websocket:
-                await on_open(websocket)
-                async for message in websocket:
-                    await on_message(message)
-                    
-                await on_close(websocket)
+            with connect(server_url, additional_headers=headers) as websocket:
+                on_open(websocket)
+                message = websocket.recv() 
+                websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
+
+                websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
+
+                on_close(websocket)
+        # open two thread 
+        # one for each player
+        import threading
+        t1 = threading.Thread(target=first_player, args=(jwt1,))
+        t2 = threading.Thread(target=second_player, args=(jwt2,))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+        
+        
 
 
-        async def double_run():
-            await asyncio.gather(second_player(jwt2), first_player(jwt1))
 
-        asyncio.get_event_loop().run_until_complete(double_run())

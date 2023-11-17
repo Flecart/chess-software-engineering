@@ -100,10 +100,10 @@ class ChessGame():
             raise ValueError('Invalid color')
 
         return GameStatusResponse(
-            ended = self.has_game_ended,
+            ended= self.__finished,
             move_made = move_made, 
             possible_moves=  possible_moves,
-            turn = self.current_player.name,
+            turn = self.current_player.name.__str__().lower(),
             view=view
         )
 

@@ -1,5 +1,6 @@
 from logging import Logger
 from fastapi import  FastAPI,  WebSocket, Depends
+from fastapi.encoders import jsonable_encoder
 from backend.game.utils import Color
 from backend.game.v1_chess_game_manager import ChessGameManager
 from typing import Annotated
@@ -48,11 +49,15 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         player_color = game.get_player_color(username)
         print(username,player_color, flush=True)
         SocketManager().join(game_id, username, websocket)
+        # data = game.get_player_response(player_color)
+        # print(player_color,data)
+        # await websocket.send_json(jsonable_encoder(data))
 
         while True:
             data = await websocket.receive_json()
             request = WebsocketRequests(**data)
-
+            list_moves = None
+            move = None
             match request.kind:
                 
                 case "move":
@@ -68,29 +73,24 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                     try:
                         game.move(request.data)
                         await SocketManager().broadcast(game_id, player_color) 
-                        
-                        data = True
+                        move = request.data
                     except Exception as e:
-                        print(e) # TODO: change log 
+                        pass
                 case "status":
                     # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
                     # TODO: nello status bisogna mettere anche il nome dei giocatori.
-                    if player_color == Color.WHITE:
-                        data = game.white_view
-                    elif player_color == Color.BLACK:
-                        data = game.black_view
-                    else:
+                    if not (player_color == Color.WHITE and player_color == Color.BLACK):
                         raise Exception("Watching player not supported yet")
                 case "list_move":
                     # rispondi con la lista delle mosse 
 
                     # trova colore fai check colore player corrente 
                     if player_color == game.current_player:
-                        data = game.get_moves()
-                    else:
-                        data = []
-                    
-            await websocket.send_json(data)
+                        list_moves = game.get_moves()
+            data = game.get_player_response(player_color\
+                            ,possible_moves=list_moves,move_made=move)
+            print(player_color,data)
+            await websocket.send_json(jsonable_encoder(data))
     
     @app.put(prefix + "/{game_id}/join/")
     def join_game(game_id: int, user_data: Annotated[dict, Depends(decode_access_token)]):

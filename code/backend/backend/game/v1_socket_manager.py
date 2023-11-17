@@ -1,5 +1,6 @@
 
 from fastapi import WebSocket
+import websockets
 from .utils import Color
 
 from backend.game.v1_chess_game_manager import ChessGameManager
@@ -46,15 +47,16 @@ class SocketManager:
         Sends the current state to both players
         """
         game = ChessGameManager().get_game(game_id)
+        sockets = []
         for connections in self.__web_sockets[game_id]:
             # we also should remove time out socket and close them
             # and make this thing async
             ## TODO da refactorare 
             player_color = game.get_player_color(connections[0])
-            if player_color is None:
-                continue
             if player_color != current_player_color:
-                await connections[1].send_json( game.black_view if player_color == Color.BLACK else game.white_view)
+                sockets.append(connections[1])
+        
+        websockets.broadast(sockets,GameResponse(kind="status",data=game.get_player_response(current_player_color)))
 
 
 
