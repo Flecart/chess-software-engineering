@@ -7,7 +7,7 @@ import { AuthForm } from '../components/AuthForm';
 import { postLogin } from '../api/auth';
 
 export const Login = () => {
-    const navigate = useNavigate({ from: '/auth/login' });
+    const navigate = useNavigate({ from: '/login' });
     const [usename, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -19,7 +19,7 @@ export const Login = () => {
 
     return (
         <>
-            <Typography.Title>Log in</Typography.Title>
+            <Typography.Title>Accedi</Typography.Title>
             <AuthForm setUsername={setUsername} setPassword={setPassword} execAction={action} />
         </>
     );

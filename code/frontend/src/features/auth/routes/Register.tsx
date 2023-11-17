@@ -7,7 +7,7 @@ import { AuthForm } from '../components/AuthForm';
 import { postRegister } from '../api/auth';
 
 export const Register = () => {
-    const navigate = useNavigate({ from: '/auth/register' });
+    const navigate = useNavigate({ from: '/register' });
     const [usename, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
