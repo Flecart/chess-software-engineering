@@ -5,7 +5,15 @@ from typing import Annotated
 from backend.routes.exception import JSONException
 from backend.routes.auth import decode_access_token
 from .data import CreateGameRequest,GameStatusResponse
-    
+
+from pydantic import BaseModel
+from typing import Literal
+import json
+# TODO: move me to request nad responses file
+class WebsocketRequests(BaseModel):
+    kind: Literal["move", "join", "status"]
+    data: str # TODO: da definire
+
 
 def create_game_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/game'
@@ -30,6 +38,25 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         await websocket.accept()
         while True:
             data = await websocket.receive_text()
+            data = json.loads(data)
+            request = WebsocketRequests(**data)
+
+            match request.kind:
+                case "join":
+                    # TODO: get correct request data for the socket join
+                    ChessGameManager().join_socket(websocket, request.data)
+                case "move":
+                    # Mmmh, qui mancano le informazioni per fare la mossa
+                    # forse potrebbe essere più sensato mettere il codice
+                    # per i websocket in un socket manager che abbia anch'essa
+                    # quelle informazioni.
+                    # Una altra cosa è lasciare a quel manager la risposta
+                    # quindi dovremmo spostare di nuovo il codice dei socket
+                    # che ho messo a chess manager e chess game
+                    ChessGameManager().move()
+                case "status":
+                    # rispondi con lo stato attuale a chi lo ha chiesto
+                    pass
             await websocket.send_text(f"{data}")
     
     @app.put(prefix + "/{game_id}/join/")
