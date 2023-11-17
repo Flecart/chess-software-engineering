@@ -19,7 +19,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/game'
 
     @app.post(prefix)
-    def create_game(req: CreateGameRequest) -> int:
+    def create_game(req: CreateGameRequest, token: Annotated[str, Depends(decode_access_token)]) -> int:
         """
         Create a new game.
         Is't important to notice that the player
@@ -29,7 +29,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         return ChessGameManager().create_new_game(req)
 
     @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id: int, websocket: WebSocket):
+    async def web_socket(game_id: int, websocket: WebSocket, token: Annotated[str, Depends(decode_access_token)]):
         """
         this web socket should be joined by a user to play
 

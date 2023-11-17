@@ -12,13 +12,8 @@ from ..auth import decode_access_token, create_guest_access_token, create_login_
 
 def create_user_routes(app: FastAPI,prefix:str=''):
     prefix = f'{prefix}/user'
-    @app.post("/token")
-    def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],db:Session=Depends(get_db)):
-        if form_data.username == 'guest': # TODO: fixme, should allow guest username?
-            return { "access_token": create_guest_access_token(form_data.username) , "token_type": "bearer" }
-        return { "access_token": login_api(LoginCredentials(username=form_data.username,password=form_data.password),db) , "token_type": "bearer" }
 
-    @app.post('/guest')
+    @app.post(prefix+'/guest')
     def guest(db: Session=Depends(get_db)) -> str:
         """
         Login a user
