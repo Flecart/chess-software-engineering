@@ -1,11 +1,16 @@
 import { Route } from '@tanstack/react-router';
 import { rootRoute } from '.';
-import { Game } from '@/features/chessboard';
+import { Pregame, Game } from '@/features/chessboard';
 
 const gameRoute = new Route({
     getParentRoute: () => rootRoute,
     path: 'game',
-    component: Game,
+});
+
+const indexGameRoute = new Route({
+    getParentRoute: () => gameRoute,
+    path: '/',
+    component: Pregame,
 });
 
 export const specificGameRoute = new Route({
@@ -17,4 +22,4 @@ export const specificGameRoute = new Route({
     },
 });
 
-export const gameRoutes = gameRoute.addChildren([specificGameRoute]);
+export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute]);
