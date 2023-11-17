@@ -1,9 +1,5 @@
 import { Button, Form, Input } from 'antd';
-
-type FieldType = {
-    username: string;
-    password: string;
-};
+import type { AuthPayload } from '../types';
 
 type Props = {
     setUsername: (username: string) => void;
@@ -18,7 +14,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
     return (
         <>
             <Form name="basic-auth" wrapperCol={{ span: 16 }} style={{ maxWidth: 600 }}>
-                <Form.Item<FieldType>
+                <Form.Item<AuthPayload>
                     label="Username"
                     name="username"
                     rules={[{ required: true, message: 'Inserisci il nome utente' }]}
@@ -26,7 +22,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
                     <Input onChange={onChangeUsername} />
                 </Form.Item>
 
-                <Form.Item<FieldType>
+                <Form.Item<AuthPayload>
                     label="Password"
                     name="password"
                     rules={[{ required: true, message: 'Inserisci la password' }]}
