@@ -4,22 +4,22 @@ import { Typography } from 'antd';
 
 import { AuthForm } from '../components/AuthForm';
 
-import { postRegister } from '../api/auth';
+import { postLogin } from '../api/auth';
 
-export const Register = () => {
-    const navigate = useNavigate({ from: '/register' });
+export const Login = () => {
+    const navigate = useNavigate({ from: '/login' });
     const [usename, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const action = () => {
-        postRegister(usename, password);
+        postLogin(usename, password);
         //TODO: handle errors
         navigate({ to: '/' });
     };
 
     return (
         <>
-            <Typography.Title>Registrati</Typography.Title>
+            <Typography.Title>Accedi</Typography.Title>
             <AuthForm setUsername={setUsername} setPassword={setPassword} execAction={action} />
         </>
     );
