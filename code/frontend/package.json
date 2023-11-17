@@ -53,7 +53,8 @@
         }
     },
     "lint-staged": {
-        "**/*": "npx prettier --write --ignore-unknown"
+        "**/*": "npx prettier --write --ignore-unknown",
+        "**/*.ts?(x)": ["npm run lint", "bash -c tsc -p tsconfig.json --pretty --noEmit"]
     },
     "prettier": {
         "printWidth": 120,
