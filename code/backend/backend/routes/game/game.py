@@ -1,5 +1,5 @@
 from fastapi import  FastAPI,  WebSocket
-from 
+# from backend.routes.game.v1
 
 from backend.routes.exception import JSONException
 from .data import CreateGameRequest,GameStatusResponse
@@ -21,9 +21,9 @@ def create_game_routes(app: FastAPI,prefix:str=''):
 
 
     @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id: int, websocket:WebSocket):
+    async def web_socket(game_id: int, websocket: WebSocket):
         """
-        this web socket should be joined by a user ho play
+        this web socket should be joined by a user to play
 
         Maybe this in a future could also be used to watch people play
         """
