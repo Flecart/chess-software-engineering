@@ -3,6 +3,7 @@ import { RootRoute, Route, Router } from '@tanstack/react-router';
 import { gameRoutes } from './game';
 import { registerRoute, loginRoute } from './auth';
 import { leaderboardRoute } from './leaderboard';
+import { profileRoute } from './profile';
 import { Landing, ToBeImplemented } from '@/features/misc/';
 import { RouterDevtools } from '@/components/RouterDevtools';
 
@@ -31,6 +32,7 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     gameRoutes,
     leaderboardRoute,
+    profileRoute,
     notFoundRoute,
     registerRoute,
     loginRoute,
