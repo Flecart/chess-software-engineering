@@ -37,9 +37,8 @@ class ChessGameManager:
         return self.__games[id]
 
     def create_new_game(self, game_creation: CreateGameRequest) -> int:
-        self.__games[self.__games_n] = ChessGame(game_creation)
-
         self.__games_n += 1
+        self.__games[self.__games_n] = ChessGame(game_creation)
         return self.__games_n
 
     def join(self, game_id: int, player: int, color: Color) -> None:
@@ -77,24 +76,6 @@ class ChessGameManager:
             return game.black_view
         else:
             raise ValueError("color must be white or black")
-        
+
     def get_moves(self, game_id: int) -> list[str]:
         return self.__games[game_id].get_moves()
-    
-    def join_socket(self, socket: WebSocket, token: str) -> None:
-        data = decode_access_token(token)
-        # TODO: handle decode errors, it is not done in websockets.
-        
-        # TODO: use data to retrieve correct user id for the game, or other game id...
-        user_id = data.get("user") # database query, get correct id here
-
-        game_id = self.__white_games.get(user_id)
-        color = Color.WHITE
-        if game_id is None:
-            game_id = self.__black_games.get(user_id)
-            color = Color.BLACK
-
-        if game_id is None:
-            raise ValueError("user not joined a game")
-        game = self.__games[game_id]
-        game.join(socket, color)

@@ -1,5 +1,3 @@
-from fastapi import WebSocket
-
 from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
@@ -8,14 +6,6 @@ from backend.bot.data.enums import Actions
 from .utils import START_POSITION_FEN, Color, GameTypes
 import backend.bot.mcts as engine
 
-from pydantic import BaseModel
-from typing import Literal
-
-
-# TODO: refactor, move me to response and answer format folder
-class GameResponse(BaseModel):
-    kind: Literal["status"] # add with other types
-    data: GameStatusResponse
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
@@ -31,9 +21,9 @@ class ChessGame():
         self.__black_view: str|None = None
         self.__white_view: str|None = None
 
-        self.__white_socket: WebSocket|None = None
-        self.__black_socket: WebSocket|None = None
-        
+        self.__white_player: str|None = None
+        self.__black_player: str|None = None
+
 
     @property
     def fen(self) -> str:
@@ -55,27 +45,28 @@ class ChessGame():
     def current_player(self) -> Color:
         return Color.WHITE if len(self.__moves) % 2 == 0 else Color.BLACK
 
-    def join(self, socket: WebSocket, color: Color) -> None:
+    def join(self, user: str, color: Color) -> None:
         if color == Color.WHITE:
-            self.__white_socket = socket
+            if self.__white_player is not None:
+                raise ValueError("White color has already joined")
+            self.__white_player = user
         elif color == Color.BLACK:
-            self.__black_socket = socket
+            if self.__black_player is not None:
+                raise ValueError("Black color has already joined")
+            self.__black_player = user
         else:
             raise ValueError("color must be white or black")
 
-    def broadcast(self) -> None:
+    def get_player_color(self, username: str) -> Color | None:
         """
-        Sends the current state to both players
+        Get the color of a player from its username.
         """
-        if self.__white_socket is None or self.__black_socket is None:
-            raise ValueError("players not connected")
-        
-        self.__white_socket.send_json(
-            GameResponse(kind="status", data=self.__make_status_response(Color.WHITE))
-        )
-        self.__black_socket.send_json(
-            GameResponse(kind="status", data=self.__make_status_response(Color.BLACK))
-        )
+        if self.__white_player == username:
+            return Color.WHITE
+        elif self.__black_player == username:
+            return Color.BLACK
+        else:
+            return None
 
     def get_moves(self) -> None:
         game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.LIST_MOVE,None))
@@ -97,11 +88,3 @@ class ChessGame():
     def __create_game_state_action(self, action:Actions, move: str|None) -> GameStateInput:
         return GameStateInput(self.__fen, self.__type,action, move)
     
-    def __make_status_response(self, color: Color) -> GameStatusResponse:
-        return GameStatusResponse(
-            self.__fen,
-            self.__finished,
-            None,
-            self.__white_view if color == Color.WHITE else self.__black_view,
-            self.__moves[-1] if len(self.__moves) > 0 else None,
-        )

@@ -41,16 +41,19 @@ def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
     except  JWTError :
         Logger('debug').error(f"Error decoding jwt, {JWTError}, {token} {SECRET_KEY}") 
         raise credentials_exception
-    return {'username':username, 'guest': guest}
+    return {'username': username, 'guest': guest}
+
 
 def decode_user_token(token: Annotated[dict, Depends(decode_access_token)]):
     if token['guest'] == True:
         raise JSONException(status_code=401, error={'message': 'this route is only for authenticated users'})
     return token
 
+
 def create_guest_access_token(id: int):
     # TODO: the database should save that this guest connected
     return _create_access_token({"sub":  'guest-'+str(id), 'guest':True})
+
 
 def create_login_access_token(login: LoginCredentials) -> str:
     # TODO: first make request to database to verify this.
