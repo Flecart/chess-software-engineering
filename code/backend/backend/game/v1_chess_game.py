@@ -3,7 +3,8 @@ from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.enums import Actions
 
-from .utils import START_POSITION_FEN, Color, GameTypes
+from backend.bot.data.enums import GameType
+from .utils import START_POSITION_FEN, Color 
 import backend.bot.mcts as engine
 
 
@@ -16,7 +17,7 @@ class ChessGame():
 
         # TODO(ang): usa informazioni di game_creation per settare i giocatori
         # e la tipologia di gioco
-        self.__type: GameTypes = GameTypes(game_creation.type)
+        self.__type: GameType = GameType(game_creation.type)
 
         self.__black_view: str|None = None
         self.__white_view: str|None = None
@@ -69,11 +70,11 @@ class ChessGame():
             return None
 
     def get_moves(self) -> None:
-        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.LIST_MOVE,None))
+        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.LIST_MOVE, None))
         return game_state.possible_moves
     
     def get_best_move(self) -> str:
-        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MAKE_BEST_MOVE,None))
+        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MAKE_BEST_MOVE, None))
         return game_state.best_move
 
     def move(self, move: str) -> None:
@@ -85,6 +86,27 @@ class ChessGame():
         self.__black_view = game_state.black_view
         self.__white_view = game_state.white_view
 
+    def get_player_response(self,
+                            color: Color,
+                            possible_moves: list[str] | None = None,
+                            move_made: str | None = None
+    ) -> GameStatusResponse:
+        view = ''
+        if color == Color.BLACK:
+            view = self.__black_view
+        elif color == Color.WHITE:
+            view = self.__white_view
+        else:
+            raise ValueError('Invalid color')
+
+        return GameStatusResponse(
+            ended = self.has_game_ended,
+            move_made = move_made, 
+            possible_moves=  possible_moves,
+            turn = self.current_player.name,
+            view=view
+        )
+
     def __create_game_state_action(self, action:Actions, move: str|None) -> GameStateInput:
-        return GameStateInput(self.__fen, self.__type,action, move)
+        return GameStateInput(self.__type, self.__fen, action, move)
     

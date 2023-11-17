@@ -31,7 +31,7 @@ class SocketManager:
     
     def __init(self):
         # chiave id_partita, linka, utente - websocket
-        self.__web_sockets: dict[int, list[(str, WebSocket)]] = {}
+        self.__web_sockets: dict[int, list[tuple[str, WebSocket]]] = {}
 
     def join(self,game_id: int,username: str, websocket: WebSocket):
         game = ChessGameManager().get_game(game_id) 
@@ -41,14 +41,20 @@ class SocketManager:
         self.__web_sockets[game_id].append((username, websocket))
 
 
-    def broadcast(self, game_id: int, data: str) -> None:
+    async def broadcast(self, game_id: int, current_player_color: Color) -> None:
         """
         Sends the current state to both players
         """
-        for dict in self.__web_sockets[game_id]:
+        game = ChessGameManager().get_game(game_id)
+        for connections in self.__web_sockets[game_id]:
             # we also should remove time out socket and close them
             # and make this thing async
-            dict["websocket"].send_text(data)
+            ## TODO da refactorare 
+            player_color = game.get_player_color(connections[0])
+            if player_color is None:
+                continue
+            if player_color != current_player_color:
+                await connections[1].send_json( game.black_view if player_color == Color.BLACK else game.white_view)
 
 
 

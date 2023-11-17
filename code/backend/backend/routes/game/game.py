@@ -1,3 +1,4 @@
+from logging import Logger
 from fastapi import  FastAPI,  WebSocket, Depends
 from backend.game.utils import Color
 from backend.game.v1_chess_game_manager import ChessGameManager
@@ -32,38 +33,20 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         return ChessGameManager().create_new_game(req)
 
     @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id: int, websocket: WebSocket, user_data: Annotated[dict, Depends(decode_access_token)]):
+    async def web_socket(game_id: int, websocket: WebSocket):
         """
         this web socket should be joined by a user to play
 
         Maybe this in a future could also be used to watch people play
         """
-        """"
-        TO Test
-        const serverUrl = 'ws://localhost:8000/game/1/ws';
-        const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdHJpbmciLCJndWVzdCI6ZmFsc2UsImV4cCI6MTcwMDI0MzM0MX0.eQgGYZeu2CEvgYjUdhOiWF_hmaU8B4MXbfh_TO5zxls';
-
-        // Create a WebSocket connection with the authentication header
-        const socket = new WebSocket(serverUrl, ['Authorization', authToken]);
-        socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection opened:', event);
-        });
-        socket.addEventListener('message', (event) => {
-            console.log('Message from server:', event.data);
-        });
-        socket.addEventListener('error', (event) => {
-            console.error('WebSocket error:', event);
-        });
-        socket.addEventListener('close', (event) => {
-            console.log('WebSocket connection closed:', event);
-        });
-
-        """
+        user_data = decode_access_token(websocket.headers['Authorization'])
+        # user_data = {"username" __, "guest": boolean}
+        username = user_data["username"]
         await websocket.accept()
 
-        username = user_data["username"]
         game = ChessGameManager().get_game(game_id)
         player_color = game.get_player_color(username)
+        print(username,player_color, flush=True)
         SocketManager().join(game_id, username, websocket)
 
         while True:
@@ -71,6 +54,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
             request = WebsocketRequests(**data)
 
             match request.kind:
+                
                 case "move":
                     # manda lo stato aggiornato a tutti i giocatori
 
@@ -82,13 +66,15 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                     # quindi dovremmo spostare di nuovo il codice dei socket
                     # che ho messo a chess manager e chess game
                     try:
-                        game.move(player_color, request.data)
-                        #SocketManager().broadcast(game_id, ) 
+                        game.move(request.data)
+                        await SocketManager().broadcast(game_id, player_color) 
+                        
                         data = True
-                    except:
-                        data = False
+                    except Exception as e:
+                        print(e) # TODO: change log 
                 case "status":
                     # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
+                    # TODO: nello status bisogna mettere anche il nome dei giocatori.
                     if player_color == Color.WHITE:
                         data = game.white_view
                     elif player_color == Color.BLACK:
@@ -100,7 +86,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
 
                     # trova colore fai check colore player corrente 
                     if player_color == game.current_player:
-                        data = game.list_moves()
+                        data = game.get_moves()
                     else:
                         data = []
                     

@@ -1,8 +1,9 @@
 
+import json
 import unittest
 import requests
 from backend.config import Config
-
+import json
 import asyncio
 import websockets
 
@@ -19,7 +20,7 @@ async def on_open(event):
     print('WebSocket connection opened:', event)
 
 async def on_message(event):
-    print('Message from server:', event.data)
+    print('Message from server:', event)
 
 async def on_error(event):
     print('WebSocket error:', event)
@@ -50,19 +51,31 @@ class TestApiGame(unittest.TestCase):
         requests.put(self.base_url_api + f"/game/{game_id}/join",headers=_auth(jwt2)).json()
         print(game_id, flush=True)
 
-        async def socket_conn(auth_token):
-            server_url = f"ws://{self.host}/api/v1/game/{game_id}/ws"
+        server_url = f"ws://{self.host}/api/v1/game/{game_id}/ws"
 
+        async def first_player(auth_token):
+            headers = [('Authorization', auth_token)]
+
+            async with websockets.connect(server_url, extra_headers=headers) as websocket:
+                await on_open(websocket)
+                await websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
+                async for message in websocket:
+                    await on_message(message)
+                    
+                await on_close(websocket)
+
+        async def second_player(auth_token):
             headers = [('Authorization', auth_token)]
 
             async with websockets.connect(server_url, extra_headers=headers) as websocket:
                 await on_open(websocket)
                 async for message in websocket:
                     await on_message(message)
-
+                    
                 await on_close(websocket)
 
+
         async def double_run():
-            await asyncio.gather(socket_conn(jwt1), socket_conn(jwt2))
+            await asyncio.gather(second_player(jwt2), first_player(jwt1))
 
         asyncio.get_event_loop().run_until_complete(double_run())
