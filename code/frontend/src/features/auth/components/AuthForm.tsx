@@ -35,7 +35,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit" ghost onClick={execAction}>
+                    <Button type="primary" htmlType="submit" onClick={execAction}>
                         Submit
                     </Button>
                 </Form.Item>
