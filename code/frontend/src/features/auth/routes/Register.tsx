@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Flex, Typography } from 'antd';
+import { Typography } from 'antd';
 
 import { AuthForm } from '../components/AuthForm';
 
@@ -19,7 +19,7 @@ export const Register = () => {
 
     return (
         <>
-            <Typography.Title>Register</Typography.Title>
+            <Typography.Title>Registrati</Typography.Title>
             <AuthForm setUsername={setUsername} setPassword={setPassword} execAction={action} />
         </>
     );

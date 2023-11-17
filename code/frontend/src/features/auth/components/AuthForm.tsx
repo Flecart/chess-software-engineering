@@ -21,7 +21,7 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
                 <Form.Item<FieldType>
                     label="Username"
                     name="username"
-                    rules={[{ required: true, message: 'Please input your username!' }]}
+                    rules={[{ required: true, message: 'Inserisci il nome utente' }]}
                 >
                     <Input onChange={onChangeUsername} />
                 </Form.Item>
@@ -29,14 +29,14 @@ export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
                 <Form.Item<FieldType>
                     label="Password"
                     name="password"
-                    rules={[{ required: true, message: 'Please input your password!' }]}
+                    rules={[{ required: true, message: 'Inserisci la password' }]}
                 >
                     <Input.Password onChange={onChangePassword} />
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ span: 16 }}>
                     <Button type="primary" htmlType="submit" onClick={execAction}>
-                        Submit
+                        Conferma
                     </Button>
                 </Form.Item>
             </Form>
