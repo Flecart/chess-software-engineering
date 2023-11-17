@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from datetime import datetime
 from typing import Annotated
@@ -29,18 +28,19 @@ def _create_access_token(data: dict, expires_delta: timedelta | None = None)->st
 
 
 def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    print("decode access", token)
     credentials_exception = JSONException(status_code=401, error={"message": "Could not validate jwt"})
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         data: dict = payload.get("sub")
-        #TODO the schema should be insert in some other way 
+        # TODO the schema should be insert in some other way 
         if not('guest' in data) or not ('username' in data):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     return data
 
-def decode_user_token(token:Annotated[dict, Depends(decode_access_token)]):
+def decode_user_token(token: Annotated[dict, Depends(decode_access_token)]):
     if token['guest'] == True:
         raise JSONException(status_code=401, error={'message': 'this route is only for authenticated users'})
     return token
