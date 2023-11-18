@@ -5,6 +5,7 @@ import requests
 from backend.config import Config
 import json
 import asyncio
+import time
 from websockets.sync.client import connect
 
 def _auth(jwt:str) -> requests:
@@ -57,23 +58,43 @@ class TestApiGame(unittest.TestCase):
             headers = [('Authorization', auth_token)]
 
             with connect(server_url, additional_headers=headers) as websocket:
-                on_open(websocket)
+                message = websocket.recv()
+                print('first player join', message)
+                time.sleep(2)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
                 message = websocket.recv()
+
+                _go_listening_until_move(websocket,'first player ')
                     
-                on_close(websocket)
+
+        def _go_listening_until_move(ws, name=None):
+            print(name, 'in waiting')
+            while True:
+                message = ws.recv()
+                print(message, name)
+                if "waiting" not in json.loads(message):
+                    print(message, name)
+                    return message
+
 
         def second_player(auth_token):
             headers = [('Authorization', auth_token)]
-
             with connect(server_url, additional_headers=headers) as websocket:
-                on_open(websocket)
                 message = websocket.recv() 
+                print("second player start state", message)
+                _go_listening_until_move(websocket,'second player ')
+                 
+                time.sleep(2)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
+                message = websocket.recv()
 
+                time.sleep(2)
                 websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
+                message = websocket.recv()                
 
-                on_close(websocket)
+                _go_listening_until_move(websocket,'second player ')
+
+
         # open two thread 
         # one for each player
         import threading

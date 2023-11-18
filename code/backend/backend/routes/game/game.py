@@ -12,6 +12,7 @@ from .data import CreateGameRequest,GameStatusResponse
 
 from pydantic import BaseModel
 from typing import Literal
+import asyncio
 import json
 
 # TODO: move me to request nad responses file
@@ -48,49 +49,51 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         game = ChessGameManager().get_game(game_id)
         player_color = game.get_player_color(username)
         print(username,player_color, flush=True)
-        SocketManager().join(game_id, username, websocket)
-        # data = game.get_player_response(player_color)
-        # print(player_color,data)
-        # await websocket.send_json(jsonable_encoder(data))
+        await SocketManager().join(game_id, username, websocket)
 
         while True:
-            data = await websocket.receive_json()
-            request = WebsocketRequests(**data)
-            list_moves = None
-            move = None
-            match request.kind:
-                
-                case "move":
-                    # manda lo stato aggiornato a tutti i giocatori
+            if SocketManager().is_socket_reading(game_id, websocket):
+                # TODO: refactor me, and put me in socket manager?
+                data = await websocket.receive_json()
+                request = WebsocketRequests(**data)
+                print(data)
+                list_moves = None
+                move = None
+                match request.kind:
+                    case "move":
+                        # manda lo stato aggiornato a tutti i giocatori
 
-                    # Mmmh, qui mancano le informazioni per fare la mossa
-                    # forse potrebbe essere più sensato mettere il codice
-                    # per i websocket in un socket manager che abbia anch'essa
-                    # quelle informazioni.
-                    # Una altra cosa è lasciare a quel manager la risposta
-                    # quindi dovremmo spostare di nuovo il codice dei socket
-                    # che ho messo a chess manager e chess game
-                    try:
-                        game.move(request.data)
-                        await SocketManager().broadcast(game_id, player_color) 
-                        move = request.data
-                    except Exception as e:
-                        pass
-                case "status":
-                    # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
-                    # TODO: nello status bisogna mettere anche il nome dei giocatori.
-                    if not (player_color == Color.WHITE and player_color == Color.BLACK):
-                        raise Exception("Watching player not supported yet")
-                case "list_move":
-                    # rispondi con la lista delle mosse 
+                        # Mmmh, qui mancano le informazioni per fare la mossa
+                        # forse potrebbe essere più sensato mettere il codice
+                        # per i websocket in un socket manager che abbia anch'essa
+                        # quelle informazioni.
+                        # Una altra cosa è lasciare a quel manager la risposta
+                        # quindi dovremmo spostare di nuovo il codice dei socket
+                        # che ho messo a chess manager e chess game
+                        try:
+                            game.move(request.data)
+                            await SocketManager().notify_opponent(game_id, player_color) 
+                            move = request.data
+                        except Exception as e:
+                            pass
+                    case "status":
+                        # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
+                        # TODO: nello status bisogna mettere anche il nome dei giocatori.
+                        if not (player_color == Color.WHITE and player_color == Color.BLACK):
+                            raise Exception("Watching player not supported yet")
+                    case "list_move":
+                        # rispondi con la lista delle mosse 
 
-                    # trova colore fai check colore player corrente 
-                    if player_color == game.current_player:
-                        list_moves = game.get_moves()
-            data = game.get_player_response(player_color\
+                        # trova colore fai check colore player corrente 
+                        if player_color == game.current_player:
+                            list_moves = game.get_moves()
+
+                data = game.get_player_response(player_color\
                             ,possible_moves=list_moves,move_made=move)
-            print(player_color,data)
-            await websocket.send_json(jsonable_encoder(data))
+                await websocket.send_json(jsonable_encoder(data))
+            else:
+                await websocket.send_json({"waiting": True})
+                await asyncio.sleep(1) 
     
     @app.put(prefix + "/{game_id}/join/")
     def join_game(game_id: int, user_data: Annotated[dict, Depends(decode_access_token)]):

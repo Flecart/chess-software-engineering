@@ -12,15 +12,17 @@ class ChessGame():
     # TODO: definisci la tipologia di mosse
     def __init__(self, game_creation: CreateGameRequest, fen: str = START_POSITION_FEN, moves: list[str] = []):
         self.__fen: str = fen
-        self.__finished: bool = False
         self.__moves = moves
 
         # TODO(ang): usa informazioni di game_creation per settare i giocatori
         # e la tipologia di gioco
         self.__type: GameType = GameType(game_creation.type)
 
-        self.__black_view: str|None = None
-        self.__white_view: str|None = None
+        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.LIST_MOVE))
+
+        self.__finished = game_state.finish
+        self.__black_view = game_state.black_view
+        self.__white_view = game_state.white_view
 
         self.__white_player: str|None = None
         self.__black_player: str|None = None
@@ -45,6 +47,16 @@ class ChessGame():
     @property
     def current_player(self) -> Color:
         return Color.WHITE if len(self.__moves) % 2 == 0 else Color.BLACK
+
+    def is_current_player(self, username: str) -> bool:
+        color = self.current_player
+        if color == Color.WHITE and self.__white_player == username:
+            return True
+        
+        if color == Color.BLACK and self.__black_player == username:
+            return True
+        
+        return False
 
     def join(self, user: str, color: Color) -> None:
         if color == Color.WHITE:
@@ -107,6 +119,6 @@ class ChessGame():
             view=view
         )
 
-    def __create_game_state_action(self, action:Actions, move: str|None) -> GameStateInput:
+    def __create_game_state_action(self, action:Actions, move: str|None=None) -> GameStateInput:
         return GameStateInput(self.__type, self.__fen, action, move)
     
