@@ -1,3 +1,18 @@
+import { Button, Result } from 'antd';
+import { useNavigate } from '@tanstack/react-router';
+
 export const ToBeImplemented = () => {
-    return <h1>To Be Implemented</h1>;
+    const navigate = useNavigate({ from: '/404' });
+    return (
+        <Result
+            status="404"
+            title="404"
+            subTitle="La pagina che hai cercato non esiste."
+            extra={
+                <Button type="primary" onClick={() => navigate({ to: '/' })}>
+                    Torna alla Home
+                </Button>
+            }
+        />
+    );
 };

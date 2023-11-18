@@ -25,7 +25,7 @@ function getItem(
 const menuItems: MenuProps['items'] = [
     getItem(<Link to="/game">Gioca</Link>, 'online', <PlayCircleOutlined />),
     getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
-    getItem(<Link to="/404">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
+    getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
     { type: 'divider' },
     getItem(<Link to="/register">Registrati</Link>, 'register', <FormOutlined />),
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),
