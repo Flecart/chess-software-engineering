@@ -14,7 +14,7 @@ RUN git config --global --add safe.directory /app/deploy
 
 RUN pip install flask
 
-COPY webhook.py ./webhook.py
+COPY webhook.py monitor.py ./
 
 EXPOSE 80
 
