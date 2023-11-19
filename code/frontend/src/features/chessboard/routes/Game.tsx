@@ -1,21 +1,15 @@
 import { frontendUrl } from '@/config';
-import { useNavigate } from '@tanstack/react-router';
+import { specificGameRouteId } from '@/routes/game';
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 
-type Props = {
-    useParams: () => { gameId?: string };
-    useSearch: () => { boardOrientation?: 'white' | 'black' };
-};
-
-export const Game = ({ useParams, useSearch }: Props) => {
-    const { gameId } = useParams();
-    const { boardOrientation } = useSearch();
-    if (!gameId) throw new Error('gameId is required');
-    if (!boardOrientation) throw new Error('boardOrientation is required');
-    const navigate = useNavigate({ from: '/game/$gameId' });
+export const Game = () => {
+    const { gameId } = useParams({ from: specificGameRouteId });
+    const { boardOrientation } = useSearch({ from: specificGameRouteId });
+    const navigate = useNavigate({ from: specificGameRouteId });
     const [isMyTurn, setIsMyTurn] = useState(boardOrientation === 'white');
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
     const [gameEnded, setGameEnded] = useState(false);

@@ -16,13 +16,13 @@ export const rootRoute = new RootRoute({
     ),
 });
 
-export const indexRoute = new Route({
+const indexRoute = new Route({
     getParentRoute: () => rootRoute,
     path: '/',
     component: Landing,
 });
 
-export const notFoundRoute = new Route({
+const notFoundRoute = new Route({
     getParentRoute: () => rootRoute,
     path: '404',
     component: ToBeImplemented,

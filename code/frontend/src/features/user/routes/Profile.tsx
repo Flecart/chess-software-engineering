@@ -1,4 +1,4 @@
-import { specificProfileRoute } from '@/routes/profile';
+import { specificProfileRouteId } from '@/routes/profile';
 import { useParams } from '@tanstack/react-router';
 import { Avatar, Flex, Typography } from 'antd';
 import { GameCard } from '../components/GameCard';
@@ -9,7 +9,7 @@ const bigText: React.CSSProperties = {
 };
 
 export const Profile = () => {
-    const params = useParams({ from: specificProfileRoute.id });
+    const params = useParams({ from: specificProfileRouteId });
     const { data: user, error: userError } = useUserQuery(params.username);
     const { data: games, error: gamesError } = useUserGamesQuery(params.username);
 
@@ -22,9 +22,9 @@ export const Profile = () => {
                         {user.username}
                     </Typography.Title>
                     <Flex align="center" justify="space-evenly" wrap="wrap" style={{ width: '100%' }}>
-                        <Typography.Text style={bigText}>Punteggio Elo: {user.eloScore}</Typography.Text>
-                        <Typography.Text style={bigText}>Partite vinte: {user.wonGames}</Typography.Text>
-                        <Typography.Text style={bigText}>Partite perse: {user.lostGames}</Typography.Text>
+                        <Typography.Text style={bigText}>Punteggio Elo: {user.elo}</Typography.Text>
+                        <Typography.Text style={bigText}>Partite vinte: {user.wins}</Typography.Text>
+                        <Typography.Text style={bigText}>Partite perse: {user.losses}</Typography.Text>
                     </Flex>
                 </Flex>
             )}

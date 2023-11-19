@@ -1,6 +1,13 @@
 import { Layout as LibLayout, Menu, Flex, type MenuProps } from 'antd';
 import { Link, Outlet } from '@tanstack/react-router';
-import { PlayCircleOutlined, RobotOutlined, TrophyOutlined, FormOutlined, EditOutlined } from '@ant-design/icons';
+import {
+    PlayCircleOutlined,
+    RobotOutlined,
+    TrophyOutlined,
+    FormOutlined,
+    EditOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
 import ChessLogo from '/colored_knight.svg';
 
 const { Sider, Content } = LibLayout;
@@ -26,7 +33,7 @@ const menuItems: MenuProps['items'] = [
     getItem(<Link to="/game">Gioca</Link>, 'online', <PlayCircleOutlined />),
     getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
     getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
-    getItem(<Link to="/profile">Profilo</Link>, 'profile', <EditOutlined />),
+    getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />),
     { type: 'divider' },
     getItem(<Link to="/register">Registrati</Link>, 'register', <FormOutlined />),
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),

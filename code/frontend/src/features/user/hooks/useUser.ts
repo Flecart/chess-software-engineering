@@ -1,14 +1,14 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { getUser, getUserGames } from '../api/users';
 
-function userOptions(username: string) {
+export function userOptions(username: string) {
     return queryOptions({
         queryKey: ['user', { username }],
         queryFn: () => getUser(username),
     });
 }
 
-function userGamesOptions(username: string) {
+export function userGamesOptions(username: string) {
     return queryOptions({
         queryKey: ['user-games', { username }],
         queryFn: () => getUserGames(username),
