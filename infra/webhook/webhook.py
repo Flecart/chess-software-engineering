@@ -12,8 +12,6 @@ app.config["DEBUG"] = False
 post_script = os.getenv("POST_SCRIPT")
 webhook_token = os.getenv("WEBHOOK_TOKEN")
 
-q = queue.Queue()
-
 class coda(monitor):
     def __init__(self, size=1):
         super().__init__()
@@ -39,32 +37,7 @@ class coda(monitor):
         print("Deploy ended", flush=True)
         self.ok2pop.signal()
 
-
-def deploy():
-  try:
-      output = subprocess.check_output(
-          post_script, executable='/bin/bash', shell=True,
-          stderr=subprocess.STDOUT, universal_newlines=True)
-  except subprocess.CalledProcessError as er:
-      print(er.output, file=sys.stderr)
-      return False, er.output
-  else:
-      print(output, file=sys.stderr)
-      return True, output
-
 coda = coda()
-
-def worker():
-    while True:
-        if not q.empty():
-            item = q.get()
-            print("Deploying", flush=True)
-            item.start()
-            item.join()
-            print("Deploy completed", flush=True)
-
-
-
 
 @app.route("/", methods=["POST"])
 def root():
@@ -80,12 +53,9 @@ def root():
         print("Received push event", flush=True)
         t = threading.Thread(target=coda.deploy)
         print("Add event to queue", flush=True)
-        #q.put(t)
         t.start()
 
     return "Ok", 200
 
 if __name__ == "__main__":
-    w = threading.Thread(target=worker)
-    #w.start()
     app.run(host="0.0.0.0", port=80)
