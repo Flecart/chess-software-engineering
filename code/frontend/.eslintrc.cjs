@@ -12,7 +12,7 @@ module.exports = {
             {
                 patterns: [
                     {
-                        group: ['@/features/*/*'],
+                        group: ['*/features/*/*'],
                         message: 'Please import from the feature folder instead.',
                     },
                 ],
