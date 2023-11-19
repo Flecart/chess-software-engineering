@@ -1,13 +1,15 @@
 import { axios } from '@/lib/axios';
 
-export async function postRegister(username: string, password: string): Promise<unknown> {
+export type jwt_token = string;
+
+export async function postRegister(username: string, password: string): Promise<jwt_token> {
     //TODO: create a type for the response
-    const response = await axios.post('/auth/register', { username, password });
+    const response = await axios.post('/api/v1/user/signup', { username, password });
     return response.data;
 }
 
-export async function postLogin(username: string, password: string): Promise<unknown> {
+export async function postLogin(username: string, password: string): Promise<jwt_token> {
     //TODO: create a type for the response
-    const response = await axios.post('/auth/login', { username, password });
+    const response = await axios.post('/api/v1/user/login', { username, password });
     return response.data;
 }
