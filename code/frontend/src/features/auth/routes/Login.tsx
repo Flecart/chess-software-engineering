@@ -1,14 +1,14 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Typography } from 'antd';
 
-import { TokenContext } from '@/lib/context';
 import { AuthForm } from '../components/AuthForm';
 import { postLogin } from '../api/auth';
+import { useTokenContext } from '@/lib/tokenContext';
 
 export const Login = () => {
     const navigate = useNavigate({ from: '/login' });
-    const { setToken } = useContext(TokenContext);
+    const { setToken } = useTokenContext();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
