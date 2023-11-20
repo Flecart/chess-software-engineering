@@ -1,4 +1,5 @@
 
+import asyncio
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 
@@ -63,7 +64,7 @@ class SocketManager:
             if game.is_current_player(player) and socket == websocket:
                 return True
 
-        game.get_bot_move()
+        game.get_bot_move(asyncio.get_running_loop())
         return False
 
     async def notify_opponent(self, game_id: int, current_player_color: Color) -> None:
@@ -82,8 +83,12 @@ class SocketManager:
                 continue
 
             if player_color != None and player_color != current_player_color:
-                await ws.send_json(jsonable_encoder(game.get_player_response(player_color)))
-        
+                try:
+                    ren = game.get_player_response(player_color)
+                    await ws.send_json(jsonable_encoder(ren))
+                except Exception as e:
+                    print(e,ws.client_state)
+
 
         for (name, ws) in to_remove:
             await self.remove(game_id, name, ws)
@@ -92,7 +97,8 @@ class SocketManager:
         """
         """
         self.__web_sockets[game_id].remove((username, websocket))
-        await websocket.close()
+        if websocket.client_state != WebSocketState.DISCONNECTED:
+            await websocket.close()
 
 
 

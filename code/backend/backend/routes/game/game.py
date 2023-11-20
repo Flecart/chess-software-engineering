@@ -2,7 +2,7 @@ from logging import Logger
 from fastapi import  FastAPI,  WebSocket, Depends, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 from fastapi.websockets import WebSocketState
-from websockets import ConnectionClosedOK
+from websockets import ConnectionClosedError, ConnectionClosedOK
 from backend.game.utils import Color
 from backend.game.v1_chess_game_manager import ChessGameManager
 from typing import Annotated
@@ -96,6 +96,8 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         except WebSocketDisconnect :
             await SocketManager().remove(game_id, username, websocket)
         except ConnectionClosedOK:
+            await SocketManager().remove(game_id, username, websocket)
+        except ConnectionClosedError:
             await SocketManager().remove(game_id, username, websocket)
 
 

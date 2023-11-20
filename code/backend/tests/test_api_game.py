@@ -24,6 +24,14 @@ def _go_listening_until_move(ws, name=None):
         if "waiting" not in json.loads(message):
             return message
 
+def _play_moves(websocket,name,moves):
+    for (i,move) in enumerate(moves):
+        websocket.send(json.dumps({"kind": "move", "data":move }))
+        message = websocket.recv()
+        if message['ended']:
+            return i
+        _go_listening_until_move(websocket,name)
+    return None
 
 class TestApiGame(unittest.TestCase):
 
@@ -64,6 +72,28 @@ class TestApiGame(unittest.TestCase):
         t.start()
         t.join()
 
+    def test_join_game_bot_wrong_move(self):
+        jwt = self._create_guest_user()
+
+        game_id = requests.post(self.base_url_api + "/game",headers=_auth(jwt),json=default_game_body(True)).json()
+        requests.put(self.base_url_api + f"/game/{game_id}/join",headers=_auth(jwt)).json()
+
+        server_url = lambda x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
+
+        def player(auth_token):
+            with connect(server_url(auth_token)) as websocket:
+                message = websocket.recv()
+                websocket.send(json.dumps({"kind": "move", "data": "a1a3"}))
+                message = websocket.recv()
+                websocket.send(json.dumps({"kind": "move", "data": "a3a4"}))
+                message = websocket.recv()
+
+            websocket.close()
+
+        import threading
+        t = threading.Thread(target=player, args=(jwt,))
+        t.start()
+        t.join()
 
     def test_join_game_bot(self):
         jwt = self._create_guest_user()
@@ -101,32 +131,31 @@ class TestApiGame(unittest.TestCase):
 
         server_url = lambda x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
 
-        def first_player(auth_token):
 
+        def first_player(auth_token):
             with connect(server_url(auth_token)) as websocket:
                 message = websocket.recv()
-                time.sleep(2)
+                time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
                 message = websocket.recv()
-                _go_listening_until_move(websocket,'first player ')
-
+                _go_listening_until_move(websocket,'first')
             websocket.close()
+
 
         def second_player(auth_token):
             with connect(server_url(auth_token)) as websocket:
                 message = websocket.recv() 
                 _go_listening_until_move(websocket,'second player ')
-                 
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
                 message = websocket.recv()
-
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
-                message = websocket.recv()                
+                message = websocket.recv()
 
             websocket.close()
 
+            
         # open two thread 
         # one for each player
         import threading
@@ -136,8 +165,3 @@ class TestApiGame(unittest.TestCase):
         t2.start()
         t1.join()
         t2.join()
-        
-        
-
-
-

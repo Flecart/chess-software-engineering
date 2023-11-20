@@ -135,7 +135,7 @@ class ChessGame():
             view=view
         )
     
-    def get_bot_move(self) -> None:
+    def get_bot_move(self,event_loop:asyncio.AbstractEventLoop) -> None:
         if self.__finished or (not self.__bot_player) \
               or self.__calculating:
             return
@@ -148,7 +148,7 @@ class ChessGame():
             game.move(move[0])
             game.__calculating = False
             from backend.game.v1_socket_manager import SocketManager
-            asyncio.run(SocketManager().notify_opponent(game.__id, bot_color))
+            event_loop.create_task(SocketManager().notify_opponent(game.__id, bot_color))
 
         
         if bot_color == self.current_player:
