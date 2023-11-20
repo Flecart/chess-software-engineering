@@ -4,14 +4,14 @@ import { useState } from 'react';
 // storageKey: This is the name of our storage that gets used when we retrieve/save our persistent data.
 // fallbackState: This is our default value, but only if the store doesn't exist, otherwise it gets overwritten by the store.
 export default <T>(storageKey: string, fallbackState: T): [T, (arg0: T) => void] => {
-    const [state, setInternalState] = useState<T>(getFromLocalStorage(storageKey) ?? fallbackState);
+    const [state, setState] = useState<T>(getFromLocalStorage(storageKey) ?? fallbackState);
 
-    const setState = (newState: T): void => {
+    const setPersistState = (newState: T): void => {
         localStorage.setItem(storageKey, JSON.stringify(newState));
-        setInternalState(newState);
+        setState(newState);
     };
 
-    return [state, setState];
+    return [state, setPersistState];
 };
 
 function getFromLocalStorage<T>(key: string): T | null {
