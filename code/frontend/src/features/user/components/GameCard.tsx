@@ -12,7 +12,7 @@ export const GameCard = ({ game }: Props) => {
     const eloGain = game.eloGain > 0 ? `+${game.eloGain}` : game.eloGain;
     return (
         <Card hoverable bordered>
-            <Flex wrap="wrap" justify="center">
+            <Flex wrap="wrap" justify="center" gap="small">
                 <Link to="/profile/$username" params={{ username: game.opponentName }}>
                     <Avatar src={game.opponentAvatar} size={100} />
                 </Link>

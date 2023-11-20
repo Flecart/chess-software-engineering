@@ -12,7 +12,7 @@ const indexProfileRoute = new Route({
     path: '/',
     component: () => {
         //TODO: redirect to logged user
-        return <Navigate to="/profile/$username" params={{ username: 'magnus' }} />;
+        return <Navigate to="/profile/$username" params={{ username: 'magnus' }} replace />;
     },
 });
 
