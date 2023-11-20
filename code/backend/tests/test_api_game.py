@@ -52,12 +52,11 @@ class TestApiGame(unittest.TestCase):
         requests.put(self.base_url_api + f"/game/{game_id}/join",headers=_auth(jwt2)).json()
         print(game_id, flush=True)
 
-        server_url = f"ws://{self.host}/api/v1/game/{game_id}/ws"
+        server_url = lambda x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
 
         def first_player(auth_token):
-            headers = [('Authorization', auth_token)]
 
-            with connect(server_url, additional_headers=headers) as websocket:
+            with connect(server_url(auth_token)) as websocket:
                 message = websocket.recv()
                 print('first player join', message)
                 time.sleep(2)
@@ -78,8 +77,7 @@ class TestApiGame(unittest.TestCase):
 
 
         def second_player(auth_token):
-            headers = [('Authorization', auth_token)]
-            with connect(server_url, additional_headers=headers) as websocket:
+            with connect(server_url(auth_token)) as websocket:
                 message = websocket.recv() 
                 print("second player start state", message)
                 _go_listening_until_move(websocket,'second player ')

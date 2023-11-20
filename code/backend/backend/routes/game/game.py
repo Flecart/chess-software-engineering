@@ -34,15 +34,14 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         # TODO: log the request!
         return ChessGameManager().create_new_game(req)
 
-    @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id: int, websocket: WebSocket):
+    @app.websocket(prefix + "/{game_id}/{token}/ws")
+    async def web_socket(game_id: int,token:str, websocket: WebSocket):
         """
         this web socket should be joined by a user to play
 
         Maybe this in a future could also be used to watch people play
         """
-        user_data = decode_access_token(websocket.headers['Authorization'])
-        # user_data = {"username" __, "guest": boolean}
+        user_data = decode_access_token(token)
         username = user_data["username"]
         await websocket.accept()
 
