@@ -14,6 +14,8 @@
         "prepare": "cd ../.. && husky install code/frontend/.husky"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.8.4",
+        "@tanstack/react-query-devtools": "^5.8.4",
         "@tanstack/react-router": "^0.0.1-beta.195",
         "antd": "^5.10.2",
         "axios": "^1.6.0",
@@ -27,6 +29,7 @@
     },
     "devDependencies": {
         "@commitlint/config-conventional": "^18.1.0",
+        "@tanstack/eslint-plugin-query": "^5.8.4",
         "@tanstack/router-devtools": "^0.0.1-beta.205",
         "@total-typescript/ts-reset": "^0.5.1",
         "@types/node": "^20.8.9",
@@ -54,7 +57,10 @@
     },
     "lint-staged": {
         "**/*": "npx prettier --write --ignore-unknown",
-        "**/*.ts?(x)": ["npm run lint", "bash -c tsc -p tsconfig.json --pretty --noEmit"]
+        "**/*.ts?(x)": [
+            "npm run lint",
+            "bash -c tsc -p tsconfig.json --pretty --noEmit"
+        ]
     },
     "prettier": {
         "printWidth": 120,

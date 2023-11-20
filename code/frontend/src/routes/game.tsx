@@ -13,13 +13,15 @@ const indexGameRoute = new Route({
     component: Pregame,
 });
 
-export const specificGameRoute = new Route({
+const specificGameRoute = new Route({
     getParentRoute: () => gameRoute,
     path: '$gameId',
     component: Game,
-    validateSearch: (search): { boardOrientation?: 'white' | 'black' } => {
+    validateSearch: (search): { boardOrientation: 'white' | 'black' } => {
         return { boardOrientation: search.boardOrientation === 'white' ? 'white' : 'black' };
     },
 });
+
+export const specificGameRouteId = specificGameRoute.id;
 
 export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute]);
