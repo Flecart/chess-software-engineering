@@ -9,11 +9,11 @@ import { postLogin } from '../api/auth';
 export const Login = () => {
     const navigate = useNavigate({ from: '/login' });
     const { setToken } = useContext(TokenContext);
-    const [usename, setUsername] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const action = async () => {
-        const token = await postLogin(usename, password);
+        const token = await postLogin(username, password);
         setToken(token);
         //TODO: handle errors
         navigate({ to: '/' });

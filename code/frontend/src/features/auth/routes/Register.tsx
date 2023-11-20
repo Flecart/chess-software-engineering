@@ -9,11 +9,11 @@ import { postRegister } from '../api/auth';
 export const Register = () => {
     const navigate = useNavigate({ from: '/register' });
     const { setToken } = useContext(TokenContext);
-    const [usename, setUsername] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
     const action = async () => {
-        const token = await postRegister(usename, password);
+        const token = await postRegister(username, password);
         setToken(token);
         //TODO: handle errors
         navigate({ to: '/' });
