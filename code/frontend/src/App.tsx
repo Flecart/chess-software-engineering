@@ -3,8 +3,8 @@ import { router } from '@/routes';
 import { RouterProvider } from '@tanstack/react-router';
 import { ConfigProvider as AntdConfigProvider, theme } from 'antd';
 import itIT from 'antd/lib/locale/it_IT';
-import { TokenContext } from './lib/context';
-import type { jwt_token } from './features/auth/api/auth';
+import { TokenContext } from '@/lib/context';
+import type { jwt_token } from '@/types';
 
 export const App = () => {
     const [token, setToken] = useState<null | jwt_token>(null);

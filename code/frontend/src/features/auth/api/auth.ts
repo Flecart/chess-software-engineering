@@ -1,6 +1,6 @@
 import { axios } from '@/lib/axios';
 
-export type jwt_token = string;
+import type { jwt_token } from '@/types';
 
 export async function postRegister(username: string, password: string): Promise<jwt_token> {
     //TODO: create a type for the response
