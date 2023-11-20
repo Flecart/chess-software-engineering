@@ -18,7 +18,7 @@ class User(Base):
     __tablename__ = "users"
     user = Column(String, primary_key=True, index=True)
     profile_image = Column(LargeBinary, default=None)
-    profile_image_url = Column(String, default="https://i.stack.imgur.com/l60Hf.png")
+    profile_image_url = Column(String, default=f"https://api.dicebear.com/7.x/lorelei/png?seed={user}")
     profile_image_type = Column(Enum("link", "blob", name="image_type"), default="link")
     auth = relationship("Auth", back_populates="user_instance")
 
