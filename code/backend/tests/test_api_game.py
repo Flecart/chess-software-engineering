@@ -38,6 +38,32 @@ class TestApiGame(unittest.TestCase):
         jwt=requests.post(self.base_url_api + '/user/guest').json()
         return jwt
 
+    def test_join_game_bot_black(self):
+        jwt = self._create_guest_user()
+
+        game_id = requests.post(self.base_url_api + "/game",headers=_auth(jwt),json=default_game_body(True)).json()
+        requests.put(self.base_url_api + f"/game/{game_id}/join/black",headers=_auth(jwt)).json()
+
+        server_url = lambda x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
+
+        def player(auth_token):
+            with connect(server_url(auth_token)) as websocket:
+                message = websocket.recv()
+                time.sleep(1)
+                websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
+                message = websocket.recv()
+                _go_listening_until_move(websocket,'black player ')
+                websocket.send(json.dumps({"kind": "move", "data": "a6a5"}))
+                message = websocket.recv()
+
+            websocket.close()
+
+
+        import threading
+        t = threading.Thread(target=player, args=(jwt,))
+        t.start()
+        t.join()
+
 
     def test_join_game_bot(self):
         jwt = self._create_guest_user()
@@ -85,7 +111,6 @@ class TestApiGame(unittest.TestCase):
                 _go_listening_until_move(websocket,'first player ')
 
             websocket.close()
-                    
 
         def second_player(auth_token):
             with connect(server_url(auth_token)) as websocket:
@@ -101,7 +126,6 @@ class TestApiGame(unittest.TestCase):
                 message = websocket.recv()                
 
             websocket.close()
-
 
         # open two thread 
         # one for each player

@@ -1,12 +1,9 @@
 """
 Game manager for the new version of api games
 """
-from fastapi import WebSocket
-
 from backend.routes.game.data import CreateGameRequest
 from backend.game.v1_chess_game import ChessGame
 from backend.game.utils import Color
-from backend.routes.auth import decode_access_token
 
 class ChessGameManager:
     """
@@ -38,7 +35,7 @@ class ChessGameManager:
 
     def create_new_game(self, game_creation: CreateGameRequest) -> int:
         self.__games_n += 1
-        self.__games[self.__games_n] = ChessGame(game_creation)
+        self.__games[self.__games_n] = ChessGame(self.__games_n,game_creation)
         return self.__games_n
 
     def join(self, game_id: int, player: int, color: Color) -> None:

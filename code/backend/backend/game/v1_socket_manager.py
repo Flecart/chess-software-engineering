@@ -1,8 +1,7 @@
 
 from fastapi import WebSocket
-import websockets
+from fastapi.websockets import WebSocketState
 
-from backend.game.v1_chess_game import BOT_USERNAME
 from .utils import Color
 from fastapi.encoders import jsonable_encoder
 
@@ -64,7 +63,7 @@ class SocketManager:
             if game.is_current_player(player) and socket == websocket:
                 return True
 
-        game.get_bot_move(callback=lambda :self.notify_opponent(game_id, game.get_player_color(BOT_USERNAME)))
+        game.get_bot_move()
         return False
 
     async def notify_opponent(self, game_id: int, current_player_color: Color) -> None:
@@ -78,17 +77,22 @@ class SocketManager:
             ## TODO da refactorare 
             player_color = game.get_player_color(name)
             # check ws connection is open
-            if ws.client_state != websockets.protocol.State.OPEN:
+            if ws.client_state == WebSocketState.DISCONNECTED:
                 to_remove.append((name, ws))
                 continue
 
             if player_color != None and player_color != current_player_color:
                 await ws.send_json(jsonable_encoder(game.get_player_response(player_color)))
         
+
         for (name, ws) in to_remove:
-            self.__web_sockets[game_id].remove((name, ws))
-            await ws.close()
+            await self.remove(game_id, name, ws)
         
+    async def remove(self, game_id: int, username: str, websocket: WebSocket):
+        """
+        """
+        self.__web_sockets[game_id].remove((username, websocket))
+        await websocket.close()
 
 
 

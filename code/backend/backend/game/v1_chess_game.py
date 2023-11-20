@@ -1,4 +1,5 @@
 import asyncio
+from backend.config import Config
 from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
@@ -9,11 +10,12 @@ from .utils import START_POSITION_FEN, Color
 import backend.bot.mcts as engine
 
 
-BOT_USERNAME = 'bot'
+_BOT_USERNAME = Config()['bot']
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
-    def __init__(self, game_creation: CreateGameRequest, fen: str = START_POSITION_FEN, moves: list[str] = []):
+    def __init__(self,id:int, game_creation: CreateGameRequest, fen: str = START_POSITION_FEN, moves: list[str] = []):
+        self.__id:int = id
         self.__fen: str = fen
         self.__moves = moves
 
@@ -77,9 +79,9 @@ class ChessGame():
 
         if self.__bot_player:
             if self.__black_player is None:
-                self.__black_player = BOT_USERNAME
+                self.__black_player = _BOT_USERNAME
             elif self.__white_player is None:
-                self.__white_player = BOT_USERNAME
+                self.__white_player = _BOT_USERNAME
             else:
                 raise ValueError("Bot player can't join a game with two players")
 
@@ -133,18 +135,20 @@ class ChessGame():
             view=view
         )
     
-    def get_bot_move(self,callback) -> None:
+    def get_bot_move(self) -> None:
         if self.__finished or (not self.__bot_player) \
               or self.__calculating:
             return
-        bot_color = self.get_player_color(BOT_USERNAME)
+        bot_color = self.get_player_color(_BOT_USERNAME)
+
 
         def make_bot_move(game):
             game.__calculating = True
             move = game.get_best_move()
             game.move(move[0])
             game.__calculating = False
-            asyncio.run(callback())
+            from backend.game.v1_socket_manager import SocketManager
+            asyncio.run(SocketManager().notify_opponent(game.__id, bot_color))
 
         
         if bot_color == self.current_player:
