@@ -1,3 +1,4 @@
+import asyncio
 from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
@@ -7,6 +8,8 @@ from backend.bot.data.enums import GameType
 from .utils import START_POSITION_FEN, Color 
 import backend.bot.mcts as engine
 
+
+BOT_USERNAME = 'bot'
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
@@ -27,6 +30,8 @@ class ChessGame():
         self.__white_player: str|None = None
         self.__black_player: str|None = None
 
+        self.__bot_player:bool = game_creation.against_bot
+        self.__calculating:bool = False
 
     @property
     def fen(self) -> str:
@@ -69,6 +74,15 @@ class ChessGame():
             self.__black_player = user
         else:
             raise ValueError("color must be white or black")
+
+        if self.__bot_player:
+            if self.__black_player is None:
+                self.__black_player = BOT_USERNAME
+            elif self.__white_player is None:
+                self.__white_player = BOT_USERNAME
+            else:
+                raise ValueError("Bot player can't join a game with two players")
+
 
     def get_player_color(self, username: str) -> Color | None:
         """
@@ -118,6 +132,27 @@ class ChessGame():
             turn = self.current_player.name.__str__().lower(),
             view=view
         )
+    
+    def get_bot_move(self,callback) -> None:
+        if self.__finished or (not self.__bot_player) \
+              or self.__calculating:
+            return
+        bot_color = self.get_player_color(BOT_USERNAME)
+
+        def make_bot_move(game):
+            game.__calculating = True
+            move = game.get_best_move()
+            game.move(move[0])
+            game.__calculating = False
+            asyncio.run(callback())
+
+        
+        if bot_color == self.current_player:
+            import threading
+            thread = threading.Thread(target=make_bot_move, args=(self,))
+            thread.start()
+            
+
 
     def __create_game_state_action(self, action:Actions, move: str|None=None) -> GameStateInput:
         return GameStateInput(self.__type, self.__fen, action, move)

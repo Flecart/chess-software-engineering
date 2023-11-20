@@ -119,6 +119,7 @@ def find(val,iter) -> int:
   return -1
 
 def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
+  print(game_state_input)
   fen = game_state_input.fen
   game,state = _create_state(game_state_input.game_type,fen)
   out= GameStateOutput()

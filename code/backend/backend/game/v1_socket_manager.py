@@ -1,6 +1,8 @@
 
 from fastapi import WebSocket
 import websockets
+
+from backend.game.v1_chess_game import BOT_USERNAME
 from .utils import Color
 from fastapi.encoders import jsonable_encoder
 
@@ -56,27 +58,36 @@ class SocketManager:
         """
         game = ChessGameManager().get_game(game_id)
         players_sockets = self.__web_sockets[game_id]
+
         
         for player, socket in players_sockets:
             if game.is_current_player(player) and socket == websocket:
                 return True
-            
+
+        game.get_bot_move(callback=lambda :self.notify_opponent(game_id, game.get_player_color(BOT_USERNAME)))
         return False
 
     async def notify_opponent(self, game_id: int, current_player_color: Color) -> None:
         """
         """
         game = ChessGameManager().get_game(game_id)
+        to_remove = []
         for (name, ws) in self.__web_sockets[game_id]:
             # we also should remove time out socket and close them
             # and make this thing async
             ## TODO da refactorare 
             player_color = game.get_player_color(name)
-            if player_color != None and player_color != current_player_color:
-                print('notifing',player_color)
-                await ws.send_json(jsonable_encoder(game.get_player_response(player_color)))
+            # check ws connection is open
+            if ws.client_state != websockets.protocol.State.OPEN:
+                to_remove.append((name, ws))
+                continue
 
-                
+            if player_color != None and player_color != current_player_color:
+                await ws.send_json(jsonable_encoder(game.get_player_response(player_color)))
+        
+        for (name, ws) in to_remove:
+            self.__web_sockets[game_id].remove((name, ws))
+            await ws.close()
         
 
 

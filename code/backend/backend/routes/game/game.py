@@ -47,7 +47,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
 
         game = ChessGameManager().get_game(game_id)
         player_color = game.get_player_color(username)
-        print(username,player_color, flush=True)
         await SocketManager().join(game_id, username, websocket)
 
         while True:
@@ -55,7 +54,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                 # TODO: refactor me, and put me in socket manager?
                 data = await websocket.receive_json()
                 request = WebsocketRequests(**data)
-                print(data)
                 list_moves = None
                 move = None
                 match request.kind:
