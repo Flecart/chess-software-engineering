@@ -1,4 +1,6 @@
 import type { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+const fogChar = '?';
+
 /**
  * Converts a non standard fen string to a standard fen string
  * the difference between the two is:
@@ -17,7 +19,7 @@ export function generateStandardFen(customFen: string): string {
 
         if (char === '.') {
             emptySpaces++;
-        } else if (char === 'X') {
+        } else if (char === fogChar) {
             emptySpaces++;
         } else if (char >= '0' && char <= '9') {
             emptySpaces += parseInt(char);
@@ -34,6 +36,34 @@ export function generateStandardFen(customFen: string): string {
         fen += emptySpaces;
     }
 
+    return fen;
+}
+
+/**
+ * Converts a standard fen string to a non standard fen string
+ * The new fen format uses numbers to represent empty spaces
+ *
+ * The old Fog fen uses plain dots
+ */
+export function generateOldFogFen(newFenFormat: string): string {
+    let fen = '';
+
+    for (let i = 0; i < newFenFormat.length; i++) {
+        const char = newFenFormat.charAt(i);
+        if (char == ' ') {
+            break; // old format doesn't use the last part of the fen
+        }
+
+        if (char >= '0' && char <= '9') {
+            const value = parseInt(char);
+            for (let j = 0; j < value; j++) {
+                fen += '.';
+            }
+        } else {
+            fen += char;
+        }
+    }
+    console.log(fen);
     return fen;
 }
 
@@ -56,7 +86,7 @@ export function generateFogObject(customFen: string): CustomSquareStyles {
         for (let j = 0; j < row.length; j++) {
             const char = row.charAt(j);
 
-            if (char === 'X') {
+            if (char === fogChar) {
                 const number = i + 1;
                 const letter = labels.at(j);
                 const key = `${letter}${number}` as Square; // even if I define unexsisting square's key, it's fine because they will be ignored

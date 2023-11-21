@@ -1,39 +1,20 @@
-import { useEffect, useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
-import { generateFogObject, generateStandardFen } from '../utils/fen';
-import { getBoard, makeMove } from '../api/game';
+import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/......../......../PPPPPPPP/RNBQKBNR';
 
 type Props = {
-    gameId: string;
+    fen?: string;
     boardOrientation: 'white' | 'black';
-    setIsMyTurn: React.Dispatch<React.SetStateAction<boolean>>;
+    makeMove: (from: string, to: string) => void;
     style?: React.CSSProperties;
     gameIsEnded: () => void;
 };
 
-export const Chessboard = ({ gameId, boardOrientation, setIsMyTurn, style, gameIsEnded }: Props) => {
-    const [fen, setFen] = useState(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
-
-    useEffect(() => {
-        getBoard(gameId, boardOrientation).then((res) => {
-            setFen(res.board);
-        });
-        const pollingBoard = setInterval(() => {
-            getBoard(gameId, boardOrientation).then((res) => {
-                setIsMyTurn(res.has_enemy_moved);
-                if (res.has_enemy_moved) setFen(res.board);
-            });
-        }, 1000);
-        return () => {
-            clearInterval(pollingBoard);
-        };
-        // i just need to run this once, so i can ignore the dependency array
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) => {
+    if (!fen) fen = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
 
     return (
         <div
@@ -47,21 +28,14 @@ export const Chessboard = ({ gameId, boardOrientation, setIsMyTurn, style, gameI
                 id="mainboard"
                 boardOrientation={boardOrientation}
                 position={generateStandardFen(fen)}
-                customSquareStyles={generateFogObject(fen)}
+                customSquareStyles={generateFogObject(generateOldFogFen(fen))}
                 onPieceDrop={(from, to, piece) => {
                     if (
                         (boardOrientation === 'black' && piece.startsWith('w')) ||
                         (boardOrientation === 'white' && piece.startsWith('b'))
                     )
                         return false;
-                    makeMove(gameId, `${from}${to}`)
-                        .then((res) => {
-                            if (res.game_ended === true) gameIsEnded();
-                            else setFen(res.board);
-                        })
-                        .catch(() => {
-                            // TODO: handle errors
-                        });
+                    makeMove(from, to);
                     return true; //TODO: seems like it doesn't matter the return value, investigate
                 }}
             />

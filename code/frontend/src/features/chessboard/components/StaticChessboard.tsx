@@ -1,5 +1,5 @@
 import { Chessboard as ReactChessboard } from 'react-chessboard';
-import { generateFogObject, generateStandardFen } from '../utils/fen';
+import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
 type Props = {
     customFEN: string;
@@ -17,7 +17,7 @@ export const StaticChessboard = (props: Props) => {
             <ReactChessboard
                 id="staticboard"
                 position={generateStandardFen(props.customFEN)}
-                customSquareStyles={generateFogObject(props.customFEN)}
+                customSquareStyles={generateFogObject(generateOldFogFen(props.customFEN))}
                 arePiecesDraggable={false}
                 areArrowsAllowed={false}
                 arePremovesAllowed={false}

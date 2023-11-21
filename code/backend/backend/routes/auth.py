@@ -13,7 +13,7 @@ from .user.data import LoginCredentials
 SECRET_KEY:str =  "b821bcc3363eda4506ba5af73af81b5945069293a05e58a324ebfaa040d7a4f1" if Config()['secret_key']==None else Config()['secret_key']
 ALGORITHM = "HS256"
 #TODO da commentare se va bene
-ACCESS_TOKEN_EXPIRE_MINUTES = 90
+ACCESS_TOKEN_EXPIRE_MINUTES = 60*24*10
 
 oauth2_scheme = APIKeyHeader(name="Authorization", auto_error=False)
 

@@ -11,6 +11,9 @@ const indexGameRoute = new Route({
     getParentRoute: () => gameRoute,
     path: '/',
     component: Pregame,
+    validateSearch: (search): { bot: boolean } => {
+        return { bot: !!search.bot };
+    },
 });
 
 const specificGameRoute = new Route({
@@ -22,6 +25,7 @@ const specificGameRoute = new Route({
     },
 });
 
+export const indexGameRouteId = indexGameRoute.id;
 export const specificGameRouteId = specificGameRoute.id;
 
 export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute]);
