@@ -7,7 +7,7 @@ export const Landing = () => {
 
     return (
         <Flex align="center" justify="center" gap={'large'} wrap="wrap" style={{ marginTop: '50px' }}>
-            <StaticChessboard customFEN="XXXXXX.X/XXnXXX.X/XX.p1p2/XX...P.X/pp1PNB2/...X.X.P/PP5Q/K1R3R1" />
+            <StaticChessboard customFEN="??????.?/??n???.?/??.p1p2/??...P.?/pp1PNB2/...?.?.P/PP5Q/K1R3R1" />
             <Flex gap="large" vertical style={{ maxWidth: '540px' }}>
                 <Typography.Title>Federazione Italiana Scacchisti Eterodossi - Check Mates</Typography.Title>
                 <Typography.Paragraph style={{ textAlign: 'justify' }}>
@@ -21,7 +21,7 @@ export const Landing = () => {
                     type="primary"
                     size="large"
                     onClick={() => {
-                        navigate({ to: '/404' });
+                        navigate({ to: '/game/', search: { bot: true } });
                     }}
                 >
                     Gioca contro il computer
@@ -30,7 +30,7 @@ export const Landing = () => {
                     type="default"
                     size="large"
                     onClick={() => {
-                        navigate({ to: '/game' });
+                        navigate({ to: '/game/', search: { bot: false } });
                     }}
                 >
                     Gioca Online

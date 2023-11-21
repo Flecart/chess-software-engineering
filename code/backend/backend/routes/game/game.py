@@ -127,6 +127,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
 
         # it check first if he can join as white
         # if an error is thrown it try to join as black 
+        # TODO: refactor me with pydantic
         try: 
             ChessGameManager().get_game(game_id).\
                 join(user_data['username'], Color(color))
