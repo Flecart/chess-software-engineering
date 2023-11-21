@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Literal
 
 class CreateGameRequest(BaseModel):
     against_bot: bool = True
@@ -10,11 +11,11 @@ class CreateGameRequest(BaseModel):
 
     
 class GameStatusResponse(BaseModel):
-    fen:str
-    finished:bool
-    possible_moves: list[str]|None = None
-    view:str
-    move_made:str|None
+    ended: bool
+    possible_moves: list[str] | None = None
+    view: str
+    move_made: str | None
+    turn: Literal["white", "black"]
     # time_white: datetime.deltatime|None  #should also be added from when
     # time_balck: datetime.deltatime|None
 

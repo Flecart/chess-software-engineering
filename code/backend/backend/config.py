@@ -8,7 +8,8 @@ defConfig = {
     'db_local': 'True',
     'db_password': 'password',
     'db_user': 'root',
-    'db_url': 'localhost'
+    'db_url': 'localhost',
+    'bot_username' : 'bot'
 }
 
 class Config():
