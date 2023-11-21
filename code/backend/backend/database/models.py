@@ -21,6 +21,7 @@ class User(Base):
     profile_image_url = Column(String, default=f"https://api.dicebear.com/7.x/lorelei/png?seed={user}")
     profile_image_type = Column(Enum("link", "blob", name="image_type"), default="link")
     auth = relationship("Auth", back_populates="user_instance")
+    rating = Column(Integer, default=1500)
 
 class Game(Base):
     __tablename__ = "game"
