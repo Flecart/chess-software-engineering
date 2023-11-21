@@ -44,6 +44,8 @@ export function generateStandardFen(customFen: string): string {
  * The new fen format uses numbers to represent empty spaces
  *
  * The old Fog fen uses plain dots
+ * @param newFenFormat the standard fen string
+ * @returns a non standard (old) fen string
  */
 export function generateOldFogFen(newFenFormat: string): string {
     let fen = '';
@@ -63,7 +65,6 @@ export function generateOldFogFen(newFenFormat: string): string {
             fen += char;
         }
     }
-    console.log(fen);
     return fen;
 }
 

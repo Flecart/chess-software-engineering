@@ -58,7 +58,6 @@ export const Game = () => {
             setGameEnded(true);
         }
         // questo è necessario per non andare in loop infinito di update
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastJsonMessage]);
 
@@ -94,7 +93,7 @@ export const Game = () => {
                 </Typography.Paragraph>
             </section>
 
-            <pre>{JSON.stringify(lastJsonMessage, null, 2)}</pre>
+            {/* <pre>{JSON.stringify(lastJsonMessage, null, 2)}</pre> */}
 
             <Flex vertical gap="small">
                 <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
