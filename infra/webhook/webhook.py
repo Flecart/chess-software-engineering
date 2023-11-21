@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 import threading
+import queue
+from monitor import monitor, condition, entry
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
@@ -10,20 +12,32 @@ app.config["DEBUG"] = False
 post_script = os.getenv("POST_SCRIPT")
 webhook_token = os.getenv("WEBHOOK_TOKEN")
 
+class coda(monitor):
+    def __init__(self, size=1):
+        super().__init__()
+        self.ok2pop = condition(self)
+        self.deploy_ongoing = False
 
-def deploy():
-  try:
-      output = subprocess.check_output(
-          post_script, executable='/bin/bash', shell=True,
-          stderr=subprocess.STDOUT, universal_newlines=True)
-      print("Deploy completed", flush=True)
-  except subprocess.CalledProcessError as er:
-      print(er.output, file=sys.stderr)
-      return False, er.output
-  else:
-      print(output, file=sys.stderr)
-      return True, output
+    @entry
+    def deploy(self):
+        if self.deploy_ongoing:
+            print("Waiting for previous deploy to end",flush=True)
+            self.ok2pop.wait()
+        print("Deploying", flush=True)
+        self.deploy_ongoing = True
+        try:
+            output = subprocess.check_output(
+                post_script, executable='/bin/bash', shell=True,
+                stderr=subprocess.STDOUT, universal_newlines=True)
+        except subprocess.CalledProcessError as er:
+            print(er.output, file=sys.stderr)
+        else:
+            print(output, file=sys.stderr)
+        self.deploy_ongoing = False
+        print("Deploy ended", flush=True)
+        self.ok2pop.signal()
 
+coda = coda()
 
 @app.route("/", methods=["POST"])
 def root():
@@ -37,8 +51,8 @@ def root():
 
     if event_type == 'Push Hook':
         print("Received push event", flush=True)
-        t = threading.Thread(target=deploy)
-        print("Starting deploy", flush=True)
+        t = threading.Thread(target=coda.deploy)
+        print("Add event to queue", flush=True)
         t.start()
 
     return "Ok", 200

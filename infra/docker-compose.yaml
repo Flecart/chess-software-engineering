@@ -12,6 +12,7 @@ services:
       - 8000:8000
     networks:
       - deploy
+    restart: unless-stopped
 
   frontend:
     image: t1-check-mates/frontend
@@ -24,6 +25,7 @@ services:
       - 3000:5173
     networks:
       - deploy
+    restart: unless-stopped
 
   bot:
     image: t1-check-mates/bot
@@ -37,6 +39,7 @@ services:
       - "BACKEND_URL=${BACKEND_URL}"
     networks:
       - deploy
+    restart: unless-stopped
 
 networks:
   deploy:

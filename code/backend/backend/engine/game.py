@@ -98,6 +98,7 @@ class Game:
 
         self.current_player = invert_color(self.current_player)
         return result
+
     
     def get_moves(self):
         return self.board.moves

@@ -125,7 +125,7 @@ def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
 
   match game_state_input.action:
     case Actions.MOVE:
-      ind = find(game_state_input.parameters,_legal_action_to_uci(game_state_input.game_type,state,fen))
+      ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type,state,fen))
       if ind ==-1:
         raise ValueError('Invalid Move')
       state.apply_action(state.legal_actions()[ind])
@@ -159,7 +159,6 @@ def main():
   game = GameStateInput("", "",[],None)
   game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
   game.game_type= 'dark_chess'
-  game.parameters="c8d7"
   game.action = Actions.LIST_MOVE
   val = dispatch(game)
   _print_game_state_output(val)

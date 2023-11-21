@@ -3,6 +3,7 @@ import { RootRoute, Route, Router } from '@tanstack/react-router';
 import { gameRoutes } from './game';
 import { registerRoute, loginRoute } from './auth';
 import { leaderboardRoute } from './leaderboard';
+import { profileRoutes } from './profile';
 import { Landing, ToBeImplemented } from '@/features/misc/';
 import { RouterDevtools } from '@/components/RouterDevtools';
 
@@ -15,13 +16,13 @@ export const rootRoute = new RootRoute({
     ),
 });
 
-export const indexRoute = new Route({
+const indexRoute = new Route({
     getParentRoute: () => rootRoute,
     path: '/',
     component: Landing,
 });
 
-export const notFoundRoute = new Route({
+const notFoundRoute = new Route({
     getParentRoute: () => rootRoute,
     path: '404',
     component: ToBeImplemented,
@@ -31,6 +32,7 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     gameRoutes,
     leaderboardRoute,
+    profileRoutes,
     notFoundRoute,
     registerRoute,
     loginRoute,
