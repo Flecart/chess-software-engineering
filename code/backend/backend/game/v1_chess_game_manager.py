@@ -4,6 +4,7 @@ Game manager for the new version of api games
 from backend.routes.game.data import CreateGameRequest
 from backend.game.v1_chess_game import ChessGame
 from backend.game.utils import Color
+from backend.database.models import Game
 
 class ChessGameManager:
     """
@@ -27,16 +28,15 @@ class ChessGameManager:
         self.__black_games: dict[int, int] = {}
 
         # this should be deleted when connected to db
-        self.__games_n = 0
     
     # TODO in a future should also check the permission of the user
     def get_game(self, id: int) -> ChessGame:
         return self.__games[id]
 
     def create_new_game(self, game_creation: CreateGameRequest) -> int:
-        self.__games_n += 1
-        self.__games[self.__games_n] = ChessGame(self.__games_n,game_creation)
-        return self.__games_n
+        game = ChessGame(game_creation)
+        self.__games[game.id] = game
+        return game.id
 
     def join(self, game_id: int, player: int, color: Color) -> None:
         if color == Color.WHITE:
