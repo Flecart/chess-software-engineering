@@ -22,7 +22,7 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         import random
         return create_guest_access_token(random.randint(0, 100000))
 
-    @app.post(prefix)
+    @app.post(prefix + "/login")
     def login_api(login: LoginCredentials, db:Session=Depends(get_db)) -> str:
         """
         Login a user
@@ -34,8 +34,8 @@ def create_user_routes(app: FastAPI,prefix:str=''):
             raise JSONException(status_code=400, error={"message": "User or password wrong"})
 
 
-    @app.post(prefix + "/create")
-    def create_user_api(login: LoginCredentials, db:Session=Depends(get_db)) -> str:
+    @app.post(prefix + "/signup")
+    def create_user_api(login: LoginCredentials, db: Session=Depends(get_db)) -> str:
         """
         Create a new user
         return a user id or a token we don't know yet
@@ -46,9 +46,9 @@ def create_user_routes(app: FastAPI,prefix:str=''):
             raise JSONException(status_code=400, error={"message": "User already exists"})
 
     @app.post(prefix + "/info")
-    def info(token: Annotated[str, Depends(decode_access_token)]) -> None:
+    def info(token:Annotated[str, Depends(decode_access_token)]) -> None:
         """
-        Logout a user
+        Logout a user #TODO: decide what is this for.
         """
         return token
 

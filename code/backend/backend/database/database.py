@@ -4,9 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 from backend.config import Config
 
-
 _config = Config()
-
 
 DATABASE_URL = f"postgresql://{_config['db_user']}:{_config['db_password']}@{_config['db_url']}"
 

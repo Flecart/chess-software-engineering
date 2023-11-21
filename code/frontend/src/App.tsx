@@ -1,4 +1,4 @@
-import { queryClient } from '@/lib/react-query';
+import { TokenProvider } from '@/lib/tokenContext';
 import { router } from '@/routes';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -8,17 +8,16 @@ import itIT from 'antd/lib/locale/it_IT';
 
 export const App = () => {
     return (
-        <AntdConfigProvider
-            // Customize theme
-            theme={{
-                algorithm: theme.defaultAlgorithm,
-            }}
-            locale={itIT}
-        >
-            <QueryClientProvider client={queryClient}>
+        <TokenProvider>
+            <AntdConfigProvider
+                // Customize theme
+                theme={{
+                    algorithm: theme.defaultAlgorithm,
+                }}
+                locale={itIT}
+            >
                 <RouterProvider router={router} />
-                <ReactQueryDevtools buttonPosition="top-right" />
-            </QueryClientProvider>
-        </AntdConfigProvider>
+            </AntdConfigProvider>
+        </TokenProvider>
     );
 };
