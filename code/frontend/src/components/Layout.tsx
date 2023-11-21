@@ -9,6 +9,8 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import ChessLogo from '/colored_knight.svg';
+import { useTokenContext } from '@/lib/tokenContext';
+import { useEffect, useState } from 'react';
 
 const { Sider, Content } = LibLayout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -29,17 +31,28 @@ function getItem(
     };
 }
 
-const menuItems: MenuProps['items'] = [
+const menuItemsClassic: MenuProps['items'] = [
     getItem(<Link to="/game">Gioca</Link>, 'online', <PlayCircleOutlined />),
     getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
     getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
     getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />),
+];
+
+const menuItemsNotLogged: MenuProps['items'] = [
     { type: 'divider' },
     getItem(<Link to="/register">Registrati</Link>, 'register', <FormOutlined />),
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),
 ];
 
 export const Layout = () => {
+    const { token } = useTokenContext();
+    const [menuItemsNotLog, setMenuItemsNotLog] = useState<MenuProps['items']>([]);
+
+    useEffect(() => {
+        if (token) setMenuItemsNotLog([]);
+        else setMenuItemsNotLog(menuItemsNotLogged);
+    }, [token]);
+
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>
             <Sider breakpoint="lg" collapsible style={{ overflowY: 'hidden' }}>
@@ -49,7 +62,7 @@ export const Layout = () => {
                     </Link>
                 </div>
                 <Flex vertical justify="space-between" style={{ height: '80%' }}>
-                    <Menu theme="dark" mode="inline" items={menuItems} />
+                    <Menu theme="dark" mode="inline" items={[...menuItemsClassic, ...(menuItemsNotLog as [])]} />
                 </Flex>
             </Sider>
             <LibLayout style={{ flex: 1, overflow: 'auto' }}>
