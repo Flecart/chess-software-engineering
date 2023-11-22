@@ -74,7 +74,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                                 await SocketManager().notify_opponent(game_id, player_color) 
                                 move = request.data
                             except Exception as e:
-                                pass
+                                print(e)
                         case "status":
                             # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
                             # TODO: nello status bisogna mettere anche il nome dei giocatori.

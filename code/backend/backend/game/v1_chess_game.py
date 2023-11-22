@@ -1,5 +1,7 @@
 import asyncio
 from backend.config import Config
+from backend.database.database import get_db_without_close
+from backend.database.models import Game, User
 from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
@@ -14,15 +16,25 @@ _BOT_USERNAME = Config()['bot']
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
-    def __init__(self,id:int, game_creation: CreateGameRequest, fen: str = START_POSITION_FEN, moves: list[str] = []):
-        self.__id:int = id
+    def __init__(self, game_creation: CreateGameRequest, fen: str = START_POSITION_FEN, moves: list[str] = []):
+        session = get_db_without_close() 
+        game = Game(
+            white_player = None,
+            black_player = None,
+            moves = '',
+            is_finish = False,
+            winner = None ,
+            fen=fen,
+        )
+        session.add_all([game])
+        session.commit()
+        self.__id = game.game_id
+        session.close()
+
         self.__fen: str = fen
-        self.__moves = moves
+        self.__moves = moves.copy()
 
-        # TODO(ang): usa informazioni di game_creation per settare i giocatori
-        # e la tipologia di gioco
         self.__type: GameType = GameType(game_creation.type)
-
         game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.LIST_MOVE))
 
         self.__finished = game_state.finish
@@ -34,6 +46,32 @@ class ChessGame():
 
         self.__bot_player:bool = game_creation.against_bot
         self.__calculating:bool = False
+
+
+    
+    def _join_save(self):
+        session = get_db_without_close()
+        get_user = lambda user: session.query(User).\
+                            filter(User.user == user).first()
+        game = session.query(Game)\
+            .filter(Game.game_id == self.__id).first()
+        if self.__white_player is not None:
+            user = get_user(self.__white_player)
+            if user is not None:
+                game.white_player = user.user
+
+        if self.__black_player is not None:
+            user = get_user(self.__black_player)
+            if user is not None:
+                game.black_player = user.user
+        
+        session.commit()
+        session.close()
+
+
+    @property
+    def id(self) -> str:
+        return self.__id
 
     @property
     def fen(self) -> str:
@@ -85,6 +123,9 @@ class ChessGame():
             else:
                 raise ValueError("Bot player can't join a game with two players")
 
+        self._join_save()
+
+
 
     def get_player_color(self, username: str) -> Color | None:
         """
@@ -110,6 +151,8 @@ class ChessGame():
         self.__moves.append(move)
         self.__fen = game_state.fen
         self.__finished = game_state.finish
+        if self.__finished:
+            self.save_and_update_elo()
 
         self.__black_view = game_state.black_view
         self.__white_view = game_state.white_view
@@ -156,6 +199,35 @@ class ChessGame():
             thread = threading.Thread(target=make_bot_move, args=(self,))
             thread.start()
             
+    def save_and_update_elo(self):
+        session = get_db_without_close()
+        game = session.query(Game).filter(Game.game_id == self.__id).first()
+        game.fen = self.__fen
+        game.moves = ','.join(self.__moves)
+        game.is_finish = self.__finished
+        game.winner =  Color.WHITE if Color.BLACK == self.current_player else Color.WHITE
+
+        if game.winner == 'white':
+            update_val_win = 1
+        elif game.winner == 'black':
+            update_val_win = 0
+        else:
+            update_val_win = 0.5
+
+        def elo_setting(p1,p2):
+            return 1/(1+10**((p2-p1)/400))
+
+        if self.__finished and game.black_player is not None and game.white_player is not None:
+            black = session.query(User).filter(User.user == game.black_player).first()
+            white = session.query(User).filter(User.user == game.white_player).first()
+
+            white.rating = white.rating + 32*((1-update_val_win)-elo_setting(white.rating,black.rating))
+            black.rating = black.rating + 32*(update_val_win-elo_setting(white.rating,black.rating))
+
+        session.commit()
+        session.close()
+
+         
 
 
     def __create_game_state_action(self, action:Actions, move: str|None=None) -> GameStateInput:

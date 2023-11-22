@@ -25,8 +25,6 @@ app.add_middleware(
 )
 
 
-Base.metadata.create_all(bind=engine)
-
 
 logging.getLogger('main').info('Creating routes')
 """ adding routes  """

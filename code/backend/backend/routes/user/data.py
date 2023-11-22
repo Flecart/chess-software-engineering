@@ -5,6 +5,7 @@ class LoginCredentials(BaseModel):
     password: str
 
 
-class LoginResponse(BaseModel):
-    token: str
-    user_id: int
+class LeaderBoardResponse(BaseModel):
+    user: str
+    elo: float
+    avatar: str

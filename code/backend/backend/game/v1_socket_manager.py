@@ -81,13 +81,9 @@ class SocketManager:
             if ws.client_state == WebSocketState.DISCONNECTED:
                 to_remove.append((name, ws))
                 continue
-
             if player_color != None and player_color != current_player_color:
-                try:
-                    ren = game.get_player_response(player_color)
-                    await ws.send_json(jsonable_encoder(ren))
-                except Exception as e:
-                    print(e,ws.client_state)
+                ren = game.get_player_response(player_color)
+                await ws.send_json(jsonable_encoder(ren))
 
 
         for (name, ws) in to_remove:

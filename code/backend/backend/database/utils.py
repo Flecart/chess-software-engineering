@@ -23,8 +23,16 @@ def generate_salt() -> str:
 def create_user(login: LoginCredentials, db: Session) -> bool:
     if not check_user_exists(login.username, db):
         salt = generate_salt()
-        new_auth = Auth(user=login.username, hashed_password=pwd_context.hash(salt + login.password), salt=salt)
-        new_user = User(user=login.username, auth=[new_auth])
+        new_auth = Auth(
+            user=login.username, 
+            hashed_password=pwd_context.hash(salt + login.password), 
+            salt=salt
+        )
+        new_user = User(
+            user=login.username,
+            auth=[new_auth],
+            profile_image_url = f"https://api.dicebear.com/7.x/lorelei/png?seed={login.username}"
+        )
         db.add(new_user)
         db.commit()
         return True
