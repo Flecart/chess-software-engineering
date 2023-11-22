@@ -6,6 +6,7 @@ COPY . ./
 
 ENV VITE_BACKEND_URL=https://app.t1-check-mates.mooo.com/backend
 ENV VITE_FRONTEND_URL=https://app.t1-check-mates.mooo.com
+ENV VITE_WEBSOCKET_URL=wss://app.t1-check-mates.mooo.com/backend
 
 RUN npm install
 
@@ -18,10 +19,10 @@ WORKDIR /app
 COPY --from=build /app/dist ./public
 
 # so http-server always returns index.html, for SPA
-RUN mv ./public/index.html ./public/404.html
+#RUN mv ./public/index.html ./public/404.html
 
-RUN npm install -g http-server
+RUN npm install -g http-server-spa
 
 EXPOSE 5173
 
-ENTRYPOINT ["http-server", "-p", "5173"]
+ENTRYPOINT ["http-server-spa", "./public", "index.html", "5173"]
