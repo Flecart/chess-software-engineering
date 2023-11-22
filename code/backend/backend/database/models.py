@@ -61,10 +61,18 @@ class Game(Base):
             return Color.BLACK
 
     def get_point_difference(self, player: str) -> int:
+        value={
+            'win':1,
+            'lose':0,
+            'draw':0.5
+        }
+        state = self.get_state_game(player)
+        if state not in value:
+            return 0
         if self.get_color_player(player) == Color.WHITE:
-            return get_point_difference(self.white_points, self.black_points, 1)
+            return get_point_difference(self.white_points, self.black_points, value[state])
         else:
-            return get_point_difference(self.black_points, self.white_points, 0)
+            return get_point_difference(self.black_points, self.white_points, value[state])
 
     def get_state_game(self, player: str) -> str:
         if self.winner == None:
