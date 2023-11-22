@@ -71,7 +71,7 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         Game.black_player != None ,
         Game.winner != None).all() 
 
-        return list(map(lambda x:\
+        return reversed(list(map(lambda x:\
             GameInfo( 
                 id=x.game_id,
                 opponentName=x.get_opponent(user),
@@ -81,7 +81,7 @@ def create_user_routes(app: FastAPI,prefix:str=''):
                 eloGain=round(x.get_point_difference(user)),
                 opponentElo=round(x.get_opponent_rating(user)),
                 result=x.get_state_game(user),
-            ) ,games))
+            ) ,games)))
 
     @app.get(prefix + "/leaderboard/") 
     def leaderboard(db:Session=Depends(get_db)) -> list[LeaderBoardResponse]:
