@@ -20,6 +20,7 @@
         "antd": "^5.10.2",
         "axios": "^1.6.0",
         "chess.js": "^1.0.0-beta.6",
+        "jwt-decode": "^4.0.0",
         "lucide-react": "^0.290.0",
         "modern-normalize": "^2.0.0",
         "react": "^18.2.0",
