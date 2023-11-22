@@ -51,7 +51,7 @@ class ChessGame():
         self.__bot_player:bool = game_creation.against_bot
         self.__calculating:bool = False
 
-        self.timer_white = Timer(datetime.timedelta(minutes=10))
+        self.timer_white = Timer(datetime.timedelta(seconds=2))
         self.timer_black = Timer(datetime.timedelta(minutes=10))
         
 
@@ -154,24 +154,46 @@ class ChessGame():
         game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MAKE_BEST_MOVE, None))
         return game_state.best_move
 
-    def move(self, move: str) -> None:
-        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
-        self.__moves.append(move)
-        self.__fen = game_state.fen
-        self.__finished = game_state.finish
 
+    def _check_times_up(self)->bool:
+        if self.current_player == Color.WHITE:
+            if self.timer_white.is_finished():
+                return True
+        elif self.current_player == Color.BLACK:
+            if self.timer_black.is_finished():
+                return True
+        return False
+
+    def _stop_timer(self):
         if self.current_player == Color.WHITE:
             self.timer_white.stop()
-            self.timer_black.start()
         else:
             self.timer_black.stop()
-            self.timer_white.start() 
+
+    def _start_timer(self):
+        if self.current_player == Color.WHITE:
+            self.timer_white.start()
+        else:
+            self.timer_black.start()
+
+
+    def move(self, move: str) -> None:
+        self._stop_timer()
+        self.__finished = self._check_times_up() 
+
+        if not self.__finished:
+            game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
+            self.__moves.append(move)
+            self._start_timer()
+
+            self.__fen = game_state.fen
+            self.__finished = self.__finished or game_state.finish
+            self.__black_view = game_state.black_view
+            self.__white_view = game_state.white_view
 
         if self.__finished:
             self.save_and_update_elo()
 
-        self.__black_view = game_state.black_view
-        self.__white_view = game_state.white_view
 
         
 

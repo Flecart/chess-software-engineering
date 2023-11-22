@@ -29,7 +29,7 @@ def _go_listening_until_move(ws, name=None):
 def _play_moves(websocket,name,moves):
     checked = lambda message:type(message) == dict and 'ended' in message and message['ended'] ==True
     for (i,move) in enumerate(moves):
-        time.sleep(0.2)
+        time.sleep(2)
         websocket.send(json.dumps({"kind": "move", "data":move }))
         message = json.loads(websocket.recv())
         print(name,message)
