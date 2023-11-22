@@ -10,6 +10,17 @@ services:
       no_cache: true
     ports:
       - 8000:8000
+    environment:
+      - host=${host}
+      - db_local=${db_local}
+      - db_password=${db_password}
+      - db_user=${db_user}
+      - db_url=${db_url}
+      - bot_username=${bot_username}
+      - ssl_keyfile=./privkey.pem
+      - ssl_certfile=./cert.pem
+    volumes:
+      - ${certificates_folder}:/app/certificates
     networks:
       - deploy
     restart: unless-stopped
