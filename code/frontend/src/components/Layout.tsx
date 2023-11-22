@@ -52,7 +52,7 @@ const menuItemsNotLogged: MenuProps['items'] = [
 const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />)];
 
 export const Layout = () => {
-    const { token } = useTokenContext();
+    const { token, setToken } = useTokenContext();
 
     const isBot = useMemo(() => {
         if (!token) return false;
@@ -74,6 +74,11 @@ export const Layout = () => {
         { type: 'divider' },
         ...(showLoggedInfo ? menuItemsLogged : menuItemsNotLogged),
     ];
+
+    const unsetToken = () => {
+        setToken(null);
+    }
+
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>
             <Sider breakpoint="lg" collapsible style={{ overflowY: 'hidden' }}>
@@ -87,7 +92,7 @@ export const Layout = () => {
                 </Flex>
 
                 {showLoggedInfo && (
-                    <Button ghost style={{ float: 'right', marginRight: '1rem' }}>
+                    <Button onClick={unsetToken} ghost style={{ float: 'right', marginRight: '1rem' }}>
                         Logout
                     </Button>
                 )}
