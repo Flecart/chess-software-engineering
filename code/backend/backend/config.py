@@ -9,7 +9,9 @@ defConfig = {
     'db_password': 'password',
     'db_user': 'root',
     'db_url': 'localhost',
-    'bot_username' : 'bot'
+    'bot_username' : 'bot',
+    'ssl_keyfile': './privkey.pem',
+    'ssl_certfile': './cert.pem'
 }
 
 class Config():
