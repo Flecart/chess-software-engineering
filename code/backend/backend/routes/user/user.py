@@ -66,7 +66,10 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         games = db.query(Game).filter(or_(
             Game.white_player == user ,
             Game.black_player == user 
-        ),Game.winner != None).all() 
+        ),
+        Game.white_player != None,
+        Game.black_player != None ,
+        Game.winner != None).all() 
 
         return list(map(lambda x:\
             GameInfo( 
