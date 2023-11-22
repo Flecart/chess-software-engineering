@@ -5,7 +5,6 @@ import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
 import Search from 'antd/es/input/Search';
 import type { DefaultOptionType } from 'antd/es/select';
 import * as gameApi from '../api/game';
-import { createCode, parseCode } from '../utils/code';
 
 export const Pregame = () => {
     const navigate = useNavigate({ from: indexGameRouteId });
@@ -31,7 +30,7 @@ export const Pregame = () => {
         await gameApi.joinGame(sureToken, realGameId);
         navigate({
             to: '/game/$gameId',
-            params: { gameId: createCode(realGameId) },
+            params: { gameId: realGameId },
             search: { boardOrientation: 'white' },
         });
     };
@@ -39,7 +38,6 @@ export const Pregame = () => {
     return (
         <Flex wrap="wrap" align="center" vertical>
             <Typography.Title level={1}>{bot ? 'Partita contro il computer' : 'Partita online'}</Typography.Title>
-
             <Flex vertical gap="small">
                 <Form
                     onFinish={startGame}
@@ -69,7 +67,7 @@ export const Pregame = () => {
                         enterButton="Unisciti"
                         onSearch={async (gameId) => {
                             const sureToken = await checkAndSetToken();
-                            await gameApi.joinGame(sureToken, parseCode(gameId));
+                            await gameApi.joinGame(sureToken, gameId);
 
                             navigate({
                                 to: '/game/$gameId',

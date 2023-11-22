@@ -7,7 +7,6 @@ import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { parseCode } from '../utils/code';
 import type { wsMessage } from '../types';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
@@ -26,9 +25,8 @@ export const Game = () => {
     const [isMyTurn, setIsMyTurn] = useState(boardOrientation !== 'white');
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
     const [gameEnded, setGameEnded] = useState(false);
-
-    const { lastJsonMessage, sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(parseCode(gameId), token));
     const [fen, setFen] = useState<string>(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
+    const { lastJsonMessage, sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token));
 
     const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0);
     const [opponentTimeRemaining, setOpponentTimeRemaining] = useState<number>(0);
