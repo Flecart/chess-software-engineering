@@ -9,6 +9,7 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import ChessLogo from '/colored_knight.svg';
+import { useTokenContext } from '@/lib/tokenContext';
 
 const { Sider, Content } = LibLayout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -29,17 +30,26 @@ function getItem(
     };
 }
 
-const menuItems: MenuProps['items'] = [
+const menuItemsClassic: MenuProps['items'] = [
     getItem(<Link to="/game">Gioca</Link>, 'online', <PlayCircleOutlined />),
     getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
     getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
-    getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />),
-    { type: 'divider' },
+];
+
+const menuItemsNotLogged: MenuProps['items'] = [
     getItem(<Link to="/register">Registrati</Link>, 'register', <FormOutlined />),
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),
 ];
 
+const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />)];
+
 export const Layout = () => {
+    const { token } = useTokenContext();
+    const menuItems: MenuProps['items'] = [
+        ...menuItemsClassic,
+        { type: 'divider' },
+        ...(token ? menuItemsLogged : menuItemsNotLogged),
+    ];
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>
             <Sider breakpoint="lg" collapsible style={{ overflowY: 'hidden' }}>
