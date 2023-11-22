@@ -69,12 +69,10 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                             # Una altra cosa è lasciare a quel manager la risposta
                             # quindi dovremmo spostare di nuovo il codice dei socket
                             # che ho messo a chess manager e chess game
-                            try:
-                                game.move(request.data)
-                                await SocketManager().notify_opponent(game_id, player_color) 
-                                move = request.data
-                            except Exception as e:
-                                print(e)
+                            game.move(request.data)
+                            await SocketManager().notify_opponent(game_id, player_color) 
+                            move = request.data
+                                
                         case "status":
                             # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
                             # TODO: nello status bisogna mettere anche il nome dei giocatori.

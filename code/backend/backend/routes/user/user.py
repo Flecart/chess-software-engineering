@@ -1,12 +1,13 @@
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from backend.config import Config
 from backend.database.models import Game, User
 from backend.routes.exception import JSONException
-from backend.routes.user.data import LeaderBoardResponse, LoginCredentials 
+from backend.routes.user.data import GameInfo, LeaderBoardResponse, LoginCredentials ,InfoUser
 from backend.database.database import get_db
 from backend.database.utils import create_user, check_login
 from ..auth import decode_access_token, create_guest_access_token, create_login_access_token, decode_user_token
@@ -46,32 +47,40 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         else:
             raise JSONException(status_code=400, error={"message": "User already exists"})
 
-    @app.post(prefix + "/info")
-    def info(token:Annotated[str, Depends(decode_access_token)]) -> None:
-        """
-        Logout a user #TODO: decide what is this for.
-        """
-        return token
+    @app.get(prefix + "/info/{user}")
+    def info(user:str,db:Session=Depends(get_db)) -> InfoUser:
+        selected_user = db.query(User).filter(User.user == user).first()
+        return InfoUser(
+            username=selected_user.user,
+            avatar=selected_user.profile_image_url,
+            elo=round(selected_user.rating),
+            losses=selected_user.losses,
+            wins=selected_user.wins
+        )
 
-    @app.post(prefix + "/me")
-    def info(token: Annotated[str, Depends(decode_user_token)]) -> None:
-        """
-        Logout a user
-        """
-        return token
-
-    @app.post(prefix + "/games/")
-    def get_games(token:Annotated[str, Depends(decode_user_token)],db:Session=Depends(get_db)) -> list[int]:
+    @app.get(prefix + "/games/{user}")
+    def get_games(user:str,db:Session=Depends(get_db)) -> list[GameInfo]:
         """
         Get all games of a user
         """
-        gw = db.query(Game).filter(Game.white_player == token['username']).all()
-        gb = db.query(Game).filter(Game.black_player == token['username']).all()
-        # to transofrm
-        out = list(gw.extend(gb))
-        return None
+        games = db.query(Game).filter(or_(
+            Game.white_player == user ,
+            Game.black_player == user 
+        ),Game.winner != None).all() 
 
-    @app.post(prefix + "/leaderboard/") 
+        return list(map(lambda x:\
+            GameInfo( 
+                id=x.game_id,
+                opponentName=x.get_opponent(user),
+                opponentAvatar= db.query(User)\
+                    .filter(User.user == x.get_opponent(user))\
+                    .first().profile_image_url,
+                eloGain=round(x.get_point_difference(user)),
+                opponentElo=round(x.get_opponent_rating(user)),
+                result=x.get_state_game(user),
+            ) ,games))
+
+    @app.get(prefix + "/leaderboard/") 
     def leaderboard(db:Session=Depends(get_db)) -> list[LeaderBoardResponse]:
         """
         Get all games of a user
@@ -80,6 +89,8 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         
         return list(map(lambda x: LeaderBoardResponse(
             avatar=x.profile_image_url,
-            user=x.user,
-            elo=x.rating
+            username=x.user,
+            elo=round(x.rating),
+            losses=x.losses,
+            wins=x.wins
         ),rating))
