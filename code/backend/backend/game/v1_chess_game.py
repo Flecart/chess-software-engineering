@@ -206,24 +206,27 @@ class ChessGame():
         game.moves = ','.join(self.__moves)
         game.is_finish = self.__finished
         game.winner =  Color.WHITE if Color.BLACK == self.current_player else Color.WHITE
-
-        if game.winner == 'white':
-            update_val_win = 1
-        elif game.winner == 'black':
-            update_val_win = 0
-        else:
-            update_val_win = 0.5
-
-        def elo_setting(p1,p2):
-            return 1/(1+10**((p2-p1)/400))
-
+         
         if self.__finished and game.black_player is not None and game.white_player is not None:
             black = session.query(User).filter(User.user == game.black_player).first()
             white = session.query(User).filter(User.user == game.white_player).first()
 
-            white.rating = white.rating + 32*((1-update_val_win)-elo_setting(white.rating,black.rating))
-            black.rating = black.rating + 32*(update_val_win-elo_setting(white.rating,black.rating))
+            if game.winner == 'white':
+                white.wins = white.wins + 1
+                black.losses = black.losses + 1
+            elif game.winner == 'black':
+                black.wins = black.wins + 1
+                white.losses = white.losses + 1
 
+            game.black_points = black.rating
+            game.white_points = white.rating
+            white.rating = white.rating +\
+                game.get_point_difference(white.user)
+            black.rating = black.rating +\
+                game.get_point_difference(black.user)
+            
+            session.add_all([black,white])
+        session.add(game)
         session.commit()
         session.close()
 

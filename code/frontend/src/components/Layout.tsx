@@ -49,11 +49,28 @@ const menuItemsNotLogged: MenuProps['items'] = [
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),
 ];
 
-const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile">Profilo</Link>, 'profile', <UserOutlined />)];
-
 export const Layout = () => {
     const { token, setToken } = useTokenContext();
 
+    const username = useMemo<string>(() => {
+        const defValue = 'magnus';
+        if (!token) return defValue;
+        const decodedToken = jwtDecode(token);
+        if ('sub' in decodedToken && (decodedToken.sub as string).startsWith('guest')) {
+            return defValue;
+        }
+        return decodedToken.sub as string;
+    }, [token]);
+
+    const menuItemsLogged: MenuProps['items'] = [
+        getItem(
+            <Link to="/profile/$username" params={{ username }}>
+                Profilo
+            </Link>,
+            'profile',
+            <UserOutlined />,
+        ),
+    ];
     const isBot = useMemo(() => {
         if (!token) return false;
         const decodedToken = jwtDecode(token);
@@ -77,7 +94,7 @@ export const Layout = () => {
 
     const unsetToken = () => {
         setToken(null);
-    }
+    };
 
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>

@@ -6,6 +6,24 @@ class LoginCredentials(BaseModel):
 
 
 class LeaderBoardResponse(BaseModel):
-    user: str
+    username: str
     elo: float
     avatar: str
+    wins:int =0
+    losses:int =0
+
+class InfoUser(BaseModel):
+    username: str
+    elo: float
+    avatar: str
+    wins:int =0
+    losses:int =0
+
+class GameInfo(BaseModel):
+    opponentName: str
+    opponentElo: float
+    opponentAvatar: str
+    result: str
+    eloGain:int 
+    id: int
+    

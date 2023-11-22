@@ -1,11 +1,15 @@
-import type { User } from '@/features/user';
 import { Flex, Typography } from 'antd';
 import { Usercard } from '../components/UserCard';
+import { useLeaderboardQuery } from '../hooks/useLeaderboard';
 
 const { Title } = Typography;
 const textHeaderStyle: React.CSSProperties = { margin: '0', marginBottom: '10px' };
 
 export const Leaderboard = () => {
+    const { data: leaderboard, error } = useLeaderboardQuery();
+
+    const thereIsLeaderboard = !!leaderboard && leaderboard.length > 0;
+
     return (
         <Flex vertical gap="10px" style={{ maxWidth: '800px', margin: '0 auto' }}>
             <Title level={1} style={{ textAlign: 'center' }}>
@@ -27,17 +31,14 @@ export const Leaderboard = () => {
                 </Title>
             </Flex>
 
-            {mockUsers.map((user, i) => (
-                <Usercard key={user.username} user={user} position={i + 1} />
-            ))}
+            {(() => {
+                if (thereIsLeaderboard)
+                    return leaderboard.map((user, i) => <Usercard key={user.username} user={user} position={i + 1} />);
+
+                if (error) return <p>Errore nel caricamento della classifica</p>;
+
+                return <p>Caricamento...</p>;
+            })()}
         </Flex>
     );
 };
-
-const mockUsers: User[] = Array.from({ length: 10 }, (_, i) => ({
-    username: `User${i + 1}`,
-    elo: Math.floor(Math.random() * 2000),
-    avatar: `https://api.dicebear.com/7.x/croodles/svg?seed=${i + 1}`,
-    wins: Math.floor(Math.random() * 100),
-    losses: Math.floor(Math.random() * 100),
-}));

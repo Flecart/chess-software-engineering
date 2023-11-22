@@ -238,7 +238,7 @@ class TestApiGame(unittest.TestCase):
         for (w,b) in versus:
             game_id = requests.post(self.base_url_api + "/game",headers=_auth(jwt[w]),json=default_game_body(False)).json()
             print('created ',game_id)
-            print(requests.put(self.base_url_api + f"/game/{game_id}/join/white",headers=_auth(jwt[w])).json())
-            print(requests.put(self.base_url_api + f"/game/{game_id}/join/black",headers=_auth(jwt[b])).json())
+            requests.put(self.base_url_api + f"/game/{game_id}/join/white",headers=_auth(jwt[w])).json()
+            requests.put(self.base_url_api + f"/game/{game_id}/join/black",headers=_auth(jwt[b])).json()
             self._two_player_play(jwt[w],jwt[b],moves_white,moves_black,game_id)
         
