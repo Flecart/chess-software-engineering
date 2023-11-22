@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import datetime
 from typing import Literal
 
 class CreateGameRequest(BaseModel):
@@ -16,6 +17,10 @@ class GameStatusResponse(BaseModel):
     view: str
     move_made: str | None
     turn: Literal["white", "black"]
-    # time_white: datetime.deltatime|None  #should also be added from when
-    # time_balck: datetime.deltatime|None
+    time_left_white:str|None  #should also be added from when
+    time_left_black: str|None
+    time_start_white: str|None
+    time_start_black: str|None
+
+    
 

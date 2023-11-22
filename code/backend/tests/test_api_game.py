@@ -31,8 +31,8 @@ def _play_moves(websocket,name,moves):
     for (i,move) in enumerate(moves):
         time.sleep(0.2)
         websocket.send(json.dumps({"kind": "move", "data":move }))
-        print(name,'played',move)
         message = json.loads(websocket.recv())
+        print(name,message)
         if checked(message):
             return i
         message = _go_listening_until_move(websocket,name)
@@ -47,7 +47,6 @@ class TestApiGame(unittest.TestCase):
         def first_player(auth_token):
             with connect(self.websocket_url(game_id,auth_token)) as websocket:
                 message = json.loads(websocket.recv())
-                print(message)
                 if message['turn'] == 'black':
                     _go_listening_until_move(websocket,'black')
                 _play_moves(websocket,'white',moves_white)

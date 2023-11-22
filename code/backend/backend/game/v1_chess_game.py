@@ -1,7 +1,9 @@
 import asyncio
+import datetime
 from backend.config import Config
 from backend.database.database import get_db_without_close
 from backend.database.models import Game, User
+from backend.game.v1_timer import Timer
 from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
@@ -13,6 +15,8 @@ import backend.bot.mcts as engine
 
 
 _BOT_USERNAME = Config()['bot']
+
+
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
@@ -46,6 +50,10 @@ class ChessGame():
 
         self.__bot_player:bool = game_creation.against_bot
         self.__calculating:bool = False
+
+        self.timer_white = Timer(datetime.timedelta(minutes=10))
+        self.timer_black = Timer(datetime.timedelta(minutes=10))
+        
 
 
     
@@ -151,11 +159,22 @@ class ChessGame():
         self.__moves.append(move)
         self.__fen = game_state.fen
         self.__finished = game_state.finish
+
+        if self.current_player == Color.WHITE:
+            self.timer_white.stop()
+            self.timer_black.start()
+        else:
+            self.timer_black.stop()
+            self.timer_white.start() 
+
         if self.__finished:
             self.save_and_update_elo()
 
         self.__black_view = game_state.black_view
         self.__white_view = game_state.white_view
+
+        
+
 
     def get_player_response(self,
                             color: Color,
@@ -175,7 +194,11 @@ class ChessGame():
             move_made = move_made, 
             possible_moves=  possible_moves,
             turn = self.current_player.name.__str__().lower(),
-            view=view
+            view=view,
+            time_start_black=None if self.timer_black.start_time==None else self.timer_black.start_time.isoformat(), 
+            time_start_white=None if self.timer_white.start_time==None else self.timer_white.start_time.isoformat(),
+            time_left_black=str(self.timer_black.remaining_time),
+            time_left_white=str(self.timer_white.remaining_time),
         )
     
     def get_bot_move(self,event_loop:asyncio.AbstractEventLoop) -> None:
