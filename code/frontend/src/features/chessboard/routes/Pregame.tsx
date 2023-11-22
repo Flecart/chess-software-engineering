@@ -39,28 +39,34 @@ export const Pregame = () => {
         <Flex wrap="wrap">
             <section style={{ width: '25%' }}>
                 <Typography.Paragraph>Scegli il tempo (To implement)</Typography.Paragraph>
-                <Button onClick={startGame}>Start Game</Button>
+                <Button onClick={startGame}>
+                    Start Game {bot && 'vs Bot'}
+                </Button>
             </section>
 
-            <Divider orientation="left">Or</Divider>
-            <section>
-                <Search
-                    placeholder="input game id"
-                    allowClear
-                    enterButton="Join Game"
-                    size="large"
-                    onSearch={async (gameId) => {
-                        const sureToken = await checkAndSetToken();
-                        await gameApi.joinGame(sureToken, parseCode(gameId));
+            { !bot && (
+                <>
+                <Divider orientation="left">Or</Divider>
+                <section>
+                    <Search
+                        placeholder="input game id"
+                        allowClear
+                        enterButton="Join Game"
+                        size="large"
+                        onSearch={async (gameId) => {
+                            const sureToken = await checkAndSetToken();
+                            await gameApi.joinGame(sureToken, parseCode(gameId));
 
-                        navigate({
-                            to: '/game/$gameId',
-                            params: { gameId: gameId },
-                            search: { boardOrientation: 'black' },
-                        });
-                    }}
-                />
-            </section>
+                            navigate({
+                                to: '/game/$gameId',
+                                params: { gameId: gameId },
+                                search: { boardOrientation: 'black' },
+                            });
+                        }}
+                    />
+                </section>
+                </>
+            )}
         </Flex>
     );
 };

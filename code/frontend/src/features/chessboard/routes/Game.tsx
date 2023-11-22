@@ -89,7 +89,7 @@ export const Game = () => {
                         text: gameId,
                     }}
                 >
-                    Condividi l'id di Gioco con l'altra persona! {gameId}
+                    Se giochi con una altra persona, condividi l'ID {gameId}!
                 </Typography.Paragraph>
             </section>
 
