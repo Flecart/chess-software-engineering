@@ -1,13 +1,14 @@
 import { useTokenContext } from '@/lib/tokenContext';
 import { indexGameRouteId } from '@/routes/game';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { Button, Divider, Flex, Typography } from 'antd';
+import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
 import Search from 'antd/es/input/Search';
+import type { DefaultOptionType } from 'antd/es/select';
 import * as gameApi from '../api/game';
 import { createCode, parseCode } from '../utils/code';
 
 export const Pregame = () => {
-    const navigate = useNavigate({ from: '/game' });
+    const navigate = useNavigate({ from: indexGameRouteId });
     const { token, setToken } = useTokenContext();
     const { bot } = useSearch({ from: indexGameRouteId });
 
@@ -23,11 +24,11 @@ export const Pregame = () => {
         return token;
     };
 
-    const startGame = async () => {
+    const startGame = async (values: { time: number; color: 'white' | 'black' }) => {
+        console.log(values);
         const sureToken = await checkAndSetToken();
         const realGameId = await gameApi.createGame(sureToken, bot);
         await gameApi.joinGame(sureToken, realGameId);
-
         navigate({
             to: '/game/$gameId',
             params: { gameId: createCode(realGameId) },
@@ -36,23 +37,36 @@ export const Pregame = () => {
     };
 
     return (
-        <Flex wrap="wrap">
-            <section style={{ width: '25%' }}>
-                <Typography.Paragraph>Scegli il tempo (To implement)</Typography.Paragraph>
-                <Button onClick={startGame}>
-                    Start Game {bot && 'vs Bot'}
-                </Button>
-            </section>
+        <Flex wrap="wrap" align="center" vertical>
+            <Typography.Title level={1}>{bot ? 'Partita contro il computer' : 'Partita online'}</Typography.Title>
 
-            { !bot && (
-                <>
-                <Divider orientation="left">Or</Divider>
+            <Flex vertical gap="small">
+                <Form
+                    onFinish={startGame}
+                    layout="inline"
+                    name="start-game"
+                    initialValues={{ time: timeOptions[0]?.value, color: colorOptions[0]?.value }}
+                >
+                    <Form.Item label="Tempo: " name="time">
+                        <Select bordered={false} options={timeOptions} style={{ minWidth: '150px' }} />
+                    </Form.Item>
+                    <Form.Item label="Colore: " name="color">
+                        <Select bordered={false} options={colorOptions} style={{ minWidth: '100px' }} />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">
+                            Nuova Partita
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Flex>
+            {!bot && <Divider>Oppure</Divider>}
+            {!bot && (
                 <section>
                     <Search
-                        placeholder="input game id"
+                        placeholder="Inserisci il codice partita"
                         allowClear
-                        enterButton="Join Game"
-                        size="large"
+                        enterButton="Unisciti"
                         onSearch={async (gameId) => {
                             const sureToken = await checkAndSetToken();
                             await gameApi.joinGame(sureToken, parseCode(gameId));
@@ -65,8 +79,18 @@ export const Pregame = () => {
                         }}
                     />
                 </section>
-                </>
             )}
         </Flex>
     );
 };
+
+const timeOptions: DefaultOptionType[] = [
+    { label: 'Nessun tempo', value: 0 },
+    { label: '10 minuti', value: 10 },
+    { label: '30 minuti', value: 30 },
+];
+
+const colorOptions: DefaultOptionType[] = [
+    { label: 'Bianco', value: 'white' },
+    { label: 'Nero', value: 'black' },
+];

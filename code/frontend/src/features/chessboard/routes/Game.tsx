@@ -8,32 +8,11 @@ import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { parseCode } from '../utils/code';
+import type { wsMessage } from '../types';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
-
-// TODO: maybe we need to differentiate the response types, because
-// now we mix the repsponse with the beginning of the game, with those of the game
-type GameState = {
-    ended: boolean;
-    possible_moves: null | string[];
-    view: string;
-    move_made: null | string;
-    turn: 'white' | 'black';
-
-    // TODO: refactor next sprint
-    time_left_white: string | null;
-    time_left_black: string | null;
-    time_start_white: string | null;
-    time_start_black: string | null;
-};
-
-type WaitingState = {
-    waiting: true;
-};
-
-type wsMessage = GameState | WaitingState | null;
 
 export const Game = () => {
     const { gameId } = useParams({ from: specificGameRouteId });
