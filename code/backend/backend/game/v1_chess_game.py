@@ -51,7 +51,7 @@ class ChessGame():
         self.__bot_player:bool = game_creation.against_bot
         self.__calculating:bool = False
 
-        self.timer_white = Timer(datetime.timedelta(seconds=2))
+        self.timer_white = Timer(datetime.timedelta(minutes=10))
         self.timer_black = Timer(datetime.timedelta(minutes=10))
         
 

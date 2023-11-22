@@ -89,6 +89,9 @@ def create_user_routes(app: FastAPI,prefix:str=''):
         Get all games of a user
         """
         rating = db.query(User).order_by(User.rating.desc()).all()
+        if rating == None or len(rating) == 0: 
+            return []
+
         
         return list(map(lambda x: LeaderBoardResponse(
             avatar=x.profile_image_url,
