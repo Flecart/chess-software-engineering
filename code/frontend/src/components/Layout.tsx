@@ -46,13 +46,7 @@ const menuItemsNotLogged: MenuProps['items'] = [
 
 export const Layout = () => {
     const { token } = useTokenContext();
-    const [menuItemsNotLog, setMenuItemsNotLog] = useState<MenuProps['items']>([]);
-
-    useEffect(() => {
-        if (token) setMenuItemsNotLog([]);
-        else setMenuItemsNotLog(menuItemsNotLogged);
-    }, [token]);
-
+     const menuItems = [...menuItemsClassic, ...(token ? [] : menuItemsNotLogged)];
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>
             <Sider breakpoint="lg" collapsible style={{ overflowY: 'hidden' }}>
