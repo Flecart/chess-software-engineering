@@ -2,7 +2,7 @@ import { useTokenContext } from '@/lib/tokenContext';
 import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
@@ -26,7 +26,45 @@ export const Game = () => {
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
     const [gameEnded, setGameEnded] = useState(false);
     const [fen, setFen] = useState<string>(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
-    const { lastJsonMessage, sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token));
+    const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token), {
+        onMessage: (event) => {
+            const message = JSON.parse(event.data) as wsMessage;
+            if (isMyTurn) {
+                if (message && 'move_made' in message && message.move_made !== null) {
+                    setFen(message.view);
+                    setIsMyTurn(false);
+                }
+            } else if (message && !('waiting' in message)) {
+                setFen(message.view);
+                setIsMyTurn(true);
+            }
+
+            if (message !== null && 'ended' in message) {
+                let myRemainingTime = '';
+                let opponentRemainingTime = '';
+                let myStartTime: string | null = null;
+                let opponentStartTime: string | null = null;
+                if (boardOrientation === 'white') {
+                    myRemainingTime = message.time_left_white as string;
+                    opponentRemainingTime = message.time_left_black as string;
+                    myStartTime = message.time_start_white;
+                    opponentStartTime = message.time_start_black;
+                } else {
+                    myRemainingTime = message.time_left_black as string;
+                    opponentRemainingTime = message.time_left_white as string;
+                    myStartTime = message.time_start_black;
+                    opponentStartTime = message.time_start_white;
+                }
+                setMyTimeRemaining(() => parseTimeDelta(myRemainingTime));
+                setOpponentTimeRemaining(() => parseTimeDelta(opponentRemainingTime));
+                setMyTimeStart(() => myStartTime);
+                setOpponentTimeStart(() => opponentStartTime);
+                if (message.ended) {
+                    setGameEnded(true);
+                }
+            }
+        },
+    });
 
     const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0);
     const [opponentTimeRemaining, setOpponentTimeRemaining] = useState<number>(0);
@@ -53,46 +91,6 @@ export const Game = () => {
         // Deve essere fatta una richiesta per triggerare l'endgame
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
     };
-
-    useEffect(() => {
-        if (isMyTurn) {
-            if (lastJsonMessage && 'move_made' in lastJsonMessage && lastJsonMessage.move_made !== null) {
-                setFen(lastJsonMessage.view);
-                setIsMyTurn(false);
-            }
-        } else if (lastJsonMessage && !('waiting' in lastJsonMessage)) {
-            setFen(lastJsonMessage.view);
-            setIsMyTurn(true);
-        }
-
-        if (lastJsonMessage !== null && 'ended' in lastJsonMessage) {
-            let myRemainingTime = '';
-            let opponentRemainingTime = '';
-            let myStartTime: string | null = null;
-            let opponentStartTime: string | null = null;
-            if (boardOrientation === 'white') {
-                myRemainingTime = lastJsonMessage.time_left_white as string;
-                opponentRemainingTime = lastJsonMessage.time_left_black as string;
-                myStartTime = lastJsonMessage.time_start_white;
-                opponentStartTime = lastJsonMessage.time_start_black;
-            } else {
-                myRemainingTime = lastJsonMessage.time_left_black as string;
-                opponentRemainingTime = lastJsonMessage.time_left_white as string;
-                myStartTime = lastJsonMessage.time_start_black;
-                opponentStartTime = lastJsonMessage.time_start_white;
-            }
-            setMyTimeRemaining(() => parseTimeDelta(myRemainingTime));
-            setOpponentTimeRemaining(() => parseTimeDelta(opponentRemainingTime));
-            setMyTimeStart(() => myStartTime);
-            setOpponentTimeStart(() => opponentStartTime);
-            if (lastJsonMessage.ended) {
-                setGameEnded(true);
-            }
-        }
-
-        // questo è necessario per non andare in loop infinito di update
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lastJsonMessage]);
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn) {
@@ -125,8 +123,6 @@ export const Game = () => {
                     Se giochi con una altra persona, condividi l'ID {gameId}!
                 </Typography.Paragraph>
             </section>
-
-            {/* <pre>{JSON.stringify(lastJsonMessage, null, 2)}</pre> */}
 
             <Flex vertical gap="small">
                 <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
