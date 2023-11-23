@@ -13,12 +13,20 @@ const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/???
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
 
+// TODO: maybe we need to differentiate the response types, because
+// now we mix the repsponse with the beginning of the game, with those of the game
 type GameState = {
     ended: boolean;
     possible_moves: null | string[];
     view: string;
     move_made: null | string;
     turn: 'white' | 'black';
+
+    // TODO: refactor next sprint
+    time_left_white: string | null
+    time_left_black: string | null
+    time_start_white: string | null
+    time_start_black: string | null
 };
 
 type WaitingState = {
@@ -43,6 +51,34 @@ export const Game = () => {
     const { lastJsonMessage, sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(parseCode(gameId), token));
     const [fen, setFen] = useState<string>(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
+    const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0); 
+    const [opponentTimeRemaining, setOpponentTimeRemaining] = useState<number>(0);
+    
+
+    // TODO: refactor me, serve solametne per non fartire il timer quando il bianco non ha ancora fatto la mossa
+    // const [isFirstMoveMade, setIsFirstMoveMade] = useState<boolean>(boardOrientation === 'white');
+
+    function parseTimeDelta(timeDelta: string): number {
+        const parts = timeDelta.split(/[:.]/);
+        if (parts.length < 3) throw new Error('Invalid time delta');
+        // TODO: a volte c'è anche millisecondi, non sempre, non lo stiamo gestendo, non 
+        // so se è importante, forse non si nota.
+
+        const hours = parseInt(parts[0] as string, 10);
+        const minutes = parseInt(parts[1] as string, 10);
+        const seconds = parseInt(parts[2] as string, 10);
+
+        const totalSeconds = hours * 60 * 60 + minutes * 60 + seconds;
+
+        return totalSeconds;
+    }
+
+    const endTimeCallback = () => {
+        console.log("enttime callback");
+        // Deve essere fatta una richiesta per triggerare l'endgame
+        makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
+    }
+
     useEffect(() => {
         if (isMyTurn) {
             if (lastJsonMessage && 'move_made' in lastJsonMessage && lastJsonMessage.move_made !== null) {
@@ -54,9 +90,24 @@ export const Game = () => {
             setIsMyTurn(true);
         }
 
-        if (lastJsonMessage !== null && 'ended' in lastJsonMessage && lastJsonMessage.ended) {
-            setGameEnded(true);
+        if (lastJsonMessage !== null && 'ended' in lastJsonMessage) {
+            let myRemainingTime = "";
+            let opponentRemainingTime = "";
+            if (boardOrientation === 'white') {
+                myRemainingTime = lastJsonMessage.time_left_white as string;
+                opponentRemainingTime = lastJsonMessage.time_left_black as string;
+            } else {
+                myRemainingTime = lastJsonMessage.time_left_black as string;
+                opponentRemainingTime = lastJsonMessage.time_left_white as string;
+            }
+            setMyTimeRemaining(parseTimeDelta(myRemainingTime));
+            setOpponentTimeRemaining(parseTimeDelta(opponentRemainingTime));
+
+            if (lastJsonMessage.ended) {
+                setGameEnded(true);
+            }
         }
+
         // questo è necessario per non andare in loop infinito di update
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lastJsonMessage]);
@@ -64,6 +115,7 @@ export const Game = () => {
     const makeMove = (from: string, to: string) => {
         if (isMyTurn) {
             sendJsonMessage({ kind: 'move', data: `${from}${to}` });
+            setIsFirstMoveMade(true);
         }
         // l'aggiornamento del turno è fatto dall'effect
     };
@@ -99,14 +151,23 @@ export const Game = () => {
                 <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
                     {isMyTurn ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
-                <PlayerInfo color={opponentBoardOrientation} myTurn={!isMyTurn} opponent />
-                <Chessboard
-                    fen={fen}
-                    boardOrientation={boardOrientation}
-                    makeMove={makeMove}
-                    gameIsEnded={gameIsEnded}
+                <PlayerInfo color={opponentBoardOrientation} 
+                    myTurn={!isMyTurn} 
+                    timeRemaining={opponentTimeRemaining} 
+                    timerStopping={isMyTurn} opponent 
                 />
-                <PlayerInfo color={boardOrientation} myTurn={isMyTurn} />
+                    <Chessboard
+                        fen={fen}
+                        boardOrientation={boardOrientation}
+                        makeMove={makeMove}
+                        gameIsEnded={gameIsEnded}
+                    />
+                <PlayerInfo color={boardOrientation} 
+                    myTurn={isMyTurn} 
+                    timeRemaining={myTimeRemaining}
+                    timerStopping={!isMyTurn}
+                    timerEndCallback={endTimeCallback}
+                />
             </Flex>
 
             {/* Modal to show when game ends */}
