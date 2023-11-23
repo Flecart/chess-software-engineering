@@ -23,10 +23,10 @@ type GameState = {
     turn: 'white' | 'black';
 
     // TODO: refactor next sprint
-    time_left_white: string | null
-    time_left_black: string | null
-    time_start_white: string | null
-    time_start_black: string | null
+    time_left_white: string | null;
+    time_left_black: string | null;
+    time_start_white: string | null;
+    time_start_black: string | null;
 };
 
 type WaitingState = {
@@ -51,17 +51,15 @@ export const Game = () => {
     const { lastJsonMessage, sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(parseCode(gameId), token));
     const [fen, setFen] = useState<string>(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
 
-    const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0); 
+    const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0);
     const [opponentTimeRemaining, setOpponentTimeRemaining] = useState<number>(0);
-    
-
-    // TODO: refactor me, serve solametne per non fartire il timer quando il bianco non ha ancora fatto la mossa
-    // const [isFirstMoveMade, setIsFirstMoveMade] = useState<boolean>(boardOrientation === 'white');
+    const [myTimeStart, setMyTimeStart] = useState<string | null>(null);
+    const [opponentTimeStart, setOpponentTimeStart] = useState<string | null>(null);
 
     function parseTimeDelta(timeDelta: string): number {
         const parts = timeDelta.split(/[:.]/);
         if (parts.length < 3) throw new Error('Invalid time delta');
-        // TODO: a volte c'è anche millisecondi, non sempre, non lo stiamo gestendo, non 
+        // TODO: a volte c'è anche millisecondi, non sempre, non lo stiamo gestendo, non
         // so se è importante, forse non si nota.
 
         const hours = parseInt(parts[0] as string, 10);
@@ -74,10 +72,10 @@ export const Game = () => {
     }
 
     const endTimeCallback = () => {
-        console.log("enttime callback");
+        console.log('enttime callback');
         // Deve essere fatta una richiesta per triggerare l'endgame
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
-    }
+    };
 
     useEffect(() => {
         if (isMyTurn) {
@@ -91,18 +89,25 @@ export const Game = () => {
         }
 
         if (lastJsonMessage !== null && 'ended' in lastJsonMessage) {
-            let myRemainingTime = "";
-            let opponentRemainingTime = "";
+            let myRemainingTime = '';
+            let opponentRemainingTime = '';
+            let myStartTime: string | null = null;
+            let opponentStartTime: string | null = null;
             if (boardOrientation === 'white') {
                 myRemainingTime = lastJsonMessage.time_left_white as string;
                 opponentRemainingTime = lastJsonMessage.time_left_black as string;
+                myStartTime = lastJsonMessage.time_start_white;
+                opponentStartTime = lastJsonMessage.time_start_black;
             } else {
                 myRemainingTime = lastJsonMessage.time_left_black as string;
                 opponentRemainingTime = lastJsonMessage.time_left_white as string;
+                myStartTime = lastJsonMessage.time_start_black;
+                opponentStartTime = lastJsonMessage.time_start_white;
             }
-            setMyTimeRemaining(parseTimeDelta(myRemainingTime));
-            setOpponentTimeRemaining(parseTimeDelta(opponentRemainingTime));
-
+            setMyTimeRemaining(() => parseTimeDelta(myRemainingTime));
+            setOpponentTimeRemaining(() => parseTimeDelta(opponentRemainingTime));
+            setMyTimeStart(() => myStartTime);
+            setOpponentTimeStart(() => opponentStartTime);
             if (lastJsonMessage.ended) {
                 setGameEnded(true);
             }
@@ -115,7 +120,6 @@ export const Game = () => {
     const makeMove = (from: string, to: string) => {
         if (isMyTurn) {
             sendJsonMessage({ kind: 'move', data: `${from}${to}` });
-            setIsFirstMoveMade(true);
         }
         // l'aggiornamento del turno è fatto dall'effect
     };
@@ -151,21 +155,24 @@ export const Game = () => {
                 <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
                     {isMyTurn ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
-                <PlayerInfo color={opponentBoardOrientation} 
-                    myTurn={!isMyTurn} 
-                    timeRemaining={opponentTimeRemaining} 
-                    timerStopping={isMyTurn} opponent 
+                <PlayerInfo
+                    color={opponentBoardOrientation}
+                    myTurn={!isMyTurn}
+                    timeRemaining={opponentTimeRemaining}
+                    timerStopping={opponentTimeStart === null}
+                    opponent
                 />
-                    <Chessboard
-                        fen={fen}
-                        boardOrientation={boardOrientation}
-                        makeMove={makeMove}
-                        gameIsEnded={gameIsEnded}
-                    />
-                <PlayerInfo color={boardOrientation} 
-                    myTurn={isMyTurn} 
+                <Chessboard
+                    fen={fen}
+                    boardOrientation={boardOrientation}
+                    makeMove={makeMove}
+                    gameIsEnded={gameIsEnded}
+                />
+                <PlayerInfo
+                    color={boardOrientation}
+                    myTurn={isMyTurn}
                     timeRemaining={myTimeRemaining}
-                    timerStopping={!isMyTurn}
+                    timerStopping={myTimeStart === null}
                     timerEndCallback={endTimeCallback}
                 />
             </Flex>

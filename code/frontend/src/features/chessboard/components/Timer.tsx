@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-    ClockCircleOutlined,
-} from '@ant-design/icons';
+import { ClockCircleOutlined } from '@ant-design/icons';
 interface TimerProps {
     start?: number;
     stop?: boolean;
@@ -9,26 +7,30 @@ interface TimerProps {
 }
 
 const Timer: React.FC<TimerProps> = ({ start = 0, stop = false, onZero }) => {
-
     /*la prima mossa lo vedi perchè start non è settato semplicemente quindi ti dovrebbe arrivare un valore nullo*/
     // c'è i parametri che ti arrivano
-    // sono entrambi a None 
+    // sono entrambi a None
     // perchè i timer non sono partiti
-    // capito
+    // capito?
+    // mi puoi andare sul ws
     const [seconds, setSeconds] = useState<number>(start);
 
     const displayTimer = useCallback(() => {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor(seconds / 60);
         const secondsLeft = seconds % 60;
-        
-        let out = ''
-        if (hours>0){
-            out+=`${hours}h:`
+
+        if (seconds <= 0) {
+            return '0m:0s';
+        }
+
+        let out = '';
+        if (hours > 0) {
+            out += `${hours}h:`;
         }
         return `${out}${minutes}m:${secondsLeft < 10 ? '0' : ''}${secondsLeft}s`;
     }, [seconds]);
-    
+
     useEffect(() => {
         setSeconds(start);
     }, [start]);
@@ -37,14 +39,16 @@ const Timer: React.FC<TimerProps> = ({ start = 0, stop = false, onZero }) => {
         let interval: NodeJS.Timeout;
         if (!stop) {
             interval = setInterval(() => {
-                setSeconds((seconds) => seconds - 1);
-                if (seconds <= 0) {
-                    if (onZero) {
-                        onZero();
+                setSeconds((seconds) => {
+                    if (seconds <= 0) {
+                        if (onZero) {
+                            onZero();
+                        }
+                        clearInterval(interval);
                     }
-                    clearInterval(interval);
-                }
-            }, 1000); 
+                    return seconds - 1;
+                });
+            }, 1000);
         }
 
         return () => {
@@ -52,23 +56,25 @@ const Timer: React.FC<TimerProps> = ({ start = 0, stop = false, onZero }) => {
                 clearInterval(interval);
             }
         };
-    }, [stop]);
+    }, [stop, onZero]);
 
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: '2em',
-            fontWeight: 'bold',
-            color: '#333',
-            background: '#f5f5f5',
-          }}>
-            <ClockCircleOutlined/> 
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                fontSize: '2em',
+                fontWeight: 'bold',
+                color: '#333',
+                background: '#f5f5f5',
+            }}
+        >
+            <ClockCircleOutlined />
             <pre> </pre>
             {displayTimer()}
-          </div>
+        </div>
     );
-}
+};
 
 export default Timer;
