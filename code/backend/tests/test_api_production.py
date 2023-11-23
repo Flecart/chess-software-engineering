@@ -91,7 +91,7 @@ class TestApiGame(unittest.TestCase):
         self.host ='app.t1-check-mates.mooo.com/backend'
         self.base_url = f'https://{self.host}'
         self.base_url_api = f'{self.base_url}/api/v1'
-        self.websocket_url = lambda game_id,x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
+        self.websocket_url = lambda game_id,x: f"wss://{self.host}/api/v1/game/{game_id}/{x}/ws"
     
 
     def _create_guest_user(self)->str:

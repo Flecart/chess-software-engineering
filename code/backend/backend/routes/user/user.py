@@ -83,7 +83,7 @@ def create_user_routes(app: FastAPI,prefix:str=''):
                 result=x.get_state_game(user),
             ) ,games)))
 
-    @app.get(prefix + "/leaderboard/") 
+    @app.get(prefix + "/leaderboard") 
     def leaderboard(db:Session=Depends(get_db)) -> list[LeaderBoardResponse]:
         """
         Get all games of a user
