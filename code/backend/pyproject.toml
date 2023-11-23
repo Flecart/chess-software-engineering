@@ -20,6 +20,7 @@ passlib = "^1.7.4"
 python-jose = "^3.3.0"
 python-multipart = "^0.0.6"
 websockets = "^12.0"
+bcrypt = "^4.0.1"
 
 [tool.poetry.group.test.dependencies]
 requests = "^2.31.0"

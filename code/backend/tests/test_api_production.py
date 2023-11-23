@@ -88,9 +88,8 @@ class TestApiGame(unittest.TestCase):
 
 
     def setUp(self):
-        config = Config()
-        self.host =f"{config['host']}:{config['port']}"
-        self.base_url = f'http://{self.host}'
+        self.host ='app.t1-check-mates.mooo.com/backend'
+        self.base_url = f'https://{self.host}'
         self.base_url_api = f'{self.base_url}/api/v1'
         self.websocket_url = lambda game_id,x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
     
@@ -115,17 +114,17 @@ class TestApiGame(unittest.TestCase):
                 jwt.append(self._login(user,psw))
         
         versus = [
-            (0,7)
-            (0,2)
-            (0,3)
-            (0,4)
-            (0,5)
-            (0,5)
-            (2,1)
-            (6,3)
-            (5,4)
-            (6,2)
-            (5,3)
+            (0,7),
+            (0,2),
+            (0,3),
+            (0,4),
+            (0,5),
+            (0,5),
+            (2,1),
+            (6,3),
+            (5,4),
+            (6,2),
+            (5,3),
         ]
 
         for (w,b) in versus:
