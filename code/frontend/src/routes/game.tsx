@@ -12,7 +12,7 @@ const indexGameRoute = new Route({
     path: '/',
     component: Pregame,
     validateSearch: (search): { bot: boolean } => {
-        return { bot: !!search.bot };
+        return { bot: 'bot' in search && (search.bot === 'true' || search.bot === true) };
     },
 });
 

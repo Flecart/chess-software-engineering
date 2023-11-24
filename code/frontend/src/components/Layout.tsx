@@ -34,13 +34,19 @@ function getItem(
 
 const menuItemsClassic: MenuProps['items'] = [
     getItem(
-        <Link to="/game" search={{ bot: true }}>
+        <Link to="/game/" search={{ bot: false }}>
             Gioca
         </Link>,
         'online',
         <PlayCircleOutlined />,
     ),
-    getItem(<Link to="/404">Pratica</Link>, 'bot', <RobotOutlined />),
+    getItem(
+        <Link to="/game/" search={{ bot: true }}>
+            Pratica
+        </Link>,
+        'bot',
+        <RobotOutlined />,
+    ),
     getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
 ];
 
