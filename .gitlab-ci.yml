@@ -38,7 +38,8 @@ test_frontend:
     - npm run coverage
   artifacts:
     paths:
-      - 'code/frontend/coverage/'
+      - 'code/frontend/coverage/lcov.info'
+      - 'code/frontend/coverage/cobertura-coverage.xml'
     reports:
       coverage_report:
         coverage_format: cobertura
