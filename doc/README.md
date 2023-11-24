@@ -2,8 +2,6 @@
 
 Gli elementi di consegna per lo sprint-2 sono presenti a [questo link](http://gitlab.t1-check-mates.mooo.com/t1-check-mates/monorepo/-/wikis/consegne/deliverables_2)
 
-Video, review, e reference a database e test saranno presenti 24 Novembre.
-
 
 # README
 
