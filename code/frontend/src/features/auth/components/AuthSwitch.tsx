@@ -1,5 +1,4 @@
-import { useTokenContext } from '@/lib/tokenContext';
-import { useIsGuest } from '..';
+import { useAuth } from '../hooks/useAuth';
 
 type Props = {
     AuthComponent: () => JSX.Element;
@@ -7,11 +6,9 @@ type Props = {
 };
 export const AuthSwitch = ({ AuthComponent, UnauthComponent }: Props) => {
     const NewComponent = () => {
-        const { token } = useTokenContext();
-        const isGuest = useIsGuest(token);
-        const isAuthenticated = token !== null && !isGuest;
+        const { isAuth } = useAuth();
 
-        return isAuthenticated ? <AuthComponent /> : <UnauthComponent />;
+        return isAuth ? <AuthComponent /> : <UnauthComponent />;
     };
     return NewComponent;
 };

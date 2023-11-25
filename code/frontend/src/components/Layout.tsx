@@ -1,4 +1,4 @@
-import { useIsGuest } from '@/features/auth';
+import { useAuth } from '@/features/auth';
 import { useTokenContext } from '@/lib/tokenContext';
 import {
     EditOutlined,
@@ -57,9 +57,8 @@ const menuItemsNotLogged: MenuProps['items'] = [
 const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile/">Profilo</Link>, 'profile', <UserOutlined />)];
 
 export const Layout = () => {
-    const { token, unsetToken } = useTokenContext();
-    const isGuest = useIsGuest(token);
-    const showLoggedInfo = token !== null && !isGuest;
+    const { unsetToken } = useTokenContext();
+    const { isAuth: showLoggedInfo } = useAuth();
 
     const menuItems: MenuProps['items'] = [
         ...menuItemsClassic,

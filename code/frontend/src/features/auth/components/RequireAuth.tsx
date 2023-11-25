@@ -1,11 +1,8 @@
-import { useTokenContext } from '@/lib/tokenContext';
 import { Navigate, Outlet } from '@tanstack/react-router';
-import { useIsGuest } from '../hooks/useIsGuest';
+import { useAuth } from '../hooks/useAuth';
 
 export const RequireAuth = () => {
-    const { token } = useTokenContext();
-    const isGuest = useIsGuest(token);
-    const isAuthenticated = token !== null && !isGuest;
+    const { isAuth } = useAuth();
 
-    return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+    return isAuth ? <Outlet /> : <Navigate to="/login" replace />;
 };

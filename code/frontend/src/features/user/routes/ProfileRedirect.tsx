@@ -1,10 +1,8 @@
-import { useUsername } from '@/features/auth';
-import { useTokenContext } from '@/lib/tokenContext';
+import { useAuth } from '@/features/auth';
 import { Navigate } from '@tanstack/react-router';
 
 export const ProfileRedirect = () => {
-    const { token } = useTokenContext();
-    const username = useUsername(token);
+    const { username } = useAuth();
 
     return <Navigate to="/profile/$username" params={{ username }} replace />;
 };

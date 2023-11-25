@@ -1,14 +1,12 @@
-import { useUsername } from '@/features/auth';
+import { useAuth } from '@/features/auth';
 import { GameCard } from '@/features/user';
 import { useUserGamesQuery, useUserQuery } from '@/features/user/';
-import { useTokenContext } from '@/lib/tokenContext';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Avatar, Button, Flex, Typography } from 'antd';
 
 export const AuthLanding = () => {
     const navigate = useNavigate({ from: '/' });
-    const { token } = useTokenContext();
-    const username = useUsername(token);
+    const { username } = useAuth();
     const { data: user } = useUserQuery(username);
     const { data } = useUserGamesQuery(username);
 
