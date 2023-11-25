@@ -1,19 +1,17 @@
-import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Typography } from 'antd';
 
 import { AuthForm } from '../components/AuthForm';
 import { postLogin } from '../api/auth';
+import { username, password } from '../hooks/auth';
 import { useTokenContext } from '@/lib/tokenContext';
 
 export const Login = () => {
     const navigate = useNavigate({ from: '/login' });
     const { setToken } = useTokenContext();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
 
     const action = async () => {
-        const token = await postLogin(username, password);
+        const token = await postLogin(username.value, password.value);
         setToken(token);
         //TODO: handle errors
         navigate({ to: '/' });
@@ -22,7 +20,7 @@ export const Login = () => {
     return (
         <>
             <Typography.Title>Accedi</Typography.Title>
-            <AuthForm setUsername={setUsername} setPassword={setPassword} execAction={action} />
+            <AuthForm username={username} password={password} execAction={action} />
         </>
     );
 };

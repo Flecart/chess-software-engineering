@@ -1,15 +1,16 @@
 import { Button, Form, Input } from 'antd';
+import type { Signal } from '@preact/signals';
 import type { AuthPayload } from '../types';
 
 type Props = {
-    setUsername: (username: string) => void;
-    setPassword: (password: string) => void;
+    username: Signal<string>;
+    password: Signal<string>;
     execAction: () => void;
 };
 
-export const AuthForm = ({ setUsername, setPassword, execAction }: Props) => {
-    const onChangeUsername = (e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value);
-    const onChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
+export const AuthForm = ({ username, password, execAction }: Props) => {
+    const onChangeUsername = (e: React.ChangeEvent<HTMLInputElement>) => (username.value = e.target.value);
+    const onChangePassword = (e: React.ChangeEvent<HTMLInputElement>) => (password.value = e.target.value);
 
     return (
         <>
