@@ -1,17 +1,16 @@
-import { Layout as LibLayout, Menu, Flex, type MenuProps, Button } from 'antd';
-import { Link, Outlet } from '@tanstack/react-router';
+import { useIsGuest } from '@/features/auth';
+import { useTokenContext } from '@/lib/tokenContext';
 import {
+    EditOutlined,
+    FormOutlined,
     PlayCircleOutlined,
     RobotOutlined,
     TrophyOutlined,
-    FormOutlined,
-    EditOutlined,
     UserOutlined,
 } from '@ant-design/icons';
+import { Link, Outlet } from '@tanstack/react-router';
+import { Button, Flex, Layout as LibLayout, Menu, type MenuProps } from 'antd';
 import ChessLogo from '/colored_knight.svg';
-import { useTokenContext } from '@/lib/tokenContext';
-import { useMemo } from 'react';
-import { jwtDecode } from 'jwt-decode';
 
 const { Sider, Content } = LibLayout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -59,14 +58,7 @@ const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile/">Profil
 
 export const Layout = () => {
     const { token, unsetToken } = useTokenContext();
-
-    const isGuest = useMemo(() => {
-        if (!token) return false;
-        const decodedToken = jwtDecode(token);
-        // check if the decoded token has guest property
-        return 'guest' in decodedToken && typeof decodedToken.guest === 'boolean' && decodedToken.guest;
-    }, [token]);
-
+    const isGuest = useIsGuest(token);
     const showLoggedInfo = token !== null && !isGuest;
 
     const menuItems: MenuProps['items'] = [
