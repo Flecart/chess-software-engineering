@@ -4,8 +4,9 @@ import { gameRoutes } from './game';
 import { registerRoute, loginRoute } from './auth';
 import { leaderboardRoute } from './leaderboard';
 import { profileRoutes } from './profile';
-import { Landing, ToBeImplemented } from '@/features/misc/';
+import { Landing, AuthLanding, ToBeImplemented } from '@/features/misc/';
 import { RouterDevtools } from '@/components/RouterDevtools';
+import { AuthSwitch } from '@/features/auth';
 
 export const rootRoute = new RootRoute({
     component: () => (
@@ -19,7 +20,7 @@ export const rootRoute = new RootRoute({
 const indexRoute = new Route({
     getParentRoute: () => rootRoute,
     path: '/',
-    component: Landing,
+    component: AuthSwitch({ AuthComponent: AuthLanding, UnauthComponent: Landing }),
 });
 
 const notFoundRoute = new Route({

@@ -1,11 +1,14 @@
+import { useUsername } from '@/features/auth';
 import { GameCard } from '@/features/user';
 import { useUserGamesQuery, useUserQuery } from '@/features/user/';
+import { useTokenContext } from '@/lib/tokenContext';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Avatar, Button, Flex, Typography } from 'antd';
 
 export const AuthLanding = () => {
     const navigate = useNavigate({ from: '/' });
-    const username = 'magnus';
+    const { token } = useTokenContext();
+    const username = useUsername(token);
     const { data: user } = useUserQuery(username);
     const { data } = useUserGamesQuery(username);
 
@@ -20,7 +23,7 @@ export const AuthLanding = () => {
                     {username}
                 </Link>
             </Flex>
-            <Flex vertical>
+            <Flex justify="center" vertical style={{ maxWidth: '600px', margin: '0 auto' }}>
                 <Typography.Title
                     level={2}
                     style={{
@@ -45,7 +48,7 @@ export const AuthLanding = () => {
                     }}
                 >
                     {games.map((game) => (
-                        <GameCard key={game.id} game={game} />
+                        <GameCard key={game.id} game={game} size="small" />
                     ))}
                 </Flex>
             </Flex>
@@ -54,7 +57,7 @@ export const AuthLanding = () => {
                     type="primary"
                     size="large"
                     onClick={() => {
-                        navigate({ to: '/404' });
+                        navigate({ to: '/game/', search: { bot: true } });
                     }}
                 >
                     Gioca contro il computer
@@ -63,7 +66,7 @@ export const AuthLanding = () => {
                     type="default"
                     size="large"
                     onClick={() => {
-                        navigate({ to: '/game' });
+                        navigate({ to: '/game/', search: { bot: false } });
                     }}
                 >
                     Gioca Online
