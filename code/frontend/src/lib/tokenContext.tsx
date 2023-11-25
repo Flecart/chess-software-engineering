@@ -6,11 +6,13 @@ import type { jwt_token } from '@/types';
 type TokenContextProps = {
     token: jwt_token | null;
     setToken: (prevToken: jwt_token | null) => void;
+    unsetToken: () => void;
 };
 
 export const TokenContext = createContext<TokenContextProps>({
     token: null,
     setToken: () => null,
+    unsetToken: () => null,
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -25,6 +27,9 @@ export const TokenProvider = ({ children }: { children: ReactNode }) => {
         () => ({
             token,
             setToken,
+            unsetToken: () => {
+                setToken(null);
+            },
         }),
         [token, setToken],
     );

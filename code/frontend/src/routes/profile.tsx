@@ -1,6 +1,7 @@
-import { Navigate, Route } from '@tanstack/react-router';
-import { rootRoute } from '.';
 import { Profile } from '@/features/user';
+import { ProfileRedirect } from '@/features/user/';
+import { Route } from '@tanstack/react-router';
+import { rootRoute } from '.';
 
 const profileRoute = new Route({
     getParentRoute: () => rootRoute,
@@ -10,10 +11,7 @@ const profileRoute = new Route({
 const indexProfileRoute = new Route({
     getParentRoute: () => profileRoute,
     path: '/',
-    component: () => {
-        //TODO: redirect to logged user
-        return <Navigate to="/profile/$username" params={{ username: 'magnus' }} replace />;
-    },
+    component: ProfileRedirect,
 });
 
 const specificProfileRoute = new Route({
