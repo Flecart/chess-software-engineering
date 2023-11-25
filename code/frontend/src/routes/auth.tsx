@@ -1,15 +1,21 @@
+import { AuthSwitch, HomeRedirect, Login, Register } from '@/features/auth';
 import { Route } from '@tanstack/react-router';
 import { rootRoute } from '.';
-import { Register, Login } from '@/features/auth';
 
 export const registerRoute = new Route({
     getParentRoute: () => rootRoute,
     path: 'register',
-    component: Register,
+    component: AuthSwitch({
+        AuthComponent: HomeRedirect,
+        UnauthComponent: Register,
+    }),
 });
 
 export const loginRoute = new Route({
     getParentRoute: () => rootRoute,
     path: 'login',
-    component: Login,
+    component: AuthSwitch({
+        AuthComponent: HomeRedirect,
+        UnauthComponent: Login,
+    }),
 });
