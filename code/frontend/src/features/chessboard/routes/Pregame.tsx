@@ -5,6 +5,7 @@ import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
 import Search from 'antd/es/input/Search';
 import type { DefaultOptionType } from 'antd/es/select';
 import * as gameApi from '../api/game';
+import type { GameOptions } from '../types';
 
 export const Pregame = () => {
     const navigate = useNavigate({ from: indexGameRouteId });
@@ -23,7 +24,7 @@ export const Pregame = () => {
         return token;
     };
 
-    const startGame = async (values: { time: number; color: 'white' | 'black' }) => {
+    const startGame = async (values: GameOptions) => {
         console.log(values);
         const sureToken = await checkAndSetToken();
         const realGameId = await gameApi.createGame(sureToken, bot);
@@ -43,8 +44,15 @@ export const Pregame = () => {
                     onFinish={startGame}
                     layout="inline"
                     name="start-game"
-                    initialValues={{ time: timeOptions[0]?.value, color: colorOptions[0]?.value }}
+                    initialValues={{
+                        time: timeOptions[0]?.value,
+                        color: colorOptions[0]?.value,
+                        variant: gameVariantOptions[0]?.value,
+                    }}
                 >
+                    <Form.Item label="Variante: " name="variant">
+                        <Select bordered={false} options={gameVariantOptions} style={{ minWidth: '150px' }} />
+                    </Form.Item>
                     <Form.Item label="Tempo: " name="time">
                         <Select bordered={false} options={timeOptions} style={{ minWidth: '150px' }} />
                     </Form.Item>
@@ -81,6 +89,11 @@ export const Pregame = () => {
         </Flex>
     );
 };
+
+const gameVariantOptions: DefaultOptionType[] = [
+    { label: 'Dark Chess', value: 'dark_chess' },
+    { label: 'Kriegspiel', value: 'kriegspiel' },
+];
 
 const timeOptions: DefaultOptionType[] = [
     { label: 'Nessun tempo', value: 0 },
