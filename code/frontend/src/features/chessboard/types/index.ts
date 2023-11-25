@@ -17,3 +17,9 @@ type WaitingState = {
 };
 
 export type wsMessage = GameState | WaitingState | null;
+
+export type GameOptions = {
+    variant: 'dark_chess' | 'kriegspiel';
+    time: number;
+    color: 'white' | 'black';
+};
