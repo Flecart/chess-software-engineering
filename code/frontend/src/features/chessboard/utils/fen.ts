@@ -52,9 +52,7 @@ export function generateOldFogFen(newFenFormat: string): string {
 
     for (let i = 0; i < newFenFormat.length; i++) {
         const char = newFenFormat.charAt(i);
-        if (char == ' ') {
-            break; // old format doesn't use the last part of the fen
-        }
+        if (char === ' ') break; // old format doesn't use the last part of the fen
 
         if (char >= '0' && char <= '9') {
             const value = parseInt(char);
