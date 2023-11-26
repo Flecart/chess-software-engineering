@@ -1,12 +1,13 @@
-FROM node:21-bookworm-slim as build
+FROM node:21-bookworm-slim AS build
 
 WORKDIR /app
 
 COPY . ./
 
-ENV VITE_BACKEND_URL=https://app.t1-check-mates.mooo.com/backend
+ENV VITE_PROTOCOL=https
+ENV VITE_WS_PROTOCOL=wss
+ENV VITE_HOST=app.t1-check-mates.mooo.com/backend
 ENV VITE_FRONTEND_URL=https://app.t1-check-mates.mooo.com
-ENV VITE_WEBSOCKET_URL=wss://app.t1-check-mates.mooo.com/backend
 
 RUN npm install
 
