@@ -2,14 +2,15 @@ import { useTokenContext } from '@/lib/tokenContext';
 import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { parseTimeDelta } from '../utils/time';
-import type { wsMessage } from '../types';
-import { isMyTurn, gameEnded, fen } from '../hooks/gamestate';
+import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
 import { myRemainingTime, myTimeStart, opponentRemainingTime, opponentTimeStart } from '../hooks/timer';
+import type { wsMessage } from '../types';
+import { parseTimeDelta } from '../utils/time';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
@@ -23,15 +24,7 @@ export const Game = () => {
 
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
-
-    isMyTurn.value = boardOrientation !== 'white';
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
-    gameEnded.value = false;
-    fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
-    myRemainingTime.value = 0;
-    opponentRemainingTime.value = 0;
-    myTimeStart.value = null;
-    opponentTimeStart.value = null;
     const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token), {
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
@@ -69,6 +62,16 @@ export const Game = () => {
             }
         },
     });
+
+    useEffect(() => {
+        isMyTurn.value = boardOrientation === 'white';
+        gameEnded.value = false;
+        fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
+        myRemainingTime.value = 0;
+        opponentRemainingTime.value = 0;
+        myTimeStart.value = null;
+        opponentTimeStart.value = null;
+    }, [boardOrientation]);
 
     const endTimeCallback = () => {
         console.log('enttime callback');

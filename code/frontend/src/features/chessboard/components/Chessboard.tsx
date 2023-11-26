@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
-import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 import type { Piece, Square } from 'react-chessboard/dist/chessboard/types';
-
-const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX';
-const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
-// ^ white fen is 'XXXXXXXX/XXXXXXXX/XXXXXXXX/XXXXXXXX/......../......../PPPPPPPP/RNBQKBNR';
+import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
 type Props = {
-    fen?: string;
+    fen: string;
     boardOrientation: 'white' | 'black';
     makeMove: (from: string, to: string) => void;
     style?: React.CSSProperties;
@@ -16,9 +12,7 @@ type Props = {
 };
 
 export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) => {
-    if (!fen) fen = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
     const [lastMove, setLastMove] = useState<string[] | undefined>(undefined);
-
     return (
         <div
             style={{
