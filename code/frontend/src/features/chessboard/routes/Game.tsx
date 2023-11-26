@@ -27,45 +27,45 @@ export const Game = () => {
         },
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
-            if (isMyTurn.value) {
-                if (message && 'move_made' in message && message.move_made !== null) {
-                    isMyTurn.value = false;
-                }
-            } else if (message && !('waiting' in message)) {
-                isMyTurn.value = true;
-            }
-
-            if (message && 'view' in message) fen.value = message.view;
 
             if (message && 'ended' in message) {
+                // è un messaggio di tipo gamestate
+
+                // turn handling
+                if (isMyTurn.value && message.move_made !== null) isMyTurn.value = false;
+                else if (!isMyTurn.value) isMyTurn.value = true;
+
+                // updating fen
+                fen.value = message.view;
+                // updating gameEnded
+                gameEnded.value = message.ended;
+
                 /*
+                    timer handling
+
                     Se i timer start sono entrambi null, allora è la prima mossa della partita
                     e devo inizializzare i timer con il time left
 
                     Se uno dei due è null, allora devo metterlo in pausa senza variare il tempo
                     mentre quello non null deve essere aggiornato e fatto partire
                 */
+                const timeLeftWhite = message.time_left_white ?? '0:0:0';
+                const timeLeftBlack = message.time_left_black ?? '0:0:0';
 
                 if (message.time_start_white === null && message.time_start_black === null) {
-                    const myNewTimestamp = createExpireTime(null, message.time_left_white ?? '0:0:0');
+                    const myNewTimestamp = createExpireTime(null, timeLeftWhite);
                     myTimer.restart(myNewTimestamp, false);
 
-                    const opponentNewTimestamp = createExpireTime(null, message.time_left_black ?? '0:0:0');
+                    const opponentNewTimestamp = createExpireTime(null, timeLeftBlack);
                     opponentTimer.restart(opponentNewTimestamp, false);
                 } else if (message.time_start_white === null) {
-                    myTimer.restart(createExpireTime(null, message.time_left_white ?? '0:0:0'));
+                    myTimer.restart(createExpireTime(null, timeLeftWhite));
                     myTimer.pause();
-                    opponentTimer.restart(
-                        createExpireTime(message.time_start_black, message.time_left_black ?? '0:0:0'),
-                    );
+                    opponentTimer.restart(createExpireTime(message.time_start_black, timeLeftBlack));
                 } else if (message.time_start_black === null) {
-                    opponentTimer.restart(createExpireTime(null, message.time_left_black ?? '0:0:0'));
+                    opponentTimer.restart(createExpireTime(null, timeLeftBlack));
                     opponentTimer.pause();
-                    myTimer.restart(createExpireTime(message.time_start_white, message.time_left_white ?? '0:0:0'));
-                }
-
-                if (message.ended) {
-                    gameEnded.value = true;
+                    myTimer.restart(createExpireTime(message.time_start_white, timeLeftWhite));
                 }
             }
         },
