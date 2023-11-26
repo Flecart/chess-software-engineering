@@ -3,7 +3,7 @@ import { Avatar, Flex } from 'antd';
 import type { color } from '../types';
 import { displayTimer } from '../utils/time';
 
-type Props = {
+type Props = Readonly<{
     color: color;
     myTurn: boolean;
     opponent?: boolean;
@@ -13,7 +13,7 @@ type Props = {
         hours: number;
         days: number;
     };
-};
+}>;
 
 export const PlayerInfo = ({ color, myTurn, opponent, time }: Props) => {
     const { seconds, minutes, hours, days } = time;

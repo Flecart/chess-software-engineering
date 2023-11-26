@@ -4,12 +4,12 @@ import type { Piece, Square } from 'react-chessboard/dist/chessboard/types';
 import type { color } from '../types';
 import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
-type Props = {
+type Props = Readonly<{
     fen: string;
     boardOrientation: color;
     makeMove: (from: string, to: string) => void;
     style?: React.CSSProperties;
-};
+}>;
 
 export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) => {
     const [lastMove, setLastMove] = useState<string[] | undefined>(undefined);
