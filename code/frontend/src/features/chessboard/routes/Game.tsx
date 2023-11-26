@@ -3,19 +3,14 @@ import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
 import { useEffect } from 'react';
+import { useTimer, type TimerSettings } from 'react-timer-hook';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
-
-import { useTimer, type TimerSettings } from 'react-timer-hook';
 import { createExpireTime } from '../utils/time';
-
-const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
-const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
-// ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
 
 export const Game = () => {
     const { gameId } = useParams({ from: specificGameRouteId });
@@ -87,8 +82,7 @@ export const Game = () => {
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
     };
 
-    // SET THE TIMER TO 0 SECONDS, check if right
-    // could get the value from user input in pregame
+    // set the timer to 0 seconds, will be updated by the first message
     const timerSettings: TimerSettings = { expiryTimestamp: new Date(), autoStart: false, onExpire: endTimeCallback };
     const myTimer = useTimer(timerSettings);
     const opponentTimer = useTimer(timerSettings);
@@ -98,12 +92,8 @@ export const Game = () => {
         // l'aggiornamento del turno è fatto dall'effect
     };
 
-    const gameIsEnded = () => (gameEnded.value = true);
-
-    const resetGame = () => (gameEnded.value = false);
-
     const setUpNewGame = () => {
-        resetGame();
+        gameEnded.value = false;
         navigate({ to: '/game', search: { bot: true } });
     };
 
@@ -134,12 +124,7 @@ export const Game = () => {
                     }}
                     opponent
                 />
-                <Chessboard
-                    fen={fen.value}
-                    boardOrientation={boardOrientation}
-                    makeMove={makeMove}
-                    gameIsEnded={gameIsEnded}
-                />
+                <Chessboard fen={fen.value} boardOrientation={boardOrientation} makeMove={makeMove} />
                 <PlayerInfo
                     color={boardOrientation}
                     myTurn={isMyTurn.value}
@@ -172,3 +157,7 @@ export const Game = () => {
         </Flex>
     );
 };
+
+const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
+const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
+// ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';

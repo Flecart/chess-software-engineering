@@ -1,9 +1,10 @@
-import { Avatar, Flex } from 'antd';
 import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Flex } from 'antd';
+import type { color } from '../types';
 import { displayTimer } from '../utils/time';
 
 type Props = {
-    color: 'white' | 'black';
+    color: color;
     myTurn: boolean;
     opponent?: boolean;
     time: {
@@ -12,12 +13,8 @@ type Props = {
         hours: number;
         days: number;
     };
-    timeRemaining?: number;
-    timerStopping?: boolean;
-    timerEndCallback?: () => void;
 };
 
-// TODO: refactorare il prop drilling con il timer, non è un buon pattern
 export const PlayerInfo = ({ color, myTurn, opponent, time }: Props) => {
     const { seconds, minutes, hours, days } = time;
     return (

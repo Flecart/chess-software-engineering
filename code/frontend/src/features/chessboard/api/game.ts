@@ -2,6 +2,7 @@ import { apiBaseUrl, wsUrl } from '@/config';
 import { axios } from '@/lib/axios';
 import type { jwt_token } from '@/types';
 import { createCode, parseCode } from '../utils/code';
+import type { color } from '../types';
 
 export async function loginAsGuest(): Promise<jwt_token> {
     const response = await axios.post('/api/v1/user/guest');
@@ -24,11 +25,7 @@ export async function createGame(
     return createCode(response.data);
 }
 
-export async function joinGame(
-    token: jwt_token,
-    gameId: string,
-    color: null | 'white' | 'black' = null,
-): Promise<void> {
+export async function joinGame(token: jwt_token, gameId: string, color: null | color = null): Promise<void> {
     const colorParam = color ?? '';
 
     await axios.put(`${apiBaseUrl}/game/${parseCode(gameId)}/join/${colorParam}`, undefined, {

@@ -1,6 +1,7 @@
+import { Game, Pregame } from '@/features/chessboard';
+import type { GameRouteSearch, PregameRouteSearch } from '@/types';
 import { Route } from '@tanstack/react-router';
 import { rootRoute } from '.';
-import { Pregame, Game } from '@/features/chessboard';
 
 const gameRoute = new Route({
     getParentRoute: () => rootRoute,
@@ -11,7 +12,7 @@ const indexGameRoute = new Route({
     getParentRoute: () => gameRoute,
     path: '/',
     component: Pregame,
-    validateSearch: (search): { bot: boolean } => {
+    validateSearch: (search): PregameRouteSearch => {
         return { bot: 'bot' in search && (search.bot === 'true' || search.bot === true) };
     },
 });
@@ -20,7 +21,7 @@ const specificGameRoute = new Route({
     getParentRoute: () => gameRoute,
     path: '$gameId',
     component: Game,
-    validateSearch: (search): { boardOrientation: 'white' | 'black' } => {
+    validateSearch: (search): GameRouteSearch => {
         return { boardOrientation: search.boardOrientation === 'white' ? 'white' : 'black' };
     },
 });
