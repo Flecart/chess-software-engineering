@@ -5,7 +5,8 @@
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "module": "ESNext",
         "skipLibCheck": true,
-        "verbatimModuleSyntax": true, // enforce explicit type import
+        // TODO: make this option work
+        // "verbatimModuleSyntax": true, // enforce explicit type import
         "esModuleInterop": true,
         "allowJs": true,
         "moduleDetection": "force",

@@ -2,12 +2,15 @@ import { useTokenContext } from '@/lib/tokenContext';
 import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
+import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
+import { myRemainingTime, myTimeStart, opponentRemainingTime, opponentTimeStart } from '../hooks/timer';
 import type { wsMessage } from '../types';
+import { parseTimeDelta } from '../utils/time';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
@@ -21,70 +24,54 @@ export const Game = () => {
 
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
-
-    const [isMyTurn, setIsMyTurn] = useState(boardOrientation !== 'white');
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
-    const [gameEnded, setGameEnded] = useState(false);
-    const [fen, setFen] = useState<string>(boardOrientation === 'white' ? startWhiteFEN : startBlackFEN);
     const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token), {
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
-            if (isMyTurn) {
+            if (isMyTurn.value) {
                 if (message && 'move_made' in message && message.move_made !== null) {
-                    setFen(message.view);
-                    setIsMyTurn(false);
+                    fen.value = message.view;
+                    isMyTurn.value = false;
                 }
             } else if (message && !('waiting' in message)) {
-                setFen(message.view);
-                setIsMyTurn(true);
+                fen.value = message.view;
+                isMyTurn.value = true;
             }
 
             if (message !== null && 'ended' in message) {
-                let myRemainingTime = '';
-                let opponentRemainingTime = '';
+                let myTimeRemaining = '';
+                let opponentTimeRemaining = '';
                 let myStartTime: string | null = null;
                 let opponentStartTime: string | null = null;
                 if (boardOrientation === 'white') {
-                    myRemainingTime = message.time_left_white as string;
-                    opponentRemainingTime = message.time_left_black as string;
+                    myTimeRemaining = message.time_left_white as string;
+                    opponentTimeRemaining = message.time_left_black as string;
                     myStartTime = message.time_start_white;
                     opponentStartTime = message.time_start_black;
                 } else {
-                    myRemainingTime = message.time_left_black as string;
-                    opponentRemainingTime = message.time_left_white as string;
+                    myTimeRemaining = message.time_left_black as string;
+                    opponentTimeRemaining = message.time_left_white as string;
                     myStartTime = message.time_start_black;
                     opponentStartTime = message.time_start_white;
                 }
-                setMyTimeRemaining(() => parseTimeDelta(myRemainingTime));
-                setOpponentTimeRemaining(() => parseTimeDelta(opponentRemainingTime));
-                setMyTimeStart(() => myStartTime);
-                setOpponentTimeStart(() => opponentStartTime);
-                if (message.ended) {
-                    setGameEnded(true);
-                }
+                myRemainingTime.value = parseTimeDelta(myTimeRemaining);
+                opponentRemainingTime.value = parseTimeDelta(opponentTimeRemaining);
+                myTimeStart.value = myStartTime;
+                opponentTimeStart.value = opponentStartTime;
+                if (message.ended) gameEnded.value = true;
             }
         },
     });
 
-    const [myTimeRemaining, setMyTimeRemaining] = useState<number>(0);
-    const [opponentTimeRemaining, setOpponentTimeRemaining] = useState<number>(0);
-    const [myTimeStart, setMyTimeStart] = useState<string | null>(null);
-    const [opponentTimeStart, setOpponentTimeStart] = useState<string | null>(null);
-
-    function parseTimeDelta(timeDelta: string): number {
-        const parts = timeDelta.split(/[:.]/);
-        if (parts.length < 3) throw new Error('Invalid time delta');
-        // TODO: a volte c'è anche millisecondi, non sempre, non lo stiamo gestendo, non
-        // so se è importante, forse non si nota.
-
-        const hours = parseInt(parts[0] as string, 10);
-        const minutes = parseInt(parts[1] as string, 10);
-        const seconds = parseInt(parts[2] as string, 10);
-
-        const totalSeconds = hours * 60 * 60 + minutes * 60 + seconds;
-
-        return totalSeconds;
-    }
+    useEffect(() => {
+        isMyTurn.value = boardOrientation === 'white';
+        gameEnded.value = false;
+        fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
+        myRemainingTime.value = 0;
+        opponentRemainingTime.value = 0;
+        myTimeStart.value = null;
+        opponentTimeStart.value = null;
+    }, [boardOrientation]);
 
     const endTimeCallback = () => {
         console.log('enttime callback');
@@ -93,19 +80,13 @@ export const Game = () => {
     };
 
     const makeMove = (from: string, to: string) => {
-        if (isMyTurn) {
-            sendJsonMessage({ kind: 'move', data: `${from}${to}` });
-        }
+        if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
         // l'aggiornamento del turno è fatto dall'effect
     };
 
-    const gameIsEnded = () => {
-        setGameEnded(true);
-    };
+    const gameIsEnded = () => (gameEnded.value = true);
 
-    const resetGame = () => {
-        setGameEnded(false);
-    };
+    const resetGame = () => (gameEnded.value = false);
 
     const setUpNewGame = () => {
         resetGame();
@@ -125,27 +106,27 @@ export const Game = () => {
             </section>
 
             <Flex vertical gap="small">
-                <Typography.Title level={3} type={isMyTurn ? 'success' : 'danger'}>
-                    {isMyTurn ? 'È il tuo turno' : "È il turno dell'avversario"}
+                <Typography.Title level={3} type={isMyTurn.value ? 'success' : 'danger'}>
+                    {isMyTurn.value ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
                 <PlayerInfo
                     color={opponentBoardOrientation}
-                    myTurn={!isMyTurn}
-                    timeRemaining={opponentTimeRemaining}
-                    timerStopping={opponentTimeStart === null}
+                    myTurn={!isMyTurn.value}
+                    timeRemaining={opponentRemainingTime.value}
+                    timerStopping={opponentTimeStart.value === null}
                     opponent
                 />
                 <Chessboard
-                    fen={fen}
+                    fen={fen.value}
                     boardOrientation={boardOrientation}
                     makeMove={makeMove}
                     gameIsEnded={gameIsEnded}
                 />
                 <PlayerInfo
                     color={boardOrientation}
-                    myTurn={isMyTurn}
-                    timeRemaining={myTimeRemaining}
-                    timerStopping={myTimeStart === null}
+                    myTurn={isMyTurn.value}
+                    timeRemaining={myRemainingTime.value}
+                    timerStopping={myTimeStart.value === null}
                     timerEndCallback={endTimeCallback}
                 />
             </Flex>
@@ -153,7 +134,7 @@ export const Game = () => {
             {/* Modal to show when game ends */}
             <Modal
                 title="La partita è terminata"
-                open={gameEnded}
+                open={gameEnded.value}
                 centered
                 footer={[
                     <Button key="newGame" onClick={() => setUpNewGame()}>
