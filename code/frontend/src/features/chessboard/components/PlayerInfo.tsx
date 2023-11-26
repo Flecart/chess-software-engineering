@@ -20,28 +20,31 @@ export const PlayerInfo = ({ color, myTurn, opponent, time }: Props) => {
     return (
         <Flex
             align="center"
+            justify="space-between"
             gap="small"
-            style={{ flexDirection: opponent ? 'row-reverse' : 'row', opacity: myTurn ? '1' : '.3' }}
+            style={{
+                flexDirection: opponent ? 'row-reverse' : 'row',
+                opacity: myTurn ? '1' : '.3',
+            }}
         >
-            <Avatar shape="square" icon={<UserOutlined />} />
-            <p>{color === 'black' ? 'Nero' : 'Bianco'}</p>
-            {/* space filler */}
-            <div style={{ width: '100%' }}></div>
-            <div
+            <Flex align="center" gap="small">
+                <Avatar shape="square" icon={<UserOutlined />} size={'large'} />
+                <span style={{ fontSize: '1.5rem' }}>{color === 'black' ? 'Nero' : 'Bianco'}</span>
+            </Flex>
+            <Flex
+                gap="small"
                 style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: '2em',
+                    border: '1px solid',
+                    borderRadius: '3px',
+                    padding: '.4rem',
                     fontWeight: 'bold',
-                    color: '#333',
-                    background: '#f5f5f5',
-                    minWidth: '300px',
+                    background: '#f1f1f1',
+                    fontSize: '1.5rem',
                 }}
             >
-                <ClockCircleOutlined /> {displayTimer(days, hours, minutes, seconds)}
-            </div>
-            {/* <div style={{ border: '1px solid', borderRadius: '3px', padding: '3px' }}>Timer</div> */}
+                <ClockCircleOutlined />
+                <span>{displayTimer(days, hours, minutes, seconds)}</span>
+            </Flex>
         </Flex>
     );
 };
