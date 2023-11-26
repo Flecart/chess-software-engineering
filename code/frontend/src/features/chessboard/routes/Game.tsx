@@ -34,33 +34,39 @@ export const Game = () => {
             const message = JSON.parse(event.data) as wsMessage;
             if (isMyTurn.value) {
                 if (message && 'move_made' in message && message.move_made !== null) {
-                    fen.value = message.view;
                     isMyTurn.value = false;
                 }
             } else if (message && !('waiting' in message)) {
-                fen.value = message.view;
                 isMyTurn.value = true;
             }
 
-            if (message !== null && 'ended' in message) {
-                console.log('timerozzo');
-                // calcolo il nuovo timestamp di scadenza facendo time_start + time_left
-                // se time start è null allora uso il timestamp attuale
-                if (boardOrientation === message.turn) {
-                    const myNewTimestamp = createExpireTime(
-                        message.time_start_white,
-                        message.time_left_white ?? '0:0:0',
-                    );
-                    myTimer.restart(myNewTimestamp);
-                    opponentTimer.pause();
-                } else {
-                    const opponentNewTimestamp = createExpireTime(
-                        message.time_start_black,
-                        message.time_left_black ?? '0:0:0',
-                    );
-                    console.log('opponent new timestamp', opponentNewTimestamp.getSeconds());
-                    opponentTimer.restart(opponentNewTimestamp);
+            if (message && 'view' in message) fen.value = message.view;
+
+            if (message && 'ended' in message) {
+                /*
+                    Se i timer start sono entrambi null, allora è la prima mossa della partita
+                    e devo inizializzare i timer con il time left
+
+                    Se uno dei due è null, allora devo metterlo in pausa senza variare il tempo
+                    mentre quello non null deve essere aggiornato e fatto partire
+                */
+
+                if (message.time_start_white === null && message.time_start_black === null) {
+                    const myNewTimestamp = createExpireTime(null, message.time_left_white ?? '0:0:0');
+                    myTimer.restart(myNewTimestamp, false);
+
+                    const opponentNewTimestamp = createExpireTime(null, message.time_left_black ?? '0:0:0');
+                    opponentTimer.restart(opponentNewTimestamp, false);
+                } else if (message.time_start_white === null) {
+                    myTimer.restart(createExpireTime(null, message.time_left_white ?? '0:0:0'));
                     myTimer.pause();
+                    opponentTimer.restart(
+                        createExpireTime(message.time_start_black, message.time_left_black ?? '0:0:0'),
+                    );
+                } else if (message.time_start_black === null) {
+                    opponentTimer.restart(createExpireTime(null, message.time_left_black ?? '0:0:0'));
+                    opponentTimer.pause();
+                    myTimer.restart(createExpireTime(message.time_start_white, message.time_left_white ?? '0:0:0'));
                 }
 
                 if (message.ended) {
@@ -77,7 +83,6 @@ export const Game = () => {
     }, [boardOrientation]);
 
     const endTimeCallback = () => {
-        console.log('enttime callback');
         // Deve essere fatta una richiesta per triggerare l'endgame
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
     };
