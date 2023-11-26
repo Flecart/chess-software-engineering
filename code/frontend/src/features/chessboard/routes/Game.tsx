@@ -8,9 +8,10 @@ import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
-import { myRemainingTime, myTimeStart, opponentRemainingTime, opponentTimeStart } from '../hooks/timer';
 import type { wsMessage } from '../types';
-import { parseTimeDelta } from '../utils/time';
+
+import { useTimer, type TimerSettings } from 'react-timer-hook';
+import { createExpireTime } from '../utils/time';
 
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
@@ -42,26 +43,29 @@ export const Game = () => {
             }
 
             if (message !== null && 'ended' in message) {
-                let myTimeRemaining = '';
-                let opponentTimeRemaining = '';
-                let myStartTime: string | null = null;
-                let opponentStartTime: string | null = null;
-                if (boardOrientation === 'white') {
-                    myTimeRemaining = message.time_left_white as string;
-                    opponentTimeRemaining = message.time_left_black as string;
-                    myStartTime = message.time_start_white;
-                    opponentStartTime = message.time_start_black;
+                console.log('timerozzo');
+                // calcolo il nuovo timestamp di scadenza facendo time_start + time_left
+                // se time start è null allora uso il timestamp attuale
+                if (boardOrientation === message.turn) {
+                    const myNewTimestamp = createExpireTime(
+                        message.time_start_white,
+                        message.time_left_white ?? '0:0:0',
+                    );
+                    myTimer.restart(myNewTimestamp);
+                    opponentTimer.pause();
                 } else {
-                    myTimeRemaining = message.time_left_black as string;
-                    opponentTimeRemaining = message.time_left_white as string;
-                    myStartTime = message.time_start_black;
-                    opponentStartTime = message.time_start_white;
+                    const opponentNewTimestamp = createExpireTime(
+                        message.time_start_black,
+                        message.time_left_black ?? '0:0:0',
+                    );
+                    console.log('opponent new timestamp', opponentNewTimestamp.getSeconds());
+                    opponentTimer.restart(opponentNewTimestamp);
+                    myTimer.pause();
                 }
-                myRemainingTime.value = parseTimeDelta(myTimeRemaining);
-                opponentRemainingTime.value = parseTimeDelta(opponentTimeRemaining);
-                myTimeStart.value = myStartTime;
-                opponentTimeStart.value = opponentStartTime;
-                if (message.ended) gameEnded.value = true;
+
+                if (message.ended) {
+                    gameEnded.value = true;
+                }
             }
         },
     });
@@ -70,10 +74,6 @@ export const Game = () => {
         isMyTurn.value = boardOrientation === 'white';
         gameEnded.value = false;
         fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
-        myRemainingTime.value = 0;
-        opponentRemainingTime.value = 0;
-        myTimeStart.value = null;
-        opponentTimeStart.value = null;
     }, [boardOrientation]);
 
     const endTimeCallback = () => {
@@ -81,6 +81,12 @@ export const Game = () => {
         // Deve essere fatta una richiesta per triggerare l'endgame
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
     };
+
+    // SET THE TIMER TO 0 SECONDS, check if right
+    // could get the value from user input in pregame
+    const timerSettings: TimerSettings = { expiryTimestamp: new Date(), autoStart: false, onExpire: endTimeCallback };
+    const myTimer = useTimer(timerSettings);
+    const opponentTimer = useTimer(timerSettings);
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
@@ -115,8 +121,12 @@ export const Game = () => {
                 <PlayerInfo
                     color={opponentBoardOrientation}
                     myTurn={!isMyTurn.value}
-                    timeRemaining={opponentRemainingTime.value}
-                    timerStopping={opponentTimeStart.value === null}
+                    time={{
+                        seconds: opponentTimer.seconds,
+                        minutes: opponentTimer.minutes,
+                        hours: opponentTimer.hours,
+                        days: opponentTimer.days,
+                    }}
                     opponent
                 />
                 <Chessboard
@@ -128,9 +138,12 @@ export const Game = () => {
                 <PlayerInfo
                     color={boardOrientation}
                     myTurn={isMyTurn.value}
-                    timeRemaining={myRemainingTime.value}
-                    timerStopping={myTimeStart.value === null}
-                    timerEndCallback={endTimeCallback}
+                    time={{
+                        seconds: myTimer.seconds,
+                        minutes: myTimer.minutes,
+                        hours: myTimer.hours,
+                        days: myTimer.days,
+                    }}
                 />
             </Flex>
 
