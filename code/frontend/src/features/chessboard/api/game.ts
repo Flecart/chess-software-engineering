@@ -36,6 +36,6 @@ export async function joinGame(
     });
 }
 
-export function getWsUrl(gameId: string, token: jwt_token): string {
-    return `${wsUrl}/api/v1/game/${parseCode(gameId)}/${token}/ws`;
+export function getWsUrl(gameId: string): string {
+    return `${wsUrl}/api/v1/game/${parseCode(gameId)}/ws`;
 }

@@ -25,7 +25,10 @@ export const Game = () => {
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
     const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
-    const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token), {
+    const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId), {
+        queryParams: {
+            token,
+        },
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
             if (isMyTurn.value) {
