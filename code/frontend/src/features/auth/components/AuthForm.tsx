@@ -1,5 +1,5 @@
 import { Button, Form, Input } from 'antd';
-import type { Signal } from '@preact/signals';
+import type { Signal } from '@preact/signals-react';
 import type { AuthPayload } from '../types';
 
 type Props = {
