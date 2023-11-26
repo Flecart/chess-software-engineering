@@ -1,17 +1,16 @@
-import { Layout as LibLayout, Menu, Flex, type MenuProps, Button } from 'antd';
-import { Link, Outlet } from '@tanstack/react-router';
+import { useAuth } from '@/features/auth';
+import { useTokenContext } from '@/lib/tokenContext';
 import {
+    EditOutlined,
+    FormOutlined,
     PlayCircleOutlined,
     RobotOutlined,
     TrophyOutlined,
-    FormOutlined,
-    EditOutlined,
     UserOutlined,
 } from '@ant-design/icons';
+import { Link, Outlet } from '@tanstack/react-router';
+import { Button, Flex, Layout as LibLayout, Menu, type MenuProps } from 'antd';
 import ChessLogo from '/colored_knight.svg';
-import { useTokenContext } from '@/lib/tokenContext';
-import { useMemo } from 'react';
-import { jwtDecode } from 'jwt-decode';
 
 const { Sider, Content } = LibLayout;
 type MenuItem = Required<MenuProps>['items'][number];
@@ -55,52 +54,17 @@ const menuItemsNotLogged: MenuProps['items'] = [
     getItem(<Link to="/login">Login</Link>, 'login', <EditOutlined />),
 ];
 
+const menuItemsLogged: MenuProps['items'] = [getItem(<Link to="/profile/">Profilo</Link>, 'profile', <UserOutlined />)];
+
 export const Layout = () => {
-    const { token, setToken } = useTokenContext();
-
-    const username = useMemo<string>(() => {
-        const defValue = 'magnus';
-        if (!token) return defValue;
-        const decodedToken = jwtDecode(token);
-        if ('sub' in decodedToken && (decodedToken.sub as string).startsWith('guest')) {
-            return defValue;
-        }
-        return decodedToken.sub as string;
-    }, [token]);
-
-    const menuItemsLogged: MenuProps['items'] = [
-        getItem(
-            <Link to="/profile/$username" params={{ username }}>
-                Profilo
-            </Link>,
-            'profile',
-            <UserOutlined />,
-        ),
-    ];
-    const isBot = useMemo(() => {
-        if (!token) return false;
-        const decodedToken = jwtDecode(token);
-        console.log(decodedToken);
-        // check if the decoded token has the username starting with guest
-        if ('sub' in decodedToken && (decodedToken.sub as string).startsWith('guest')) {
-            return true;
-        }
-        return false;
-    }, [token]);
-
-    const showLoggedInfo = useMemo(() => {
-        return token !== null && !isBot;
-    }, [token, isBot]);
+    const { unsetToken } = useTokenContext();
+    const { isAuth: showLoggedInfo } = useAuth();
 
     const menuItems: MenuProps['items'] = [
         ...menuItemsClassic,
         { type: 'divider' },
         ...(showLoggedInfo ? menuItemsLogged : menuItemsNotLogged),
     ];
-
-    const unsetToken = () => {
-        setToken(null);
-    };
 
     return (
         <LibLayout style={{ height: '100vh', display: 'flex', gap: '1rem' }}>
@@ -115,7 +79,7 @@ export const Layout = () => {
                 </Flex>
 
                 {showLoggedInfo && (
-                    <Button onClick={unsetToken} ghost style={{ float: 'right', marginRight: '1rem' }}>
+                    <Button onClick={unsetToken} ghost style={{ display: 'block', margin: '0 auto' }}>
                         Logout
                     </Button>
                 )}
