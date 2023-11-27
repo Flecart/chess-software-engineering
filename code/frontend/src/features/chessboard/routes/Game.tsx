@@ -20,7 +20,6 @@ export const Game = () => {
 
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
-    const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
     const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId), {
         queryParams: {
             token,
@@ -114,7 +113,6 @@ export const Game = () => {
                     {isMyTurn.value ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
                 <PlayerInfo
-                    color={opponentBoardOrientation}
                     myTurn={!isMyTurn.value}
                     time={{
                         seconds: opponentTimer.seconds,
@@ -126,7 +124,6 @@ export const Game = () => {
                 />
                 <Chessboard fen={fen.value} boardOrientation={boardOrientation} makeMove={makeMove} />
                 <PlayerInfo
-                    color={boardOrientation}
                     myTurn={isMyTurn.value}
                     time={{
                         seconds: myTimer.seconds,

@@ -1,10 +1,10 @@
+import { useAuth } from '@/features/auth';
+import { useUserQuery } from '@/features/user';
 import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Flex } from 'antd';
-import type { color } from '../types';
 import { displayTimer } from '../utils/time';
 
 type Props = Readonly<{
-    color: color;
     myTurn: boolean;
     opponent?: boolean;
     time: {
@@ -15,8 +15,12 @@ type Props = Readonly<{
     };
 }>;
 
-export const PlayerInfo = ({ color, myTurn, opponent, time }: Props) => {
+export const PlayerInfo = ({ myTurn, opponent, time }: Props) => {
+    const { isGuest, username: myUsername } = useAuth();
+    const username = opponent ? 'Avversario' : myUsername;
     const { seconds, minutes, hours, days } = time;
+
+    const { data: user } = useUserQuery(username, !isGuest && !opponent);
     return (
         <Flex
             align="center"
@@ -28,8 +32,8 @@ export const PlayerInfo = ({ color, myTurn, opponent, time }: Props) => {
             }}
         >
             <Flex align="center" gap="small">
-                <Avatar shape="square" icon={<UserOutlined />} size={'large'} />
-                <span style={{ fontSize: '1.5rem' }}>{color === 'black' ? 'Nero' : 'Bianco'}</span>
+                <Avatar shape="square" src={user?.avatar} icon={<UserOutlined />} size={'large'} />
+                <span style={{ fontSize: '1.5rem' }}>{username}</span>
             </Flex>
             <Flex
                 gap="small"
