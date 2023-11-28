@@ -9,6 +9,7 @@ from src.ballot_box_collection import BallotBoxCollection
 from game_loop import game_loop
 from config import API_TOKEN,DEBUG,TIME_TO_VOTE_IN_SECONDS
 from src.vote_mapper import VoteMapper
+from src.ballot_box_collection import BallotBoxCollection
 
 # logger = telebot.logger
 

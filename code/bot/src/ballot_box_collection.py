@@ -1,4 +1,5 @@
 from telebot import types
+<<<<<<< HEAD
 
 from utils import getUserAndChatFromMessage
 from .singleton import SingletonMeta
@@ -27,7 +28,6 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
 
     def add_vote(self, ballotbox : int, user : int, vote : str) -> None:
-
         """
         Add a vote to a move
         """
@@ -58,5 +58,3 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
         votes = self._getBallotBox(ballotbox)
         return max(votes, key=lambda k: len(votes[k]))
-        
-
