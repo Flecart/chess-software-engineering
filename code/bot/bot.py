@@ -7,7 +7,7 @@ import asyncio
 
 from game_loop import game_loop
 from config import API_TOKEN,DEBUG,TIME_TO_VOTE_IN_SECONDS
-from src.vote_mapper import VoteMapper
+from src.ballot_box_collection import BallotBoxCollection
 
 # logger = telebot.logger
 
@@ -47,14 +47,17 @@ async def surrender(message : types.Message):
 @bot.message_handler(commands=['vote'])
 async def vote(message : types.Message):
     args = ""
-    _, args = message.text.split(" ",1)
+    if message.text is not None:
+        _, args = message.text.split(" ",1)
+    else:
+        pass
 
     try: # demo
-        VoteMapper().add(message,vote=args)
+        BallotBoxCollection().add_vote(message,vote=args)
     except Exception as e:
         await bot.reply_to(message,str(e))
     else:
-        await bot.reply_to(message,f'non implemtato, ma per il momento la mossa più votata è {VoteMapper().mostVoted(message)}')
+        await bot.reply_to(message,f'non implemtato, ma per il momento la mossa più votata è {BallotBoxCollection().mostVoted(message)}')
 
 
 

@@ -6,11 +6,11 @@ class DoubleVoteError(Exception):
         self.message = message
         super().__init__(message)
 
-class VoteMapper(metaclass=SingletonMeta):
+class BallotBoxCollection(metaclass=SingletonMeta): 
 
     _vote: dict[int,tuple[list[int],dict[str,int]]] = {}
     '''
-    _vote :: { (game_id) -> ([username],votes) }
+    _vote :: { (chat_id) -> ([username],votes) }
     votes :: { (move) -> votes_given }
 
     _vote has as 
@@ -38,26 +38,28 @@ class VoteMapper(metaclass=SingletonMeta):
         return self._vote[chat]
 
 
-    def add(self, message : types.Message, vote : str) -> None:
+    def add_vote(self, message : types.Message, vote : str) -> None: # TODO valuare utlità di `vote` , posso ottenerlo da message
 
         """
         Add a vote to a move
         """
+        # TODO aggiungere controllo sulla validità di `vote`
+
         (_,user) = self._getChatAndUser(message)
         (voters,votes) = self._getChatVotes(message)
 
         if user in voters:
             raise DoubleVoteError()
 
-        
         voters.append(user)
+
         if vote not in votes.keys():
             votes[vote] = 0
 
         votes[vote] += 1
 
 
-    def reset(self, message : types.Message):
+    def reset_box(self, message : types.Message):
         """
         Reset votes 
         """
