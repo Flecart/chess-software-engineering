@@ -8,8 +8,8 @@ type GameState = {
     turn: color;
 
     // TODO: refactor next sprint
-    time_left_white: string | null;
-    time_left_black: string | null;
+    time_left_white: string;
+    time_left_black: string;
     time_start_white: string | null;
     time_start_black: string | null;
 };

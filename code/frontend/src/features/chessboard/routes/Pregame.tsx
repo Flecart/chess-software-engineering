@@ -45,7 +45,7 @@ export const Pregame = () => {
                     layout="inline"
                     name="start-game"
                     initialValues={{
-                        time: timeOptions[0]?.value,
+                        time: 3,
                         color: colorOptions[0]?.value,
                         variant: gameVariantOptions[0]?.value,
                     }}
@@ -97,6 +97,8 @@ const gameVariantOptions: DefaultOptionType[] = [
 
 const timeOptions: DefaultOptionType[] = [
     { label: 'Nessun tempo', value: 0 },
+    { label: '3 minuti', value: 3 },
+    { label: '5 minuti', value: 5 },
     { label: '10 minuti', value: 10 },
     { label: '30 minuti', value: 30 },
 ];

@@ -91,7 +91,10 @@ export const Game = () => {
     const opponentTimeOverString = opponentTimer.totalSeconds <= 0 ? "L'avversario ha finito il tempo!" : '';
 
     const makeMove = (from: string, to: string) => {
-        if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
+        if (isMyTurn.value) {
+            sendJsonMessage({ kind: 'list_move', data: '' });
+            sendJsonMessage({ kind: 'move', data: `${from}${to}` });
+        }
         // l'aggiornamento del turno è fatto dall'effect
     };
 
