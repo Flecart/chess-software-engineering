@@ -31,9 +31,7 @@ export const Game = () => {
                 // è un messaggio di tipo gamestate
 
                 // turn handling
-                if (isMyTurn.value && message.move_made !== null) isMyTurn.value = false;
-                else if (!isMyTurn.value) isMyTurn.value = true;
-
+                isMyTurn.value = message.turn === boardOrientation;
                 // updating fen
                 fen.value = message.view;
                 // updating gameEnded, when it's over never change it

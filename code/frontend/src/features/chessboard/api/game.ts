@@ -25,12 +25,13 @@ export async function createGame(
     return createCode(response.data);
 }
 
-export async function joinGame(token: jwt_token, gameId: string, color: null | color = null): Promise<void> {
+export async function joinGame(token: jwt_token, gameId: string, color: null | color = null): Promise<color> {
     const colorParam = color ?? '';
 
-    await axios.put(`${apiBaseUrl}/game/${parseCode(gameId)}/join/${colorParam}`, undefined, {
+    const response = await axios.put(`${apiBaseUrl}/game/${parseCode(gameId)}/join/${colorParam}`, undefined, {
         headers: { Authorization: token },
     });
+    return response.data.color;
 }
 
 export function getWsUrl(gameId: string): string {

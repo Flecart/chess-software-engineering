@@ -29,11 +29,11 @@ export const Pregame = () => {
         const sureToken = await checkAndSetToken();
 
         const realGameId = await gameApi.createGame(sureToken, bot, values.variant, values.time);
-        await gameApi.joinGame(sureToken, realGameId, values.color);
+        const color = await gameApi.joinGame(sureToken, realGameId, values.color);
         navigate({
             to: '/game/$gameId',
             params: { gameId: realGameId },
-            search: { boardOrientation: values.color },
+            search: { boardOrientation: color },
         });
     };
 
@@ -76,14 +76,12 @@ export const Pregame = () => {
                         enterButton="Unisciti"
                         onSearch={async (gameId) => {
                             const sureToken = await checkAndSetToken();
-                            await gameApi.joinGame(sureToken, gameId);
+                            const color = await gameApi.joinGame(sureToken, gameId);
 
                             navigate({
                                 to: '/game/$gameId',
                                 params: { gameId: gameId },
-                                search: {
-                                    boardOrientation: 'black', //TODO: how do I know the color? Maybe joinGame should return it
-                                },
+                                search: { boardOrientation: color },
                             });
                         }}
                     />

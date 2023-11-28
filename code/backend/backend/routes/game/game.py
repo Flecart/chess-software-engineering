@@ -134,7 +134,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         except ValueError as e:
             raise JSONException(error={'error': str(e)}, status_code=400)
         
-        return {"data": f"user has correctly joined game {game_id} as {color}"}
+        return {"data": f"user has correctly joined game {game_id} as {color}", "color": color}
      
     
     @app.get(prefix + "/{game_id}")
