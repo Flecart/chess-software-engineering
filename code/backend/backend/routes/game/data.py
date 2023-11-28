@@ -5,6 +5,7 @@ from typing import Literal
 class CreateGameRequest(BaseModel):
     against_bot: bool = True
     type: str = 'dark_chess' # default value
+    time: int = 0
     # Other fields that might be useful next
     # color: str = 'white'
     #time: (int,int) = (3,3) 
