@@ -16,7 +16,7 @@ export const useAuth = () => {
             !('sub' in decodedToken) ||
             !decodedToken.sub
         ) {
-            return { isAuth: false, isGuest: true, username: defName };
+            return { isAuth: false, isGuest: true, username: decodedToken.sub ?? defName };
         }
 
         return { isAuth: true, isGuest: false, username: decodedToken.sub };

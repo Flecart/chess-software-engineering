@@ -1,10 +1,10 @@
 import { Chessboard as ReactChessboard } from 'react-chessboard';
 import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
-type Props = {
+type Props = Readonly<{
     customFEN: string;
     style?: React.CSSProperties;
-};
+}>;
 
 export const StaticChessboard = (props: Props) => {
     return (

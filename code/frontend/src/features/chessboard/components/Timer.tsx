@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ClockCircleOutlined } from '@ant-design/icons';
 
-interface TimerProps {
+type TimerProps = {
     start?: number;
     stop?: boolean;
     onZero?: () => void;
-}
+};
 
-const Timer: React.FC<TimerProps> = ({ start = 0, stop = false, onZero }) => {
+const Timer = ({ start = 0, stop = false, onZero }: TimerProps) => {
     /*la prima mossa lo vedi perchè start non è settato semplicemente quindi ti dovrebbe arrivare un valore nullo*/
     // c'è i parametri che ti arrivano
     // sono entrambi a None

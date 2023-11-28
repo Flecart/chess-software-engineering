@@ -3,18 +3,14 @@ import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
 import { useEffect } from 'react';
+import { useTimer, type TimerSettings } from 'react-timer-hook';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
-import { myRemainingTime, myTimeStart, opponentRemainingTime, opponentTimeStart } from '../hooks/timer';
 import type { wsMessage } from '../types';
-import { parseTimeDelta } from '../utils/time';
-
-const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
-const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
-// ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
+import { createExpireTime } from '../utils/time';
 
 export const Game = () => {
     const { gameId } = useParams({ from: specificGameRouteId });
@@ -24,41 +20,52 @@ export const Game = () => {
 
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
-    const opponentBoardOrientation = boardOrientation === 'white' ? 'black' : 'white';
-    const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId, token), {
+    const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId), {
+        queryParams: {
+            token,
+        },
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
-            if (isMyTurn.value) {
-                if (message && 'move_made' in message && message.move_made !== null) {
-                    fen.value = message.view;
-                    isMyTurn.value = false;
-                }
-            } else if (message && !('waiting' in message)) {
-                fen.value = message.view;
-                isMyTurn.value = true;
-            }
 
-            if (message !== null && 'ended' in message) {
-                let myTimeRemaining = '';
-                let opponentTimeRemaining = '';
-                let myStartTime: string | null = null;
-                let opponentStartTime: string | null = null;
-                if (boardOrientation === 'white') {
-                    myTimeRemaining = message.time_left_white as string;
-                    opponentTimeRemaining = message.time_left_black as string;
-                    myStartTime = message.time_start_white;
-                    opponentStartTime = message.time_start_black;
-                } else {
-                    myTimeRemaining = message.time_left_black as string;
-                    opponentTimeRemaining = message.time_left_white as string;
-                    myStartTime = message.time_start_black;
-                    opponentStartTime = message.time_start_white;
+            if (message && 'ended' in message) {
+                // è un messaggio di tipo gamestate
+
+                // turn handling
+                if (isMyTurn.value && message.move_made !== null) isMyTurn.value = false;
+                else if (!isMyTurn.value) isMyTurn.value = true;
+
+                // updating fen
+                fen.value = message.view;
+                // updating gameEnded
+                gameEnded.value = message.ended;
+
+                /*
+                    timer handling
+
+                    Se i timer start sono entrambi null, allora è la prima mossa della partita
+                    e devo inizializzare i timer con il time left
+
+                    Se uno dei due è null, allora devo metterlo in pausa senza variare il tempo
+                    mentre quello non null deve essere aggiornato e fatto partire
+                */
+                const timeLeftWhite = message.time_left_white ?? '0:0:0';
+                const timeLeftBlack = message.time_left_black ?? '0:0:0';
+
+                if (message.time_start_white === null && message.time_start_black === null) {
+                    const myNewTimestamp = createExpireTime(null, timeLeftWhite);
+                    myTimer.restart(myNewTimestamp, false);
+
+                    const opponentNewTimestamp = createExpireTime(null, timeLeftBlack);
+                    opponentTimer.restart(opponentNewTimestamp, false);
+                } else if (message.time_start_white === null) {
+                    myTimer.restart(createExpireTime(null, timeLeftWhite));
+                    myTimer.pause();
+                    opponentTimer.restart(createExpireTime(message.time_start_black, timeLeftBlack));
+                } else if (message.time_start_black === null) {
+                    opponentTimer.restart(createExpireTime(null, timeLeftBlack));
+                    opponentTimer.pause();
+                    myTimer.restart(createExpireTime(message.time_start_white, timeLeftWhite));
                 }
-                myRemainingTime.value = parseTimeDelta(myTimeRemaining);
-                opponentRemainingTime.value = parseTimeDelta(opponentTimeRemaining);
-                myTimeStart.value = myStartTime;
-                opponentTimeStart.value = opponentStartTime;
-                if (message.ended) gameEnded.value = true;
             }
         },
     });
@@ -67,29 +74,25 @@ export const Game = () => {
         isMyTurn.value = boardOrientation === 'white';
         gameEnded.value = false;
         fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
-        myRemainingTime.value = 0;
-        opponentRemainingTime.value = 0;
-        myTimeStart.value = null;
-        opponentTimeStart.value = null;
     }, [boardOrientation]);
 
     const endTimeCallback = () => {
-        console.log('enttime callback');
         // Deve essere fatta una richiesta per triggerare l'endgame
         makeMove('a1', 'a1'); // mossa arbitraria a caso, utilizzata per ricevere la risposta e finire il gioco
     };
+
+    // set the timer to 0 seconds, will be updated by the first message
+    const timerSettings: TimerSettings = { expiryTimestamp: new Date(), autoStart: false, onExpire: endTimeCallback };
+    const myTimer = useTimer(timerSettings);
+    const opponentTimer = useTimer(timerSettings);
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
         // l'aggiornamento del turno è fatto dall'effect
     };
 
-    const gameIsEnded = () => (gameEnded.value = true);
-
-    const resetGame = () => (gameEnded.value = false);
-
     const setUpNewGame = () => {
-        resetGame();
+        gameEnded.value = false;
         navigate({ to: '/game', search: { bot: true } });
     };
 
@@ -110,24 +113,24 @@ export const Game = () => {
                     {isMyTurn.value ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
                 <PlayerInfo
-                    color={opponentBoardOrientation}
                     myTurn={!isMyTurn.value}
-                    timeRemaining={opponentRemainingTime.value}
-                    timerStopping={opponentTimeStart.value === null}
+                    time={{
+                        seconds: opponentTimer.seconds,
+                        minutes: opponentTimer.minutes,
+                        hours: opponentTimer.hours,
+                        days: opponentTimer.days,
+                    }}
                     opponent
                 />
-                <Chessboard
-                    fen={fen.value}
-                    boardOrientation={boardOrientation}
-                    makeMove={makeMove}
-                    gameIsEnded={gameIsEnded}
-                />
+                <Chessboard fen={fen.value} boardOrientation={boardOrientation} makeMove={makeMove} />
                 <PlayerInfo
-                    color={boardOrientation}
                     myTurn={isMyTurn.value}
-                    timeRemaining={myRemainingTime.value}
-                    timerStopping={myTimeStart.value === null}
-                    timerEndCallback={endTimeCallback}
+                    time={{
+                        seconds: myTimer.seconds,
+                        minutes: myTimer.minutes,
+                        hours: myTimer.hours,
+                        days: myTimer.days,
+                    }}
                 />
             </Flex>
 
@@ -151,3 +154,7 @@ export const Game = () => {
         </Flex>
     );
 };
+
+const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
+const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
+// ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';

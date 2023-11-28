@@ -1,9 +1,11 @@
+export type color = 'white' | 'black';
+
 type GameState = {
     ended: boolean;
     possible_moves: null | string[];
     view: string;
     move_made: null | string;
-    turn: 'white' | 'black';
+    turn: color;
 
     // TODO: refactor next sprint
     time_left_white: string | null;
@@ -21,5 +23,5 @@ export type wsMessage = GameState | WaitingState | null;
 export type GameOptions = {
     variant: 'dark_chess' | 'kriegspiel';
     time: number;
-    color: 'white' | 'black';
+    color: color;
 };

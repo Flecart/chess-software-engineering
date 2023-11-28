@@ -1,4 +1,3 @@
-import { specificProfileRouteId } from '@/routes/profile';
 import { useParams } from '@tanstack/react-router';
 import { Avatar, Flex, Typography } from 'antd';
 import { GameCard } from '../components/GameCard';
@@ -9,7 +8,7 @@ const bigText: React.CSSProperties = {
 };
 
 export const Profile = () => {
-    const params = useParams({ from: specificProfileRouteId });
+    const params = useParams({ from: '/profile/$username' });
     const { data: user, error: userError } = useUserQuery(params.username);
     const { data: games, error: gamesError } = useUserGamesQuery(params.username);
 
