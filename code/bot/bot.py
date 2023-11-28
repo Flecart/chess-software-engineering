@@ -7,6 +7,7 @@ import asyncio
 
 from game_loop import game_loop
 from config import API_TOKEN,DEBUG,TIME_TO_VOTE_IN_SECONDS
+from src.vote_mapper import VoteMapper
 
 # logger = telebot.logger
 
@@ -48,10 +49,18 @@ async def vote(message : types.Message):
     args = ""
     _, args = message.text.split(" ",1)
 
-    await bot.reply_to(message, f'not implemented, but you voted {args}')
+    try: # demo
+        VoteMapper().add(message,vote=args)
+    except Exception as e:
+        await bot.reply_to(message,str(e))
+    else:
+        await bot.reply_to(message,f'non implemtato, ma per il momento la mossa più votata è {VoteMapper().mostVoted(message)}')
+
+
 
 def start():
     asyncio.run(bot.polling())
+    print('Ready')
 
 if __name__ == "__main__":
     start()
