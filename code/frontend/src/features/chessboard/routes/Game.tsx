@@ -89,6 +89,9 @@ export const Game = () => {
     const myTimer = useTimer(timerSettings);
     const opponentTimer = useTimer(timerSettings);
 
+    const myTimeOverString = myTimer.totalSeconds <= 0 ? 'Hai finito il tempo!' : '';
+    const opponentTimeOverString = opponentTimer.totalSeconds <= 0 ? "L'avversario ha finito il tempo!" : '';
+
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
         // l'aggiornamento del turno è fatto dall'effect
@@ -139,7 +142,7 @@ export const Game = () => {
 
             {/* Modal to show when game ends */}
             <Modal
-                title={winner.value ? 'Hai vinto! 🙂' : 'Hai perso! ☹️'}
+                title={winner.value ? `Hai vinto! ${opponentTimeOverString} 🙂` : `Hai perso! ${myTimeOverString} ☹️`}
                 open={gameEnded.value}
                 centered
                 footer={[
