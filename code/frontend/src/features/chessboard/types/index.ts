@@ -25,3 +25,9 @@ export type GameOptions = {
     time: number;
     color: color;
 };
+
+export type CreateGameParams = {
+    against_bot: boolean;
+    type: 'dark_chess' | 'kriegspiel';
+    time: number;
+};

@@ -27,12 +27,13 @@ export const Pregame = () => {
     const startGame = async (values: GameOptions) => {
         console.log(values);
         const sureToken = await checkAndSetToken();
-        const realGameId = await gameApi.createGame(sureToken, bot);
-        await gameApi.joinGame(sureToken, realGameId);
+
+        const realGameId = await gameApi.createGame(sureToken, bot, values.variant, values.time);
+        await gameApi.joinGame(sureToken, realGameId, values.color);
         navigate({
             to: '/game/$gameId',
             params: { gameId: realGameId },
-            search: { boardOrientation: 'white' },
+            search: { boardOrientation: values.color },
         });
     };
 
@@ -80,7 +81,9 @@ export const Pregame = () => {
                             navigate({
                                 to: '/game/$gameId',
                                 params: { gameId: gameId },
-                                search: { boardOrientation: 'black' },
+                                search: {
+                                    boardOrientation: 'black', //TODO: how do I know the color? Maybe joinGame should return it
+                                },
                             });
                         }}
                     />
