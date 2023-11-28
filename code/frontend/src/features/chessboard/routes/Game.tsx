@@ -8,7 +8,7 @@ import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
+import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime } from '../utils/time';
 
@@ -36,8 +36,11 @@ export const Game = () => {
 
                 // updating fen
                 fen.value = message.view;
-                // updating gameEnded
-                gameEnded.value = message.ended;
+                // updating gameEnded, when it's over never change it
+                if (!gameEnded.value) gameEnded.value = message.ended;
+
+                // updating winner
+                if (gameEnded.value) winner.value = message.turn !== boardOrientation;
 
                 /*
                     timer handling
@@ -136,7 +139,7 @@ export const Game = () => {
 
             {/* Modal to show when game ends */}
             <Modal
-                title="La partita è terminata"
+                title={winner.value ? 'Hai vinto! 🙂' : 'Hai perso! ☹️'}
                 open={gameEnded.value}
                 centered
                 footer={[
