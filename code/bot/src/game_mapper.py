@@ -1,6 +1,6 @@
 from .singleton import SingletonMeta
 
-class GameMapper(metaclass=SingletonMeta): # Example of singleton, problablty will be removed
+class GameMapper(metaclass=SingletonMeta):
     """
     Maps the userId to the game
     """
