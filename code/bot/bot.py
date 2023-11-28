@@ -8,6 +8,7 @@ import asyncio
 from src.ballot_box_collection import BallotBoxCollection
 from game_loop import game_loop
 from config import API_TOKEN,DEBUG,TIME_TO_VOTE_IN_SECONDS
+from src.vote_mapper import VoteMapper
 
 # logger = telebot.logger
 
@@ -58,8 +59,6 @@ async def vote(message : types.Message):
         await bot.reply_to(message,str(e))
     else:
         await bot.reply_to(message,f'non implemtato, ma per il momento la mossa più votata è {BallotBoxCollection().mostVoted(message)}')
-
-
 
 def start():
     asyncio.run(bot.polling())
