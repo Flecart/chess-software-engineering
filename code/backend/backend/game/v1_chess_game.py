@@ -250,7 +250,7 @@ class ChessGame():
         game.fen = self.__fen
         game.moves = ','.join(self.__moves)
         game.is_finish = self.__finished
-        game.winner =  Color.WHITE if Color.BLACK == self.current_player else Color.WHITE
+        game.winner =  Color.BLACK if Color.BLACK == self.current_player else Color.WHITE
          
         if self.__finished and game.black_player is not None and game.white_player is not None:
             black = session.query(User).filter(User.user == game.black_player).first()
