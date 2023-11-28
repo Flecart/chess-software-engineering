@@ -1,3 +1,5 @@
+import { color } from '../types';
+
 /**
  * Parses a time delta string and returns the total number of seconds.
  * @param timeDelta - The time delta string in the format "HH:MM:SS".
@@ -50,4 +52,30 @@ export function displayTimer(days: number, hours: number, minutes: number, secon
     const secondsStr = seconds.toString().padStart(2, '0');
 
     return `${daysStr}${hoursStr}${minutesStr}${secondsStr}s`;
+}
+
+/**
+ * Parses the timings object and returns the time information for the specified player.
+ * @param me - The color of the player ('white' or 'black').
+ * @param timings - The timings object containing the time information.
+ * @returns An object containing the start time and remaining time for the player and the opponent.
+ */
+export function parseTimings(
+    me: color,
+    timings: {
+        time_left_white: string | null;
+        time_left_black: string | null;
+        time_start_white: string | null;
+        time_start_black: string | null;
+    },
+) {
+    const timeLeftWhite = timings.time_left_white ?? '0:0:0';
+    const timeLeftBlack = timings.time_left_black ?? '0:0:0';
+
+    const myTimeLeft = me === 'white' ? timeLeftWhite : timeLeftBlack;
+    const opponentTimeLeft = me === 'black' ? timeLeftWhite : timeLeftBlack;
+
+    const myTimeStart = me === 'white' ? timings.time_start_white : timings.time_start_black;
+    const opponentTimeStart = me === 'black' ? timings.time_start_white : timings.time_start_black;
+    return { myTimeStart, opponentTimeStart, myTimeLeft, opponentTimeLeft };
 }

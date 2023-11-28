@@ -9,16 +9,15 @@ import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
-import { createExpireTime } from '../utils/time';
+import { createExpireTime, parseTimings } from '../utils/time';
 
 export const Game = () => {
     const { gameId } = useParams({ from: '/game/$gameId' as const });
     const { boardOrientation } = useSearch({ from: '/game/$gameId' as const });
     const navigate = useNavigate({ from: '/game/$gameId' as const });
     const { token } = useTokenContext();
-
-    // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)
     if (!token) throw new Error('Token not found');
+
     const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId), {
         queryParams: {
             token,
@@ -48,23 +47,25 @@ export const Game = () => {
                     Se uno dei due è null, allora devo metterlo in pausa senza variare il tempo
                     mentre quello non null deve essere aggiornato e fatto partire
                 */
-                const timeLeftWhite = message.time_left_white ?? '0:0:0';
-                const timeLeftBlack = message.time_left_black ?? '0:0:0';
+                const { myTimeStart, opponentTimeStart, myTimeLeft, opponentTimeLeft } = parseTimings(
+                    boardOrientation,
+                    message,
+                );
 
-                if (message.time_start_white === null && message.time_start_black === null) {
-                    const myNewTimestamp = createExpireTime(null, timeLeftWhite);
+                if (myTimeStart === null && opponentTimeStart === null) {
+                    const myNewTimestamp = createExpireTime(null, myTimeLeft);
                     myTimer.restart(myNewTimestamp, false);
 
-                    const opponentNewTimestamp = createExpireTime(null, timeLeftBlack);
+                    const opponentNewTimestamp = createExpireTime(null, opponentTimeLeft);
                     opponentTimer.restart(opponentNewTimestamp, false);
-                } else if (message.time_start_white === null) {
-                    myTimer.restart(createExpireTime(null, timeLeftWhite));
+                } else if (myTimeStart === null) {
+                    myTimer.restart(createExpireTime(null, myTimeLeft));
                     myTimer.pause();
-                    opponentTimer.restart(createExpireTime(message.time_start_black, timeLeftBlack));
-                } else if (message.time_start_black === null) {
-                    opponentTimer.restart(createExpireTime(null, timeLeftBlack));
+                    opponentTimer.restart(createExpireTime(opponentTimeStart, opponentTimeLeft));
+                } else if (opponentTimeStart === null) {
+                    opponentTimer.restart(createExpireTime(null, opponentTimeLeft));
                     opponentTimer.pause();
-                    myTimer.restart(createExpireTime(message.time_start_white, timeLeftWhite));
+                    myTimer.restart(createExpireTime(myTimeStart, myTimeLeft));
                 }
             }
         },
