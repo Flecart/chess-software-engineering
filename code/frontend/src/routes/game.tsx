@@ -26,7 +26,4 @@ const specificGameRoute = new Route({
     },
 });
 
-export const indexGameRouteId = indexGameRoute.id;
-export const specificGameRouteId = specificGameRoute.id;
-
 export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute]);

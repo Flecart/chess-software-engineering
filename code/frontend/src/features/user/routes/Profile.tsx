@@ -8,7 +8,7 @@ const bigText: React.CSSProperties = {
 };
 
 export const Profile = () => {
-    const params = useParams({ from: '/profile/$username' });
+    const params = useParams({ from: '/profile/$username' as const });
     const { data: user, error: userError } = useUserQuery(params.username);
     const { data: games, error: gamesError } = useUserGamesQuery(params.username);
 

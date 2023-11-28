@@ -1,5 +1,4 @@
 import { useTokenContext } from '@/lib/tokenContext';
-import { specificGameRouteId } from '@/routes/game';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
 import { useEffect } from 'react';
@@ -13,9 +12,9 @@ import type { wsMessage } from '../types';
 import { createExpireTime } from '../utils/time';
 
 export const Game = () => {
-    const { gameId } = useParams({ from: specificGameRouteId });
-    const { boardOrientation } = useSearch({ from: specificGameRouteId });
-    const navigate = useNavigate({ from: specificGameRouteId });
+    const { gameId } = useParams({ from: '/game/$gameId' as const });
+    const { boardOrientation } = useSearch({ from: '/game/$gameId' as const });
+    const navigate = useNavigate({ from: '/game/$gameId' as const });
     const { token } = useTokenContext();
 
     // TODO: gestire meglio questo, dovrà essere in useEffect, e l'errore mostrato (magari un redirecto?)

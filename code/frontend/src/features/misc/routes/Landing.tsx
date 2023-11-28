@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { Button, Flex, Typography } from 'antd';
 
 export const Landing = () => {
-    const navigate = useNavigate({ from: '/game' });
+    const navigate = useNavigate({ from: '/game' as const });
 
     return (
         <Flex align="center" justify="center" gap={'large'} wrap="wrap" style={{ marginTop: '50px' }}>

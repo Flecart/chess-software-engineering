@@ -1,5 +1,4 @@
 import { useTokenContext } from '@/lib/tokenContext';
-import { indexGameRouteId } from '@/routes/game';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
 import Search from 'antd/es/input/Search';
@@ -8,9 +7,9 @@ import * as gameApi from '../api/game';
 import type { GameOptions } from '../types';
 
 export const Pregame = () => {
-    const navigate = useNavigate({ from: indexGameRouteId });
+    const navigate = useNavigate({ from: '/game/' as const });
     const { token, setToken } = useTokenContext();
-    const { bot } = useSearch({ from: indexGameRouteId });
+    const { bot } = useSearch({ from: '/game/' as const });
 
     const checkAndSetToken = async (): Promise<string> => {
         if (!token) {

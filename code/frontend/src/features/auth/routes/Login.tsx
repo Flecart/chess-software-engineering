@@ -7,7 +7,7 @@ import { username, password } from '../hooks/auth';
 import { useTokenContext } from '@/lib/tokenContext';
 
 export const Login = () => {
-    const navigate = useNavigate({ from: '/login' });
+    const navigate = useNavigate({ from: '/login' as const });
     const { setToken } = useTokenContext();
 
     const action = async () => {
