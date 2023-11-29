@@ -8,3 +8,5 @@ export const gameEnded = signal<boolean>(false);
 
 // fen
 export const fen = signal<string>('');
+
+export const winner = signal<boolean>(false);

@@ -8,7 +8,7 @@ import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { fen, gameEnded, isMyTurn } from '../hooks/gamestate';
+import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime } from '../utils/time';
 
@@ -36,8 +36,11 @@ export const Game = () => {
 
                 // updating fen
                 fen.value = message.view;
-                // updating gameEnded
-                gameEnded.value = message.ended;
+                // updating gameEnded, when it's over never change it
+                if (!gameEnded.value) gameEnded.value = message.ended;
+
+                // updating winner
+                if (gameEnded.value) winner.value = message.turn !== boardOrientation;
 
                 /*
                     timer handling
@@ -85,6 +88,9 @@ export const Game = () => {
     const timerSettings: TimerSettings = { expiryTimestamp: new Date(), autoStart: false, onExpire: endTimeCallback };
     const myTimer = useTimer(timerSettings);
     const opponentTimer = useTimer(timerSettings);
+
+    const myTimeOverString = myTimer.totalSeconds <= 0 ? 'Hai finito il tempo!' : '';
+    const opponentTimeOverString = opponentTimer.totalSeconds <= 0 ? "L'avversario ha finito il tempo!" : '';
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) sendJsonMessage({ kind: 'move', data: `${from}${to}` });
@@ -136,7 +142,7 @@ export const Game = () => {
 
             {/* Modal to show when game ends */}
             <Modal
-                title="La partita è terminata"
+                title={winner.value ? `Hai vinto! ${opponentTimeOverString} 🙂` : `Hai perso! ${myTimeOverString} ☹️`}
                 open={gameEnded.value}
                 centered
                 footer={[
