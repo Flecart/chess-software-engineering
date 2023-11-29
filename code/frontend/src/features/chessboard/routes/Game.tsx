@@ -7,7 +7,7 @@ import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
+import { fen, gameEnded, isMyTurn, possibleMoves, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime, parseTimings } from '../utils/time';
 
@@ -37,6 +37,8 @@ export const Game = () => {
 
                 // updating winner
                 if (gameEnded.value) winner.value = message.turn !== boardOrientation;
+
+                if (message.possible_moves !== null) possibleMoves.value = message.possible_moves;
 
                 /*
                     timer handling
@@ -75,6 +77,7 @@ export const Game = () => {
         isMyTurn.value = boardOrientation === 'white';
         gameEnded.value = false;
         fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
+        possibleMoves.value = [];
     }, [boardOrientation]);
 
     const endTimeCallback = () => {
@@ -129,7 +132,12 @@ export const Game = () => {
                     }}
                     opponent
                 />
-                <Chessboard fen={fen.value} boardOrientation={boardOrientation} makeMove={makeMove} />
+                <Chessboard
+                    fen={fen.value}
+                    boardOrientation={boardOrientation}
+                    makeMove={makeMove}
+                    possibleMoves={possibleMoves.value}
+                />
                 <PlayerInfo
                     myTurn={isMyTurn.value}
                     time={{

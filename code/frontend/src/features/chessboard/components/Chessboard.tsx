@@ -1,18 +1,45 @@
 import { useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
-import type { Piece, Square } from 'react-chessboard/dist/chessboard/types';
+import type { CustomSquareStyles, Piece, Square } from 'react-chessboard/dist/chessboard/types';
 import type { color } from '../types';
 import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
 
 type Props = Readonly<{
     fen: string;
+    possibleMoves: string[];
     boardOrientation: color;
     makeMove: (from: string, to: string) => void;
     style?: React.CSSProperties;
 }>;
 
-export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) => {
+export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMove }: Props) => {
     const [lastMove, setLastMove] = useState<string[] | undefined>(undefined);
+    const [moveSquare, setMoveSquare] = useState<CustomSquareStyles>({});
+
+    const drawMoves = (startingSquare: Square, moves: string[]) => {
+        console.log('from', startingSquare);
+        console.log('to', moves);
+
+        const newMoveSquare = {
+            [startingSquare]: {
+                background: 'rgba(255, 255, 0, 0.4)',
+            },
+            ...moves.reduce(
+                (acc, move) => ({
+                    ...acc,
+                    [move]: {
+                        background: 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+                        borderRadius: '50%',
+                    },
+                }),
+                {},
+            ),
+        };
+        console.log(newMoveSquare);
+
+        setMoveSquare(newMoveSquare);
+    };
+
     return (
         <div
             style={{
@@ -25,7 +52,7 @@ export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) =>
                 id="mainboard"
                 boardOrientation={boardOrientation}
                 position={generateStandardFen(fen)}
-                customSquareStyles={generateFogObject(generateOldFogFen(fen))}
+                customSquareStyles={{ ...generateFogObject(generateOldFogFen(fen)), ...moveSquare }}
                 onPieceDrop={(from, to, piece) => {
                     if (movedOpponentPiece(boardOrientation, piece)) return false;
 
@@ -43,6 +70,17 @@ export const Chessboard = ({ fen, boardOrientation, style, makeMove }: Props) =>
 
                     setLastMove([source, target]);
                     return isPromotion(source, target, piece);
+                }}
+                onSquareClick={(square) => {
+                    // console.log(square);
+                    const possibleMovesFromPieces = possibleMoves.filter((move) => move.startsWith(square));
+                    // console.log(possibleMovesFromPieces);
+                    if (possibleMovesFromPieces.length === 0) return;
+
+                    drawMoves(
+                        square,
+                        possibleMovesFromPieces.map((move) => move.slice(2)),
+                    );
                 }}
             />
         </div>
