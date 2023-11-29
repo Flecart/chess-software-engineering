@@ -95,8 +95,9 @@ export const Game = () => {
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) {
-            sendJsonMessage({ kind: 'list_move', data: '' });
+            // if i want the most update information, i need to ask the moves list AFTER making a move
             sendJsonMessage({ kind: 'move', data: `${from}${to}` });
+            sendJsonMessage({ kind: 'list_move', data: '' });
         }
         // l'aggiornamento del turno è fatto dall'effect
     };

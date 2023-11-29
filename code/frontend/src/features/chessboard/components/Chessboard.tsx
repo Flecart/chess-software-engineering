@@ -75,12 +75,12 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                     // console.log(square);
                     const possibleMovesFromPieces = possibleMoves.filter((move) => move.startsWith(square));
                     // console.log(possibleMovesFromPieces);
-                    if (possibleMovesFromPieces.length === 0) return;
-
-                    drawMoves(
-                        square,
-                        possibleMovesFromPieces.map((move) => move.slice(2)),
-                    );
+                    if (possibleMovesFromPieces.length === 0) setMoveSquare({});
+                    else
+                        drawMoves(
+                            square,
+                            possibleMovesFromPieces.map((move) => move.slice(2)),
+                        );
                 }}
             />
         </div>
