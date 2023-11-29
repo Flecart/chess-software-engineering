@@ -14,12 +14,10 @@ type Props = Readonly<{
 
 export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMove }: Props) => {
     const [lastMove, setLastMove] = useState<string[] | undefined>(undefined);
-    const [moveSquare, setMoveSquare] = useState<CustomSquareStyles>({});
+    const [moveSquares, setMoveSquares] = useState<CustomSquareStyles>({});
+    const [moveFrom, setMoveFrom] = useState('');
 
     const drawMoves = (startingSquare: Square, moves: string[]) => {
-        console.log('from', startingSquare);
-        console.log('to', moves);
-
         const newMoveSquare = {
             [startingSquare]: {
                 background: 'rgba(255, 255, 0, 0.4)',
@@ -35,9 +33,8 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                 {},
             ),
         };
-        console.log(newMoveSquare);
 
-        setMoveSquare(newMoveSquare);
+        setMoveSquares(newMoveSquare);
     };
 
     return (
@@ -52,7 +49,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                 id="mainboard"
                 boardOrientation={boardOrientation}
                 position={generateStandardFen(fen)}
-                customSquareStyles={{ ...generateFogObject(generateOldFogFen(fen)), ...moveSquare }}
+                customSquareStyles={{ ...generateFogObject(generateOldFogFen(fen)), ...moveSquares }}
                 onPieceDrop={(from, to, piece) => {
                     if (movedOpponentPiece(boardOrientation, piece)) return false;
 
@@ -72,15 +69,35 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                     return isPromotion(source, target, piece);
                 }}
                 onSquareClick={(square) => {
-                    // console.log(square);
-                    const possibleMovesFromPieces = possibleMoves.filter((move) => move.startsWith(square));
-                    // console.log(possibleMovesFromPieces);
-                    if (possibleMovesFromPieces.length === 0) setMoveSquare({});
-                    else
-                        drawMoves(
-                            square,
-                            possibleMovesFromPieces.map((move) => move.slice(2)),
-                        );
+                    const possibleMovesFromSquare = possibleMoves.filter((move) => move.startsWith(square));
+
+                    const hasMoveOptions = possibleMovesFromSquare.length > 0;
+
+                    if (!moveFrom) {
+                        if (hasMoveOptions) {
+                            setMoveFrom(square);
+                            drawMoves(
+                                square,
+                                possibleMovesFromSquare.map((move) => move.slice(2)),
+                            );
+                        } else setMoveSquares({});
+                        return;
+                    }
+
+                    if (possibleMoves.includes(`${moveFrom}${square}`)) {
+                        makeMove(moveFrom, square);
+                        setMoveFrom('');
+                        setMoveSquares({});
+                    } else {
+                        setMoveFrom('');
+                        if (hasMoveOptions) {
+                            setMoveFrom(square);
+                            drawMoves(
+                                square,
+                                possibleMovesFromSquare.map((move) => move.slice(2)),
+                            );
+                        } else setMoveSquares({});
+                    }
                 }}
             />
         </div>
