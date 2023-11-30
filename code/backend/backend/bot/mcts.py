@@ -6,13 +6,13 @@ from open_spiel.python.bots import human
 from open_spiel.python.bots import uniform_random
 import pyspiel
 
-from backend.bot.data.enums import GameType,Actions
+from backend.bot.data.enums import GameType, Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.MCST_player_config import MCSTPlayerConfig
 
 
-def _init_bot(bot_type, game,config):
+def _init_bot(bot_type, game, config):
   """Initializes a bot by type."""
   rng = np.random.RandomState(None)
   if bot_type == "mcts":
@@ -57,14 +57,14 @@ def _create_state(game_name, fen=None):
     params["fen"] = fen
   game = pyspiel.load_game(game_name, params)
   state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
-  return game,state
+  return game, state
 
 
 
-def _legal_action_to_uci(game_type,state,fen):
-  return _actions_to_uci(game_type,state,fen,state.legal_actions())
+def _legal_action_to_uci(game_type, state, fen):
+  return _actions_to_uci(game_type, state, fen, state.legal_actions())
 
-def action_to_uci(game_type,state,fen,action):
+def action_to_uci(game_type, state, fen, action):
   return _actions_to_uci(game_type,state,fen,[action])
 
 
@@ -80,7 +80,7 @@ def _check_castling(state:str):
   raise ValueError('Invalid Move')
 
   
-def _actions_to_uci(game_type,state,fen,actions=None):
+def _actions_to_uci(game_type, state, fen, actions=None):
   # This code is difficult because it relay on the specific implementation
   # of the libraries rather than the actual api
   board = chess.Board(fen)
@@ -105,28 +105,28 @@ def _actions_to_uci(game_type,state,fen,actions=None):
     return list(map(_handle_check_castling,actions))
 
 
-def _fen(state,game_type):
+def _fen(state, game_type):
   if game_type == GameType.CHESS:
     return state.observation_string()
   else:
     return state.to_string()
 
 
-def find(val,iter) -> int:
+def find(val, iter) -> int:
   for i,k in enumerate(iter):
     if k == val:
       return i
   return -1
 
-def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
+def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   fen = game_state_input.fen
-  game,state = _create_state(game_state_input.game_type,fen)
-  out= GameStateOutput()
+  game,state = _create_state(game_state_input.game_type, fen)
+  out = GameStateOutput()
 
   match game_state_input.action:
     case Actions.MOVE:
       ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type,state,fen))
-      if ind ==-1:
+      if ind == -1:
         raise ValueError('Invalid Move')
       state.apply_action(state.legal_actions()[ind])
       fen =  _fen(state,game_state_input.game_type)
@@ -148,14 +148,14 @@ def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
 
 
 def _print_game_state_output(out:GameStateOutput):
-  print('white_view',out.white_view)
-  print('black_view',out.black_view)
-  print('possible_moves',out.possible_moves)
-  print('best_move',out.best_move)
-  print('fen',out.fen)
+  print('white_view', out.white_view)
+  print('black_view', out.black_view)
+  print('possible_moves', out.possible_moves)
+  print('best_move', out.best_move)
+  print('fen', out.fen)
 
 
-def main():
+def __test_dark_chess():
   game = GameStateInput("", "",[],None)
   game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
   game.game_type= 'dark_chess'
@@ -164,5 +164,14 @@ def main():
   _print_game_state_output(val)
   
 
+def __test_kriegspiel():
+  game = GameStateInput("", "",[],None)
+  game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
+  game.game_type= 'dark_chess'
+  game.action = Actions.LIST_MOVE
+  val = dispatch(game)
+  _print_game_state_output(val)
+
 if __name__ == '__main__':
-  main()
+#   __test_dark_chess()
+  __test_kriegspiel

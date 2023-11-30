@@ -32,6 +32,9 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         Create a new game.
         Is't important to notice that the player
         how create the game needs to call join.
+
+        Returns:
+            int: return the id of the game
         """
         # TODO: log the request!
         return ChessGameManager().create_new_game(req)
@@ -42,6 +45,8 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         this web socket should be joined by a user to play
 
         Maybe this in a future could also be used to watch people play
+
+        TODO: this function needs to be refactored, it's too long
         """
         user_data = decode_access_token(token)
         username = user_data["username"]
@@ -62,6 +67,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                         case "move":
                             # manda lo stato aggiornato a tutti i giocatori
 
+                            # NOTA:
                             # Mmmh, qui mancano le informazioni per fare la mossa
                             # forse potrebbe essere più sensato mettere il codice
                             # per i websocket in un socket manager che abbia anch'essa
@@ -87,13 +93,17 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                             if player_color == game.current_player:
                                 list_moves = game.get_moves()
 
-                    data = game.get_player_response(player_color\
-                                ,possible_moves=list_moves,move_made=move)
+                    data = game.get_player_response(player_color, 
+                        possible_moves=list_moves, 
+                        move_made=move
+                    )
                     await websocket.send_json(jsonable_encoder(data))
+
                 else:
                     await websocket.send_json({"waiting": True})
                     await asyncio.sleep(1) 
-        except WebSocketDisconnect :
+
+        except WebSocketDisconnect:
             await SocketManager().remove(game_id, username, websocket)
         except ConnectionClosedOK:
             await SocketManager().remove(game_id, username, websocket)
