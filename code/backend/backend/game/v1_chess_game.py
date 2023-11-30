@@ -8,6 +8,7 @@ from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.enums import Actions
+import backend.game.utils as utils
 
 from backend.bot.data.enums import GameType
 from .utils import START_POSITION_FEN, Color 
@@ -151,24 +152,28 @@ class ChessGame():
             self.timer_black.start()
 
 
-    def move(self, move: str) -> None:
+    def move(self, move: str) -> str|None:
         self._stop_timer()
         self.__finished = self._check_times_up() 
 
         if not self.__finished:
             game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
-            self.__moves.append(move)
+            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE:
+                self.__moves.append(move)
+
             self._start_timer()
 
             self.__fen = game_state.fen
 
-            print("response fen", self.__fen, move)
+            print("response fen", self.__fen, move, game_state.general_message)
             self.__finished = self.__finished or game_state.finish
             self.__black_view = game_state.black_view
             self.__white_view = game_state.white_view
 
         if self.__finished:
             self.save_and_update_elo()
+
+        return game_state.general_message
 
     def get_player_response(self,
                             color: Color,
@@ -201,13 +206,30 @@ class ChessGame():
         bot_color = self.get_player_color(_BOT_USERNAME)
 
         def make_bot_move(game: "ChessGame"):
+            def find_bot_move(possible_moves: list[str]) -> str:
+                while move not in possible_moves:  # kriegspiel mode
+                    print(f"[bot player]: move {move} not in valid")
+
             game.__calculating = True
             move = None
             available_moves = game.get_moves()
-            while move not in available_moves:  # kriegspiel mode
-                print(f"[bot player]: move {move} not in valid {available_moves}")
+            move = game.get_best_move()
+
+            # NOTA: questa parte potrebbe essere migliorata, ma esattamente non so in che modo
+            # attualmente il bot di kriegspiel sbaglia mosse
+            while True:
+                if move not in available_moves:
+                    # TODO: check if this if-branch is necessary
+                    move = game.get_best_move()
+                    continue
+
+                message = game.move(move)
+                print("-" + message + "-")
+                if message != utils.KRIEGSPIEL_INVALID_MOVE:
+                    break
+
                 move = game.get_best_move()
-            game.move(move)
+
             game.__calculating = False
             from backend.game.v1_socket_manager import SocketManager
             event_loop.create_task(SocketManager().notify_opponent(game.__id, bot_color))

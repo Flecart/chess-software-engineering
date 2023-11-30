@@ -127,6 +127,7 @@ def _custom_observation_string(state, player_id: int, game_type: str):
   if game_type != GameType.KRIEGSPIEL:
     return state.observation_string(player_id)
   
+
   # kriegspiel
   fen = state.to_string()
   splitted_fen = fen.split(' ')
@@ -182,6 +183,14 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
   out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)
   out.fen = _fen(state,game_state_input.game_type) 
+
+  # This is currently (30 november) used to get the umpire message in kriegspiel.
+  # in other variant it is probably useless
+
+  player_id = 0 if fen.split(' ')[1] == 'w' else 1
+  out.general_message = state.observation_string(player_id)
+  print("openspiel official observation string: ", out.general_message)
+
   return out
 
 
@@ -191,7 +200,7 @@ def _print_game_state_output(out: GameStateOutput):
   print('possible_moves', out.possible_moves)
   print('best_move', out.best_move)
   print('fen', out.fen)
-
+  print('message', out.general_message)
 
 def __test_dark_chess():
   game = GameStateInput("", "",[],None)
@@ -220,6 +229,7 @@ def __capture_test_kriegspiel():
   val = dispatch(game)
   if val.fen == game.fen:
     print("there is a bug")
+
   _print_game_state_output(val)
 
 

@@ -7,4 +7,5 @@ class GameStateOutput:
   best_move: str | None = None
   fen: str 
   finish: bool
+  general_message: str | None = None
 
