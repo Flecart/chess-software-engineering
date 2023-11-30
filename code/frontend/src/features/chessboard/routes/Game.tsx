@@ -78,6 +78,9 @@ export const Game = () => {
         gameEnded.value = false;
         fen.value = boardOrientation === 'white' ? startWhiteFEN : startBlackFEN;
         possibleMoves.value = [];
+        sendJsonMessage({ kind: 'list_move', data: '' });
+        // sendJsonMessage is a function, not needed as a dependency
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [boardOrientation]);
 
     const endTimeCallback = () => {
