@@ -17,7 +17,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
     const [moveSquares, setMoveSquares] = useState<CustomSquareStyles>({});
     const [moveFrom, setMoveFrom] = useState('');
 
-    const drawMoves = (startingSquare: Square, moves: string[]) => {
+    const drawMoves = (startingSquare: Square, moves: Square[]) => {
         const opponentColor = boardOrientation === 'black' ? 'white' : 'black';
         const newMoveSquare = {
             [startingSquare]: {
@@ -27,7 +27,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                 (acc, move) => ({
                     ...acc,
                     [move]: {
-                        background: isSquareOccupiedByColor(fen, move as Square, opponentColor)
+                        background: isSquareOccupiedByColor(fen, move, opponentColor)
                             ? 'radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.2) 25%)'
                             : 'radial-gradient(circle, rgba(0,0,0,.2) 25%, transparent 25%)',
                         borderRadius: '50%',
@@ -81,7 +81,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                             setMoveFrom(square);
                             drawMoves(
                                 square,
-                                possibleMovesFromSquare.map((move) => move.slice(2)),
+                                possibleMovesFromSquare.map((move) => move.slice(2, 4) as Square),
                             );
                         } else setMoveSquares({});
                         return;
@@ -98,7 +98,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                             setMoveFrom(square);
                             drawMoves(
                                 square,
-                                possibleMovesFromSquare.map((move) => move.slice(2)),
+                                possibleMovesFromSquare.map((move) => move.slice(2, 4) as Square),
                             );
                         } else setMoveSquares({});
                     }
