@@ -9,3 +9,11 @@ export type GameRouteSearch = {
 export type PregameRouteSearch = {
     bot: boolean;
 };
+
+export type ErrorResponseData = {
+    message: string;
+};
+
+export type MutationMeta = {
+    onSuccessMessage?: string;
+};

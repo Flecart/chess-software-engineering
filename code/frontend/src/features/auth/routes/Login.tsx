@@ -1,26 +1,18 @@
-import { useNavigate } from '@tanstack/react-router';
 import { Typography } from 'antd';
 
 import { AuthForm } from '../components/AuthForm';
-import { postLogin } from '../api/auth';
-import { username, password } from '../hooks/auth';
-import { useTokenContext } from '@/lib/tokenContext';
+import { password, username } from '../hooks/auth';
+import { useLoginMutation } from '../hooks/useAuthMutation';
 
 export const Login = () => {
-    const navigate = useNavigate({ from: '/login' as const });
-    const { setToken } = useTokenContext();
+    const { mutate, isPending } = useLoginMutation();
 
-    const action = async () => {
-        const token = await postLogin(username.value, password.value);
-        setToken(token);
-        //TODO: handle errors
-        navigate({ to: '/' });
-    };
+    const action = () => mutate({ username: username.value, password: password.value });
 
     return (
         <>
             <Typography.Title>Accedi</Typography.Title>
-            <AuthForm username={username} password={password} execAction={action} />
+            <AuthForm username={username} password={password} execAction={action} isLoading={isPending} />
         </>
     );
 };
