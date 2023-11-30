@@ -189,7 +189,6 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
 
   player_id = 0 if fen.split(' ')[1] == 'w' else 1
   out.general_message = state.observation_string(player_id)
-  print("openspiel official observation string: ", out.general_message)
 
   return out
 

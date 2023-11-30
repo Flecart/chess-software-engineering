@@ -22,6 +22,7 @@ class GameStatusResponse(BaseModel):
     time_left_black: str|None
     time_start_white: str|None
     time_start_black: str|None
+    message: str | None = None # currently (30 Nov) used in Kriegspiel for Umpire messages
 
     
 
