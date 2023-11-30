@@ -1,4 +1,4 @@
-import type { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+import type { CustomSquareStyles, Piece, Square } from 'react-chessboard/dist/chessboard/types';
 import { color } from '../types';
 const fogChar = '?';
 
@@ -95,6 +95,27 @@ export function generateFogObject(customFen: string): CustomSquareStyles {
         }
     });
     return fogObject;
+}
+
+/**
+ * Returns what piece is occupying the given square
+ * @param fen the fen string
+ * @param square the square to check
+ */
+
+export function getPieceAtSquare(fen: string, square: Square): Piece | null {
+    const rows = generateOldFogFen(fen).split('/').reverse();
+    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
+
+    const number = parseInt(square.charAt(1)) - 1;
+    const letter = labels.indexOf(square.charAt(0));
+
+    const row = rows[number] ?? '........';
+    const char = row.charAt(letter);
+
+    if (char === '.' || char === fogChar) return null;
+    else if (char === char.toLowerCase()) return `b${char.toUpperCase()}` as Piece;
+    else return `w${char}` as Piece;
 }
 
 /**

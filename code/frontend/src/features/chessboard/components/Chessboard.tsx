@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
 import type { CustomSquareStyles, Piece, Square } from 'react-chessboard/dist/chessboard/types';
 import type { color } from '../types';
-import { generateFogObject, generateOldFogFen, generateStandardFen, isSquareOccupiedByColor } from '../utils/fen';
+import {
+    generateFogObject,
+    generateOldFogFen,
+    generateStandardFen,
+    getPieceAtSquare,
+    isSquareOccupiedByColor,
+} from '../utils/fen';
 
 type Props = Readonly<{
     fen: string;
@@ -16,6 +22,8 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
     const [lastMove, setLastMove] = useState<string[] | undefined>(undefined);
     const [moveSquares, setMoveSquares] = useState<CustomSquareStyles>({});
     const [moveFrom, setMoveFrom] = useState('');
+    const [showPromotionDialog, setShowPromotionDialog] = useState(false);
+    const promotionSquare = useRef<Square | undefined>(undefined);
 
     const drawMoves = (startingSquare: Square, moves: Square[]) => {
         const opponentColor = boardOrientation === 'black' ? 'white' : 'black';
@@ -53,6 +61,8 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                 boardOrientation={boardOrientation}
                 position={generateStandardFen(fen)}
                 customSquareStyles={{ ...generateFogObject(generateOldFogFen(fen)), ...moveSquares }}
+                showPromotionDialog={showPromotionDialog}
+                promotionToSquare={promotionSquare.current}
                 onPieceDrop={(from, to, piece) => {
                     if (movedOpponentPiece(boardOrientation, piece)) return false;
 
@@ -63,6 +73,9 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                     if (piece && lastMove) {
                         makeMove(`${lastMove[0]}`, `${lastMove[1]}${piece[1]?.toLowerCase()}`);
                     }
+                    setShowPromotionDialog(false);
+                    setMoveFrom('');
+                    setMoveSquares({});
                     return true;
                 }}
                 onPromotionCheck={(source, target, piece) => {
@@ -87,11 +100,19 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                         return;
                     }
 
-                    if (possibleMoves.includes(`${moveFrom}${square}`)) {
-                        makeMove(moveFrom, square);
+                    if (possibleMoves.some((move) => move.startsWith(`${moveFrom}${square}`))) {
                         setLastMove([moveFrom, square]);
+
+                        if (
+                            isPromotion(moveFrom as Square, square, getPieceAtSquare(fen, moveFrom as Square) ?? 'bB')
+                        ) {
+                            promotionSquare.current = square;
+                            setShowPromotionDialog(true);
+                            return;
+                        }
                         setMoveFrom('');
                         setMoveSquares({});
+                        makeMove(moveFrom, square);
                     } else {
                         setMoveFrom('');
                         if (hasMoveOptions) {
