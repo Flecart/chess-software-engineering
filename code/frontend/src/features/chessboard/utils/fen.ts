@@ -126,17 +126,8 @@ export function getPieceAtSquare(fen: string, square: Square): Piece | null {
  * @returns a boolean that tells if a Square is occupied by a piece of the given color
  */
 export function isSquareOccupiedByColor(fen: string, square: Square, color: color) {
-    const rows = generateOldFogFen(fen).split('/').reverse();
-    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
-
-    const number = parseInt(square.charAt(1)) - 1;
-    const letter = labels.indexOf(square.charAt(0));
-
-    const row = rows[number] ?? '........';
-    const char = row.charAt(letter);
-
-    if (char === '.' || char === fogChar) return false;
-    if (color === 'white' && char === char.toUpperCase()) return true;
-    if (color === 'black' && char === char.toLowerCase()) return true;
-    return false;
+    const piece = getPieceAtSquare(fen, square);
+    if (piece === null) return false;
+    else if (color.startsWith(piece.charAt(0))) return true;
+    else return false;
 }
