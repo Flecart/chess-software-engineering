@@ -1,10 +1,12 @@
+import random
 import telebot
 from telebot import async_telebot as as_telebot
 import telebot.types as types
 import logging
 import asyncio
 
-from config import API_TOKEN,DEBUG
+from game_loop import game_loop
+from config import API_TOKEN,DEBUG,TIME_TO_VOTE_IN_SECONDS
 
 # logger = telebot.logger
 
@@ -18,7 +20,23 @@ else:
 
 @bot.message_handler(commands=['newGame'])
 async def startNewGame(message : types.Message): # 
-    await bot.reply_to(message, 'not implemented')
+    
+    time_to_choose = TIME_TO_VOTE_IN_SECONDS
+
+    args = message.text.split(" ")
+    if len(args) > 1:
+        try:
+            time_to_choose = int(args[1])
+        except:
+            pass
+
+
+
+
+
+    # initialisation
+    
+    await game_loop(time_to_choose,message.chat.id,bot)
 
 
 @bot.message_handler(commands=['leave','surrender','end'])
