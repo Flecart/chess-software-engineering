@@ -7,3 +7,7 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 }
+.chatbox .ant-list-items {
+    overflow: auto;
+    height: 80vh;
+}
