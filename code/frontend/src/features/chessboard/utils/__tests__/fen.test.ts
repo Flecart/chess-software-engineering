@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { generateFogObject, generateOldFogFen, generateStandardFen } from '../fen';
 import type { CustomSquareStyles } from 'react-chessboard/dist/chessboard/types';
+import { describe, expect, it } from 'vitest';
+import { generateFogObject, generateOldFogFen, generateStandardFen, isSquareOccupiedByColor } from '../fen';
 
 const compareFen = (customFen: string, expectedFen: string) => () => {
     const result = generateStandardFen(customFen);
@@ -137,5 +137,39 @@ describe('generateFogObject', () => {
         };
         const result = generateFogObject(customFen);
         expect(result).toEqual(expectedFogObject);
+    });
+});
+
+describe('isSquareOccupiedByColor', () => {
+    it('should return false if the square is not occupied', () => {
+        const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+        const square = 'e4';
+        const color = 'white';
+        const result = isSquareOccupiedByColor(fen, square, color);
+        expect(result).toEqual(false);
+    });
+
+    it('should return true if the square is occupied by a white piece', () => {
+        const fen = 'rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR';
+        const square = 'd3';
+        const color = 'white';
+        const result = isSquareOccupiedByColor(fen, square, color);
+        expect(result).toEqual(true);
+    });
+
+    it('should return true if the square is occupied by a black piece', () => {
+        const fen = 'rnbqkbnr/ppp1pppp/3p4/8/8/8/PPPPPPPP/RNBQKBNR';
+        const square = 'd6';
+        const color = 'black';
+        const result = isSquareOccupiedByColor(fen, square, color);
+        expect(result).toEqual(true);
+    });
+
+    it('should return false if the square is occupied by a piece of the opposite color', () => {
+        const fen = 'rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR';
+        const square = 'd3';
+        const color = 'black';
+        const result = isSquareOccupiedByColor(fen, square, color);
+        expect(result).toEqual(false);
     });
 });
