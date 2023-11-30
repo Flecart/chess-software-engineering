@@ -161,6 +161,8 @@ class ChessGame():
             self._start_timer()
 
             self.__fen = game_state.fen
+
+            print("response fen", self.__fen, move)
             self.__finished = self.__finished or game_state.finish
             self.__black_view = game_state.black_view
             self.__white_view = game_state.white_view
@@ -198,10 +200,14 @@ class ChessGame():
             return
         bot_color = self.get_player_color(_BOT_USERNAME)
 
-        def make_bot_move(game):
+        def make_bot_move(game: "ChessGame"):
             game.__calculating = True
-            move = game.get_best_move()
-            game.move(move[0])
+            move = None
+            available_moves = game.get_moves()
+            while move not in available_moves:  # kriegspiel mode
+                print(f"[bot player]: move {move} not in valid {available_moves}")
+                move = game.get_best_move()
+            game.move(move)
             game.__calculating = False
             from backend.game.v1_socket_manager import SocketManager
             event_loop.create_task(SocketManager().notify_opponent(game.__id, bot_color))

@@ -66,7 +66,7 @@ def _legal_action_to_uci(game_type, state, fen):
   return _actions_to_uci(game_type, state, fen, state.legal_actions())
 
 def action_to_uci(game_type, state, fen, action):
-  return _actions_to_uci(game_type,state,fen,[action])
+  return _actions_to_uci(game_type,state,fen,[action])[0]
 
 
 def _check_castling(state:str):
@@ -82,20 +82,20 @@ def _check_castling(state:str):
 
   
 def _actions_to_uci(game_type, state, fen, actions=None):
-  # This code is difficult because it relay on the specific implementation
+  # This code is difficult because it relays on the specific implementation
   # of the libraries rather than the actual api
   board = chess.Board(fen)
   
   # transform the san to uci
   transform = lambda x: board.parse_san(state.action_to_string(x)).uci()
-
-  # kriegspiel is already in uci
   if game_type == 'kriegspiel':
+    # kriegspiel is already in uci
     transform = lambda x:state.action_to_string(x)
+
   try:
-    return list(map(transform,actions))
+    return list(map(transform, actions))
   except:
-    # It changes the function which generate the move, to accept illegals moves 
+    # This changes the function used to generate the move, in order to accept illegals moves 
     board.generate_legal_moves = board.generate_pseudo_legal_moves
     def _handle_check_castling(action):
       try:
@@ -161,16 +161,13 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
 
   match game_state_input.action:
     case Actions.MOVE:
-      print(_fen(state,game_state_input.game_type), 
-            find(game_state_input.move, _legal_action_to_uci(game_state_input.game_type, state, fen)),
-            game_state_input.move, _legal_action_to_uci(game_state_input.game_type, state, fen))
       try:
         index = _legal_action_to_uci(game_state_input.game_type, state, fen).index(game_state_input.move)
       except ValueError:
         raise ValueError('Invalid Move')
       
       state.apply_action(state.legal_actions()[index])
-      fen =  _fen(state,game_state_input.game_type)
+      fen = _fen(state, game_state_input.game_type)
 
     case Actions.MAKE_BEST_MOVE:
       action = _get_best_move(game, state) 
@@ -213,6 +210,20 @@ def __test_kriegspiel():
   val = dispatch(game)
   _print_game_state_output(val)
 
+def __capture_test_kriegspiel():
+  game = GameStateInput(
+    game_type="kriegspiel", 
+    fen="rnbqk1nr/ppp2B1p/8/2b3p1/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 5",
+    action=Actions.MOVE,
+    move="c5f2")
+  
+  val = dispatch(game)
+  if val.fen == game.fen:
+    print("there is a bug")
+  _print_game_state_output(val)
+
+
 if __name__ == '__main__':
   #   __test_dark_chess()
-  __test_kriegspiel()
+  # __test_kriegspiel()
+  __capture_test_kriegspiel()
