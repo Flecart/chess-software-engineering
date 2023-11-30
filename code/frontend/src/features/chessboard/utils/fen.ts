@@ -1,4 +1,5 @@
 import type { CustomSquareStyles, Square } from 'react-chessboard/dist/chessboard/types';
+import { color } from '../types';
 const fogChar = '?';
 
 /**
@@ -94,4 +95,27 @@ export function generateFogObject(customFen: string): CustomSquareStyles {
         }
     });
     return fogObject;
+}
+
+/**
+ * Return a boolean that tells if a Square is occupied by a piece of the given color, if the square is empty or fogged it returns false
+ * @param fen the fen string
+ * @param square the square to check
+ * @param color the color of the piece
+ * @returns a boolean that tells if a Square is occupied by a piece of the given color
+ */
+export function isSquareOccupiedByColor(fen: string, square: Square, color: color) {
+    const rows = generateOldFogFen(fen).split('/').reverse();
+    const labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
+
+    const number = parseInt(square.charAt(1)) - 1;
+    const letter = labels.indexOf(square.charAt(0));
+
+    const row = rows[number] ?? '........';
+    const char = row.charAt(letter);
+
+    if (char === '.' || char === fogChar) return false;
+    if (color === 'white' && char === char.toUpperCase()) return true;
+    if (color === 'black' && char === char.toLowerCase()) return true;
+    return false;
 }

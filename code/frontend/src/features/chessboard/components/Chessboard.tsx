@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
 import type { CustomSquareStyles, Piece, Square } from 'react-chessboard/dist/chessboard/types';
 import type { color } from '../types';
-import { generateFogObject, generateOldFogFen, generateStandardFen } from '../utils/fen';
+import { generateFogObject, generateOldFogFen, generateStandardFen, isSquareOccupiedByColor } from '../utils/fen';
 
 type Props = Readonly<{
     fen: string;
@@ -18,6 +18,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
     const [moveFrom, setMoveFrom] = useState('');
 
     const drawMoves = (startingSquare: Square, moves: string[]) => {
+        const opponentColor = boardOrientation === 'black' ? 'white' : 'black';
         const newMoveSquare = {
             [startingSquare]: {
                 background: 'rgba(255, 255, 0, 0.4)',
@@ -26,7 +27,9 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
                 (acc, move) => ({
                     ...acc,
                     [move]: {
-                        background: 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+                        background: isSquareOccupiedByColor(fen, move as Square, opponentColor)
+                            ? 'radial-gradient(circle, transparent 60%, rgba(0, 0, 0, 0.2) 25%)'
+                            : 'radial-gradient(circle, rgba(0,0,0,.2) 25%, transparent 25%)',
                         borderRadius: '50%',
                     },
                 }),
@@ -86,6 +89,7 @@ export const Chessboard = ({ fen, possibleMoves, boardOrientation, style, makeMo
 
                     if (possibleMoves.includes(`${moveFrom}${square}`)) {
                         makeMove(moveFrom, square);
+                        setLastMove([moveFrom, square]);
                         setMoveFrom('');
                         setMoveSquares({});
                     } else {
