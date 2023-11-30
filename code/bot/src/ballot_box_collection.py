@@ -1,4 +1,6 @@
 from telebot import types
+
+from utils import getUserAndChatFromMessage
 from .singleton import SingletonMeta
 
 class BallotBoxCollection(metaclass=SingletonMeta):
@@ -15,15 +17,8 @@ class BallotBoxCollection(metaclass=SingletonMeta):
             value a userid list of users that voted that move
     '''
 
-
-    def _getChatAndUser(self, message : types.Message) -> tuple[int,int]:
-        userId = message.from_user.id
-        chatId = message.chat.id
-        return (chatId,userId)
-
-
-    def _getChatVotes(self, message : types.Message):
-        (chat,_) = self._getChatAndUser(message)
+    def _getBallotBox(self, ballotbox : int):
+        chat = ballotbox
 
         if chat not in self._vote.keys():
             self._vote[chat] = dict()
@@ -31,15 +26,13 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         return self._vote[chat]
 
 
-    def add_vote(self, message : types.Message, vote : str) -> None: # TODO valuare utlità di `vote` , posso ottenerlo da message
+    def add_vote(self, ballotbox : int, user : int, vote : str) -> None:
 
         """
         Add a vote to a move
         """
-        # TODO aggiungere controllo sulla validità di `vote`
 
-        (_,user) = self._getChatAndUser(message)
-        votes = self._getChatVotes(message)
+        votes = self._getBallotBox(ballotbox)
 
         for move in votes:
             if user in votes[move]:
@@ -51,22 +44,19 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         votes[vote].append(user)
 
 
-    def reset_box(self, message : types.Message):
+    def reset_box(self, ballotbox : int):
         """
         Reset votes 
         """
-
-        (chat,_) = self._getChatAndUser(message)
-        self._vote.pop(chat)
+        self._vote.pop(ballotbox)
 
 
-    def mostVoted(self, message : types.Message):
-        (chat,_) = self._getChatAndUser(message)
+    def mostVoted(self, ballotbox : int):
 
-        if chat not in self._vote.keys():
-            self._vote[chat] = ([],dict())
+        if ballotbox not in self._vote.keys():
+            self._vote[ballotbox] = dict()
 
-        votes = self._getChatVotes(message)
+        votes = self._getBallotBox(ballotbox)
         return max(votes, key=lambda k: len(votes[k]))
         
 
