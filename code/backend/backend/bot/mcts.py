@@ -55,6 +55,7 @@ def _create_state(game_name, fen=None):
   params = {}
   if not isChess and isValidFEN:
     params["fen"] = fen
+
   game = pyspiel.load_game(game_name, params)
   state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
   return game, state
@@ -86,8 +87,8 @@ def _actions_to_uci(game_type, state, fen, actions=None):
   board = chess.Board(fen)
   
   # transform the san to uci
+  transform = lambda x: board.parse_san(state.action_to_string(x)).uci()
 
-  transform = lambda x:board.parse_san(state.action_to_string(x)).uci()
   # kriegspiel is already in uci
   if game_type == 'kriegspiel':
     transform = lambda x:state.action_to_string(x)
@@ -104,7 +105,6 @@ def _actions_to_uci(game_type, state, fen, actions=None):
 
     return list(map(_handle_check_castling,actions))
 
-
 def _fen(state, game_type):
   if game_type == GameType.CHESS:
     return state.observation_string()
@@ -118,32 +118,68 @@ def find(val, iter) -> int:
       return i
   return -1
 
+def _custom_observation_string(state, player_id: int, game_type: str):
+  """
+  This function is just a quick way to implement the right view, but it is not mantainable,
+  TODO: refactor me, use openspiel api
+  """
+
+  if game_type != GameType.KRIEGSPIEL:
+    return state.observation_string(player_id)
+  
+  # kriegspiel
+  fen = state.to_string()
+  splitted_fen = fen.split(' ')
+
+  first_part, rest = splitted_fen[0], splitted_fen[1:]
+
+  all_table = [["."] * 8 for _ in range(8)]
+  checker = lambda x: x.isalpha() and x.islower() if player_id == 0 else x.isalpha() and x.isupper()
+
+  # compute correct view for the player
+  rows = first_part.split('/')
+  for i in range(len(rows)):
+    offsets = 0
+    for j in range(len(rows[i])):
+      if rows[i][j].isdigit():
+        for k in range(int(rows[i][j])):
+          all_table[i][offsets+k] = '?'
+        offsets += int(rows[i][j])
+      elif checker(rows[i][j]):
+        all_table[i][offsets] = rows[i][j]
+        offsets += 1
+      else:
+        all_table[i][offsets] = '?'
+        offsets += 1
+
+  return '/'.join([''.join(row) for row in all_table]) + ' ' + ' '.join(rest)
+
 def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   fen = game_state_input.fen
-  game,state = _create_state(game_state_input.game_type, fen)
+  game, state = _create_state(game_state_input.game_type, fen)
   out = GameStateOutput()
 
   match game_state_input.action:
     case Actions.MOVE:
-      ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type,state,fen))
+      ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type, state, fen))
       if ind == -1:
         raise ValueError('Invalid Move')
       state.apply_action(state.legal_actions()[ind])
       fen =  _fen(state,game_state_input.game_type)
 
     case Actions.MAKE_BEST_MOVE:
-      action = _get_best_move(game,state) 
-      out.best_move = action_to_uci(game_state_input.game_type,state,fen,action)
+      action = _get_best_move(game, state) 
+      out.best_move = action_to_uci(game_state_input.game_type, state, fen, action)
       state.apply_action(action)
       fen =  _fen(state,game_state_input.game_type)
     
     case Actions.LIST_MOVE:
-      out.possible_moves = _legal_action_to_uci(game_state_input.game_type,state,fen)
+      out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
     
   out.finish = state.is_terminal()
-  out.white_view = state.observation_string(1)
-  out.black_view = state.observation_string(0)
-  out.fen =_fen(state,game_state_input.game_type) 
+  out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
+  out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)
+  out.fen = _fen(state,game_state_input.game_type) 
   return out
 
 
@@ -167,11 +203,11 @@ def __test_dark_chess():
 def __test_kriegspiel():
   game = GameStateInput("", "",[],None)
   game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
-  game.game_type= 'dark_chess'
+  game.game_type= 'kriegspiel'
   game.action = Actions.LIST_MOVE
   val = dispatch(game)
   _print_game_state_output(val)
 
 if __name__ == '__main__':
 #   __test_dark_chess()
-  __test_kriegspiel
+  __test_kriegspiel()
