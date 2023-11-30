@@ -110,9 +110,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         except ConnectionClosedError:
             await SocketManager().remove(game_id, username, websocket)
 
-
-
-
     @app.put(prefix + "/{game_id}/join/")
     def join_game(game_id: int, user_data: Annotated[dict, Depends(decode_access_token)]):
         """

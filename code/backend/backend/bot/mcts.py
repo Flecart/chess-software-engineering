@@ -143,7 +143,7 @@ def _custom_observation_string(state, player_id: int, game_type: str):
     for j in range(len(rows[i])):
       if rows[i][j].isdigit():
         for k in range(int(rows[i][j])):
-          all_table[i][offsets+k] = '?'
+          all_table[i][offsets + k] = '?'
         offsets += int(rows[i][j])
       elif checker(rows[i][j]):
         all_table[i][offsets] = rows[i][j]
@@ -161,10 +161,15 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
 
   match game_state_input.action:
     case Actions.MOVE:
-      ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type, state, fen))
-      if ind == -1:
+      print(_fen(state,game_state_input.game_type), 
+            find(game_state_input.move, _legal_action_to_uci(game_state_input.game_type, state, fen)),
+            game_state_input.move, _legal_action_to_uci(game_state_input.game_type, state, fen))
+      try:
+        index = _legal_action_to_uci(game_state_input.game_type, state, fen).index(game_state_input.move)
+      except ValueError:
         raise ValueError('Invalid Move')
-      state.apply_action(state.legal_actions()[ind])
+      
+      state.apply_action(state.legal_actions()[index])
       fen =  _fen(state,game_state_input.game_type)
 
     case Actions.MAKE_BEST_MOVE:
@@ -183,7 +188,7 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   return out
 
 
-def _print_game_state_output(out:GameStateOutput):
+def _print_game_state_output(out: GameStateOutput):
   print('white_view', out.white_view)
   print('black_view', out.black_view)
   print('possible_moves', out.possible_moves)
@@ -209,5 +214,5 @@ def __test_kriegspiel():
   _print_game_state_output(val)
 
 if __name__ == '__main__':
-#   __test_dark_chess()
+  #   __test_dark_chess()
   __test_kriegspiel()
