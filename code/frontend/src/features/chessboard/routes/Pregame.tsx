@@ -1,5 +1,4 @@
 import { useTokenContext } from '@/lib/tokenContext';
-import { indexGameRouteId } from '@/routes/game';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
 import Search from 'antd/es/input/Search';
@@ -8,9 +7,9 @@ import * as gameApi from '../api/game';
 import type { GameOptions } from '../types';
 
 export const Pregame = () => {
-    const navigate = useNavigate({ from: indexGameRouteId });
+    const navigate = useNavigate({ from: '/game/' as const });
     const { token, setToken } = useTokenContext();
-    const { bot } = useSearch({ from: indexGameRouteId });
+    const { bot } = useSearch({ from: '/game/' as const });
 
     const checkAndSetToken = async (): Promise<string> => {
         if (!token) {
@@ -27,12 +26,13 @@ export const Pregame = () => {
     const startGame = async (values: GameOptions) => {
         console.log(values);
         const sureToken = await checkAndSetToken();
-        const realGameId = await gameApi.createGame(sureToken, bot);
-        await gameApi.joinGame(sureToken, realGameId);
+
+        const realGameId = await gameApi.createGame(sureToken, bot, values.variant, values.time);
+        const color = await gameApi.joinGame(sureToken, realGameId, values.color);
         navigate({
             to: '/game/$gameId',
             params: { gameId: realGameId },
-            search: { boardOrientation: 'white' },
+            search: { boardOrientation: color },
         });
     };
 
@@ -45,7 +45,7 @@ export const Pregame = () => {
                     layout="inline"
                     name="start-game"
                     initialValues={{
-                        time: timeOptions[0]?.value,
+                        time: 3,
                         color: colorOptions[0]?.value,
                         variant: gameVariantOptions[0]?.value,
                     }}
@@ -75,12 +75,12 @@ export const Pregame = () => {
                         enterButton="Unisciti"
                         onSearch={async (gameId) => {
                             const sureToken = await checkAndSetToken();
-                            await gameApi.joinGame(sureToken, gameId);
+                            const color = await gameApi.joinGame(sureToken, gameId);
 
                             navigate({
                                 to: '/game/$gameId',
                                 params: { gameId: gameId },
-                                search: { boardOrientation: 'black' },
+                                search: { boardOrientation: color },
                             });
                         }}
                     />
@@ -97,6 +97,8 @@ const gameVariantOptions: DefaultOptionType[] = [
 
 const timeOptions: DefaultOptionType[] = [
     { label: 'Nessun tempo', value: 0 },
+    { label: '3 minuti', value: 3 },
+    { label: '5 minuti', value: 5 },
     { label: '10 minuti', value: 10 },
     { label: '30 minuti', value: 30 },
 ];

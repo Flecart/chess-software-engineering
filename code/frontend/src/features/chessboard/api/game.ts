@@ -1,8 +1,9 @@
 import { apiBaseUrl, wsUrl } from '@/config';
 import { axios } from '@/lib/axios';
 import type { jwt_token } from '@/types';
-import { createCode, parseCode } from '../utils/code';
 import type { color } from '../types';
+import { CreateGameParams } from '../types';
+import { createCode, parseCode } from '../utils/code';
 
 export async function loginAsGuest(): Promise<jwt_token> {
     const response = await axios.post('/api/v1/user/guest');
@@ -12,25 +13,25 @@ export async function loginAsGuest(): Promise<jwt_token> {
 export async function createGame(
     token: jwt_token,
     isBot: boolean = false,
-    type: string = 'dark_chess',
+    type: 'dark_chess' | 'kriegspiel' = 'dark_chess',
+    time: number = 0,
 ): Promise<string> {
-    const response = await axios.post<string>(
-        `${apiBaseUrl}/game`,
-        {
-            against_bot: isBot,
-            type,
-        },
-        { headers: { Authorization: token } },
-    );
+    const params: CreateGameParams = {
+        against_bot: isBot,
+        type,
+        time,
+    };
+    const response = await axios.post<string>(`${apiBaseUrl}/game`, params, { headers: { Authorization: token } });
     return createCode(response.data);
 }
 
-export async function joinGame(token: jwt_token, gameId: string, color: null | color = null): Promise<void> {
+export async function joinGame(token: jwt_token, gameId: string, color: null | color = null): Promise<color> {
     const colorParam = color ?? '';
 
-    await axios.put(`${apiBaseUrl}/game/${parseCode(gameId)}/join/${colorParam}`, undefined, {
+    const response = await axios.put(`${apiBaseUrl}/game/${parseCode(gameId)}/join/${colorParam}`, undefined, {
         headers: { Authorization: token },
     });
+    return response.data.color;
 }
 
 export function getWsUrl(gameId: string): string {

@@ -2,7 +2,7 @@ import { Button, Result } from 'antd';
 import { useNavigate } from '@tanstack/react-router';
 
 export const ToBeImplemented = () => {
-    const navigate = useNavigate({ from: '/404' });
+    const navigate = useNavigate({ from: '/404' as const });
     return (
         <Result
             status="404"

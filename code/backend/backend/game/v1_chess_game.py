@@ -51,8 +51,9 @@ class ChessGame():
         self.__bot_player:bool = game_creation.against_bot
         self.__calculating:bool = False
 
-        self.timer_white = Timer(datetime.timedelta(minutes=10))
-        self.timer_black = Timer(datetime.timedelta(minutes=10))
+        self.using_timer = game_creation.time != 0
+        self.timer_white = Timer(datetime.timedelta(minutes=game_creation.time))
+        self.timer_black = Timer(datetime.timedelta(minutes=game_creation.time))
         
 
 
@@ -156,6 +157,8 @@ class ChessGame():
 
 
     def _check_times_up(self)->bool:
+        if not self.using_timer:
+            return False
         if self.current_player == Color.WHITE:
             if self.timer_white.is_finished():
                 return True
@@ -250,7 +253,7 @@ class ChessGame():
         game.fen = self.__fen
         game.moves = ','.join(self.__moves)
         game.is_finish = self.__finished
-        game.winner =  Color.WHITE if Color.BLACK == self.current_player else Color.WHITE
+        game.winner =  Color.BLACK if Color.BLACK == self.current_player else Color.WHITE
          
         if self.__finished and game.black_player is not None and game.white_player is not None:
             black = session.query(User).filter(User.user == game.black_player).first()

@@ -5,7 +5,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { Avatar, Button, Flex, Typography } from 'antd';
 
 export const AuthLanding = () => {
-    const navigate = useNavigate({ from: '/' });
+    const navigate = useNavigate({ from: '/' as const });
     const { username } = useAuth();
     const { data: user } = useUserQuery(username);
     const { data } = useUserGamesQuery(username);

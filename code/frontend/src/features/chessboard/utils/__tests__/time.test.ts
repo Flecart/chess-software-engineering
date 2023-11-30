@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createExpireTime, displayTimer, parseTimeDelta } from '../time';
+import { createExpireTime, displayTimer, parseTimeDelta, parseTimings } from '../time';
 
 describe('parseTimeDelta', () => {
     it('should correctly parse a valid time delta', () => {
@@ -97,5 +97,71 @@ describe('displayTimer', () => {
     it('should correctly format time when all values are zero', () => {
         const result = displayTimer(0, 0, 0, 0);
         expect(result).toEqual('00m : 00s');
+    });
+});
+
+describe('parseTimings', () => {
+    it('should correctly parse timings for white', () => {
+        const timings = {
+            time_left_white: '01:30:15',
+            time_left_black: '02:15:30',
+            time_start_white: '2023-11-26T11:41:49.563544',
+            time_start_black: '2023-11-26T12:41:49.563544',
+        };
+        const result = parseTimings('white', timings);
+        expect(result).toEqual({
+            myTimeStart: '2023-11-26T11:41:49.563544',
+            opponentTimeStart: '2023-11-26T12:41:49.563544',
+            myTimeLeft: '01:30:15',
+            opponentTimeLeft: '02:15:30',
+        });
+    });
+
+    it('should correctly parse timings for black', () => {
+        const timings = {
+            time_left_white: '01:30:15',
+            time_left_black: '02:15:30',
+            time_start_white: '2023-11-26T11:41:49.563544',
+            time_start_black: '2023-11-26T12:41:49.563544',
+        };
+        const result = parseTimings('black', timings);
+        expect(result).toEqual({
+            myTimeStart: '2023-11-26T12:41:49.563544',
+            opponentTimeStart: '2023-11-26T11:41:49.563544',
+            myTimeLeft: '02:15:30',
+            opponentTimeLeft: '01:30:15',
+        });
+    });
+
+    it('should correctly handle null timings', () => {
+        const timings = {
+            time_left_white: null,
+            time_left_black: null,
+            time_start_white: null,
+            time_start_black: null,
+        };
+        const result = parseTimings('white', timings);
+        expect(result).toEqual({
+            myTimeStart: null,
+            opponentTimeStart: null,
+            myTimeLeft: '0:0:0',
+            opponentTimeLeft: '0:0:0',
+        });
+    });
+
+    it('should correctly handle partial null timings', () => {
+        const timings = {
+            time_left_white: '01:30:15',
+            time_left_black: null,
+            time_start_white: '2023-11-26T11:41:49.563544',
+            time_start_black: null,
+        };
+        const result = parseTimings('white', timings);
+        expect(result).toEqual({
+            myTimeStart: '2023-11-26T11:41:49.563544',
+            opponentTimeStart: null,
+            myTimeLeft: '01:30:15',
+            opponentTimeLeft: '0:0:0',
+        });
     });
 });

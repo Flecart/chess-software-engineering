@@ -22,6 +22,4 @@ const specificProfileRoute = new Route({
     component: Profile,
 });
 
-export const specificProfileRouteId = specificProfileRoute.id;
-
 export const profileRoutes = profileRoute.addChildren([indexProfileRoute, specificProfileRoute]);
