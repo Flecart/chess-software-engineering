@@ -112,8 +112,7 @@ if __name__ == "__main__":
     from backend.bot.data.enums import Actions
     from mcts import dispatch
 
-    game_type= 'kriegspiel'
-
+    game_type = 'kriegspiel'
 
     def make_move(fen,move):
         input = GameStateInput(game_type,fen,Actions.MOVE,move)    
@@ -131,6 +130,9 @@ if __name__ == "__main__":
     while True:
         command = input("Command: ")
         if command == "move":
+            # NOTA: per risolvere il problema del stateful, si potrebbe estendere dispatch ad accettare un GameState di OpenSpiel,
+            # se ha il gamestate invece di stringa, prova a runnare in altro modo per dire.
+
             my_move = best_move(darkboard.fen)
             darkboard.send_move(my_move)
         else:
