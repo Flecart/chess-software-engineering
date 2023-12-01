@@ -10,3 +10,5 @@ export const gameEnded = signal<boolean>(false);
 export const fen = signal<string>('');
 
 export const winner = signal<boolean>(false);
+
+export const possibleMoves = signal<string[]>([]);
