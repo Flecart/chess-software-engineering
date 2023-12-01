@@ -11,3 +11,8 @@
     overflow: auto;
     height: 80vh;
 }
+
+.chatbox .ant-list-header {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px -30px 36px -28px inset;
+    background-color: #f8f8ff;
+}

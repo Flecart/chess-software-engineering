@@ -156,13 +156,22 @@ export const Game = () => {
             <List
                 header={
                     <Typography.Text strong style={{ fontSize: '1.5em' }}>
-                        CHATBOX
+                        CHAT
                     </Typography.Text>
                 }
                 bordered
                 dataSource={chatData}
                 renderItem={(item) => (
-                    <List.Item>
+                    <List.Item
+                        style={{
+                            backgroundColor: '#e5e4e2',
+                            border: '0.5px solid',
+                            borderColor: 'ActiveBorder',
+                            margin: '10px',
+                            borderRadius: '7px',
+                            boxShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
+                        }}
+                    >
                         <Typography.Text>{item}</Typography.Text>
                     </List.Item>
                 )}
@@ -195,4 +204,53 @@ const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/???
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
 
-const chatData = ['ciao'];
+const chatData = [
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+];
