@@ -39,6 +39,7 @@ export const Game = () => {
                 if (gameEnded.value) winner.value = message.turn !== boardOrientation;
 
                 if (message.possible_moves !== null) possibleMoves.value = message.possible_moves;
+                else possibleMoves.value = [];
 
                 /*
                     timer handling
