@@ -15,6 +15,7 @@ asyncio = "^3.4.3"
 aiohttp = "^3.9.1"
 schedule = "^1.2.1"
 aioschedule = "^0.5.2"
+websocket-client = "^1.6.4"
 
 [tool.poetry.scripts]
 start = "bot:start"
