@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTokenContext } from '@/lib/tokenContext';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Button, Divider, Flex, Form, Select, Typography } from 'antd';
@@ -9,7 +10,8 @@ import type { GameOptions } from '../types';
 export const Pregame = () => {
     const navigate = useNavigate({ from: '/game/' as const });
     const { token, setToken } = useTokenContext();
-    const { bot } = useSearch({ from: '/game/' as const });
+    const { bot, sharedGameId } = useSearch({ from: '/game/' as const });
+    const [gameId, setGameId] = useState<string>(sharedGameId || '');
 
     const checkAndSetToken = async (): Promise<string> => {
         if (!token) {
@@ -70,10 +72,12 @@ export const Pregame = () => {
             {!bot && (
                 <section>
                     <Search
+                        value={gameId}
+                        onChange={(e) => setGameId(e.target.value)}
                         placeholder="Inserisci il codice partita"
                         allowClear
                         enterButton="Unisciti"
-                        onSearch={async (gameId) => {
+                        onSearch={async () => {
                             const sureToken = await checkAndSetToken();
                             const color = await gameApi.joinGame(sureToken, gameId);
 
