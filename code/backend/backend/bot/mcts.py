@@ -112,16 +112,10 @@ def _fen(state, game_type):
     return state.to_string()
 
 
-def find(val, iter) -> int:
-  for i,k in enumerate(iter):
-    if k == val:
-      return i
-  return -1
-
 def _custom_observation_string(state, player_id: int, game_type: str):
   """
   This function is just a quick way to implement the right view, but it is not mantainable,
-  TODO: refactor me, use openspiel api
+  TODO: refactor me, use openspiel api somehow
   """
 
   if game_type != GameType.KRIEGSPIEL:
@@ -144,16 +138,39 @@ def _custom_observation_string(state, player_id: int, game_type: str):
     for j in range(len(rows[i])):
       if rows[i][j].isdigit():
         for k in range(int(rows[i][j])):
-          all_table[i][offsets + k] = '?'
+          all_table[i][offsets + k] = '.'
         offsets += int(rows[i][j])
       elif checker(rows[i][j]):
         all_table[i][offsets] = rows[i][j]
         offsets += 1
       else:
-        all_table[i][offsets] = '?'
+        all_table[i][offsets] = '.'
         offsets += 1
 
   return '/'.join([''.join(row) for row in all_table]) + ' ' + ' '.join(rest)
+
+def _create_chat_bot_message(state, player_id: int, input_struct: GameStateInput):
+  raise NotImplementedError('Not implemented yet')
+
+def _create_observation_string(state, player_id: int, input_struct: GameStateInput):
+  """
+  Parameters
+  ----------
+  state : pyspiel.State
+    The state of the game.
+
+  player_id : int
+    The player for which the observation string is generated.
+  """
+
+  match input_struct.game_type:
+    case GameType.CHESS:
+      return state.observation_string(player_id)
+    case GameType.KRIEGSPIEL:
+      return state.observation_string(player_id)
+    case GameType.DARK_CHESS:
+      return "TODO: implement me"
+      # return _create_chat_bot_message(state, player_id, input_struct)
 
 def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   fen = game_state_input.fen
@@ -178,17 +195,16 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
     
     case Actions.LIST_MOVE:
       out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
-    
+  
+  # TODO: you should refactor this maybe with builder pattern??
+
   out.finish = state.is_terminal()
   out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
   out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)
   out.fen = _fen(state,game_state_input.game_type) 
 
-  # This is currently (30 november) used to get the umpire message in kriegspiel.
-  # in other variant it is probably useless
-
   player_id = 0 if fen.split(' ')[1] == 'w' else 1
-  out.general_message = state.observation_string(player_id)
+  out.general_message = _create_observation_string(state, player_id, game_state_input)
 
   return out
 

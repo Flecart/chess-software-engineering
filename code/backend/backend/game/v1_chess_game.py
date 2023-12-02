@@ -53,7 +53,7 @@ class ChessGame():
         self.timer_white = Timer(datetime.timedelta(minutes=game_creation.time))
         self.timer_black = Timer(datetime.timedelta(minutes=game_creation.time))
 
-        self.__message = game_state.general_message
+        self.__messages: list[str] = []
 
     @property
     def id(self) -> str:
@@ -170,7 +170,7 @@ class ChessGame():
             self.__finished = self.__finished or game_state.finish
             self.__black_view = game_state.black_view
             self.__white_view = game_state.white_view
-            self.__message = game_state.general_message
+            self.__messages.append(game_state.general_message)
 
         if self.__finished:
             self.save_and_update_elo()
@@ -200,7 +200,7 @@ class ChessGame():
             time_start_white=None if self.timer_white.start_time==None else self.timer_white.start_time.isoformat(),
             time_left_black=str(self.timer_black.remaining_time),
             time_left_white=str(self.timer_white.remaining_time),
-            message=str(self.__message)
+            message=self.__messages
         )
     
     def get_bot_move(self, event_loop: asyncio.AbstractEventLoop) -> None:
