@@ -7,9 +7,11 @@ type Props = Readonly<{
 }>;
 
 export const TwitterShareButton = ({ gameId }: Props) => {
-    const encodedGameId = encodeURIComponent(`Gioca con me usando questo id di unione alla partita: ${gameId}`);
-    const encodedUrl = encodeURIComponent(`https://app.t1-check-mates.mooo.com/game`);
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedGameId}&url=${encodedUrl}`;
+    const encodedGameId = encodeURIComponent(
+        `Gioca con me sul sito di Check Mates! Il link per entrare nella partita è:`,
+    );
+    const encodedUrl = encodeURIComponent(`https://app.t1-check-mates.mooo.com/game/?bot=false&sharedGameId=${gameId}`);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedGameId}&url=${encodedUrl}&hashtags=CheckMates,Scacchi,VariantiDiScacchi`;
 
     return (
         <>
