@@ -1,6 +1,6 @@
 import { useTokenContext } from '@/lib/tokenContext';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { Button, Flex, Modal, Typography } from 'antd';
+import { Button, Flex, List, Modal, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTimer, type TimerSettings } from 'react-timer-hook';
 import useWebSocket from 'react-use-websocket';
@@ -112,18 +112,17 @@ export const Game = () => {
     };
 
     return (
-        <Flex wrap="wrap">
-            <section style={{ width: '30%' }}>
-                <Typography.Paragraph
-                    copyable={{
-                        text: gameId,
-                    }}
-                >
-                    Se giochi con una altra persona, condividi l'ID {gameId}!
-                </Typography.Paragraph>
-            </section>
-
+        <Flex wrap="wrap" gap="large" align="center" justify="space-around">
             <Flex vertical gap="small">
+                <section>
+                    <Typography.Paragraph
+                        copyable={{
+                            text: gameId,
+                        }}
+                    >
+                        Se giochi con una altra persona, condividi l'ID {gameId}!
+                    </Typography.Paragraph>
+                </section>
                 <Typography.Title level={3} type={isMyTurn.value ? 'success' : 'danger'}>
                     {isMyTurn.value ? 'È il tuo turno' : "È il turno dell'avversario"}
                 </Typography.Title>
@@ -154,6 +153,32 @@ export const Game = () => {
                 />
             </Flex>
 
+            <List
+                header={
+                    <Typography.Text strong style={{ fontSize: '1.5em' }}>
+                        CHAT
+                    </Typography.Text>
+                }
+                bordered
+                dataSource={chatData}
+                renderItem={(item) => (
+                    <List.Item
+                        style={{
+                            backgroundColor: '#e5e4e2',
+                            border: '0.5px solid',
+                            borderColor: 'ActiveBorder',
+                            margin: '10px',
+                            borderRadius: '7px',
+                            boxShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
+                        }}
+                    >
+                        <Typography.Text>{item}</Typography.Text>
+                    </List.Item>
+                )}
+                className="chatbox"
+                style={{ minWidth: '300px' }}
+            />
+
             {/* Modal to show when game ends */}
             <Modal
                 title={winner.value ? `Hai vinto! ${opponentTimeOverString} 🙂` : `Hai perso! ${myTimeOverString} ☹️`}
@@ -178,3 +203,54 @@ export const Game = () => {
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
+
+const chatData = [
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+    'ciao',
+    'come stai?',
+    'bene grazie',
+    'tu?',
+    'bene anche io',
+    'che fai?',
+    'niente',
+    'ok',
+];
