@@ -58,7 +58,6 @@ class SocketManager:
         """
         game = ChessGameManager().get_game(game_id)
         players_sockets = self.__web_sockets[game_id]
-
         
         for player, socket in players_sockets:
             if game.is_current_player(player) and socket == websocket:

@@ -6,13 +6,13 @@ from open_spiel.python.bots import human
 from open_spiel.python.bots import uniform_random
 import pyspiel
 
-from backend.bot.data.enums import GameType,Actions
+from backend.bot.data.enums import GameType, Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.MCST_player_config import MCSTPlayerConfig
 
 
-def _init_bot(bot_type, game,config):
+def _init_bot(bot_type, game, config):
   """Initializes a bot by type."""
   rng = np.random.RandomState(None)
   if bot_type == "mcts":
@@ -55,17 +55,18 @@ def _create_state(game_name, fen=None):
   params = {}
   if not isChess and isValidFEN:
     params["fen"] = fen
+
   game = pyspiel.load_game(game_name, params)
   state = game.new_initial_state(fen) if isChess and isValidFEN else game.new_initial_state()
-  return game,state
+  return game, state
 
 
 
-def _legal_action_to_uci(game_type,state,fen):
-  return _actions_to_uci(game_type,state,fen,state.legal_actions())
+def _legal_action_to_uci(game_type, state, fen):
+  return _actions_to_uci(game_type, state, fen, state.legal_actions())
 
-def action_to_uci(game_type,state,fen,action):
-  return _actions_to_uci(game_type,state,fen,[action])
+def action_to_uci(game_type, state, fen, action):
+  return _actions_to_uci(game_type,state,fen,[action])[0]
 
 
 def _check_castling(state:str):
@@ -80,21 +81,21 @@ def _check_castling(state:str):
   raise ValueError('Invalid Move')
 
   
-def _actions_to_uci(game_type,state,fen,actions=None):
-  # This code is difficult because it relay on the specific implementation
+def _actions_to_uci(game_type, state, fen, actions=None):
+  # This code is difficult because it relays on the specific implementation
   # of the libraries rather than the actual api
   board = chess.Board(fen)
   
   # transform the san to uci
-
-  transform = lambda x:board.parse_san(state.action_to_string(x)).uci()
-  # kriegspiel is already in uci
+  transform = lambda x: board.parse_san(state.action_to_string(x)).uci()
   if game_type == 'kriegspiel':
+    # kriegspiel is already in uci
     transform = lambda x:state.action_to_string(x)
+
   try:
-    return list(map(transform,actions))
+    return list(map(transform, actions))
   except:
-    # It changes the function which generate the move, to accept illegals moves 
+    # This changes the function used to generate the move, in order to accept illegals moves 
     board.generate_legal_moves = board.generate_pseudo_legal_moves
     def _handle_check_castling(action):
       try:
@@ -104,58 +105,119 @@ def _actions_to_uci(game_type,state,fen,actions=None):
 
     return list(map(_handle_check_castling,actions))
 
-
-def _fen(state,game_type):
+def _fen(state, game_type):
   if game_type == GameType.CHESS:
     return state.observation_string()
   else:
     return state.to_string()
 
 
-def find(val,iter) -> int:
-  for i,k in enumerate(iter):
-    if k == val:
-      return i
-  return -1
+def _custom_observation_string(state, player_id: int, game_type: str):
+  """
+  This function is just a quick way to implement the right view, but it is not mantainable,
+  TODO: refactor me, use openspiel api somehow
+  """
 
-def dispatch(game_state_input:GameStateInput) -> GameStateOutput:
+  if game_type != GameType.KRIEGSPIEL:
+    return state.observation_string(player_id)
+  
+
+  # kriegspiel
+  fen = state.to_string()
+  splitted_fen = fen.split(' ')
+
+  first_part, rest = splitted_fen[0], splitted_fen[1:]
+
+  all_table = [["."] * 8 for _ in range(8)]
+  checker = lambda x: x.isalpha() and x.islower() if player_id == 0 else x.isalpha() and x.isupper()
+
+  # compute correct view for the player
+  rows = first_part.split('/')
+  for i in range(len(rows)):
+    offsets = 0
+    for j in range(len(rows[i])):
+      if rows[i][j].isdigit():
+        for k in range(int(rows[i][j])):
+          all_table[i][offsets + k] = '.'
+        offsets += int(rows[i][j])
+      elif checker(rows[i][j]):
+        all_table[i][offsets] = rows[i][j]
+        offsets += 1
+      else:
+        all_table[i][offsets] = '.'
+        offsets += 1
+
+  return '/'.join([''.join(row) for row in all_table]) + ' ' + ' '.join(rest)
+
+def _create_chat_bot_message(state, player_id: int, input_struct: GameStateInput):
+  raise NotImplementedError('Not implemented yet')
+
+def _create_observation_string(state, player_id: int, input_struct: GameStateInput):
+  """
+  Parameters
+  ----------
+  state : pyspiel.State
+    The state of the game.
+
+  player_id : int
+    The player for which the observation string is generated.
+  """
+
+  match input_struct.game_type:
+    case GameType.CHESS:
+      return state.observation_string(player_id)
+    case GameType.KRIEGSPIEL:
+      return state.observation_string(player_id)
+    case GameType.DARK_CHESS:
+      return "TODO: implement me"
+      # return _create_chat_bot_message(state, player_id, input_struct)
+
+def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
   fen = game_state_input.fen
-  game,state = _create_state(game_state_input.game_type,fen)
-  out= GameStateOutput()
+  game, state = _create_state(game_state_input.game_type, fen)
+  out = GameStateOutput()
 
   match game_state_input.action:
     case Actions.MOVE:
-      ind = find(game_state_input.move,_legal_action_to_uci(game_state_input.game_type,state,fen))
-      if ind ==-1:
+      try:
+        index = _legal_action_to_uci(game_state_input.game_type, state, fen).index(game_state_input.move)
+      except ValueError:
         raise ValueError('Invalid Move')
-      state.apply_action(state.legal_actions()[ind])
-      fen =  _fen(state,game_state_input.game_type)
+      
+      state.apply_action(state.legal_actions()[index])
+      fen = _fen(state, game_state_input.game_type)
 
     case Actions.MAKE_BEST_MOVE:
-      action = _get_best_move(game,state) 
-      out.best_move = action_to_uci(game_state_input.game_type,state,fen,action)
+      action = _get_best_move(game, state) 
+      out.best_move = action_to_uci(game_state_input.game_type, state, fen, action)
       state.apply_action(action)
       fen =  _fen(state,game_state_input.game_type)
     
     case Actions.LIST_MOVE:
-      out.possible_moves = _legal_action_to_uci(game_state_input.game_type,state,fen)
-    
+      out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
+  
+  # TODO: you should refactor this maybe with builder pattern??
+
   out.finish = state.is_terminal()
-  out.white_view = state.observation_string(1)
-  out.black_view = state.observation_string(0)
-  out.fen =_fen(state,game_state_input.game_type) 
+  out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
+  out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)
+  out.fen = _fen(state,game_state_input.game_type) 
+
+  player_id = 0 if fen.split(' ')[1] == 'w' else 1
+  out.general_message = _create_observation_string(state, player_id, game_state_input)
+
   return out
 
 
-def _print_game_state_output(out:GameStateOutput):
-  print('white_view',out.white_view)
-  print('black_view',out.black_view)
-  print('possible_moves',out.possible_moves)
-  print('best_move',out.best_move)
-  print('fen',out.fen)
+def _print_game_state_output(out: GameStateOutput):
+  print('white_view', out.white_view)
+  print('black_view', out.black_view)
+  print('possible_moves', out.possible_moves)
+  print('best_move', out.best_move)
+  print('fen', out.fen)
+  print('message', out.general_message)
 
-
-def main():
+def __test_dark_chess():
   game = GameStateInput("", "",[],None)
   game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
   game.game_type= 'dark_chess'
@@ -164,5 +226,29 @@ def main():
   _print_game_state_output(val)
   
 
+def __test_kriegspiel():
+  game = GameStateInput("", "",[],None)
+  game.fen = '4r1k1/8/8/8/8/8/8/R3K2R b KQ - 0 1'
+  game.game_type= 'kriegspiel'
+  game.action = Actions.LIST_MOVE
+  val = dispatch(game)
+  _print_game_state_output(val)
+
+def __capture_test_kriegspiel():
+  game = GameStateInput(
+    game_type="kriegspiel", 
+    fen="rnbqk1nr/ppp2B1p/8/2b3p1/4P3/8/PPPP1PPP/RNBQK1NR b KQkq - 0 5",
+    action=Actions.MOVE,
+    move="c5f2")
+  
+  val = dispatch(game)
+  if val.fen == game.fen:
+    print("there is a bug")
+
+  _print_game_state_output(val)
+
+
 if __name__ == '__main__':
-  main()
+  #   __test_dark_chess()
+  # __test_kriegspiel()
+  __capture_test_kriegspiel()

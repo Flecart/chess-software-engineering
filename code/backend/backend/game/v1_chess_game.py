@@ -8,15 +8,13 @@ from backend.routes.game.data import CreateGameRequest, GameStatusResponse
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.enums import Actions
+import backend.game.utils as utils
 
 from backend.bot.data.enums import GameType
 from .utils import START_POSITION_FEN, Color 
 import backend.bot.mcts as engine
 
-
 _BOT_USERNAME = Config()['bot']
-
-
 
 class ChessGame():
     # TODO: definisci la tipologia di mosse
@@ -48,35 +46,14 @@ class ChessGame():
         self.__white_player: str|None = None
         self.__black_player: str|None = None
 
-        self.__bot_player:bool = game_creation.against_bot
-        self.__calculating:bool = False
+        self.__bot_player: bool = game_creation.against_bot
+        self.__calculating: bool = False
 
         self.using_timer = game_creation.time != 0
         self.timer_white = Timer(datetime.timedelta(minutes=game_creation.time))
         self.timer_black = Timer(datetime.timedelta(minutes=game_creation.time))
-        
 
-
-    
-    def _join_save(self):
-        session = get_db_without_close()
-        get_user = lambda user: session.query(User).\
-                            filter(User.user == user).first()
-        game = session.query(Game)\
-            .filter(Game.game_id == self.__id).first()
-        if self.__white_player is not None:
-            user = get_user(self.__white_player)
-            if user is not None:
-                game.white_player = user.user
-
-        if self.__black_player is not None:
-            user = get_user(self.__black_player)
-            if user is not None:
-                game.black_player = user.user
-        
-        session.commit()
-        session.close()
-
+        self.__messages: list[str] = []
 
     @property
     def id(self) -> str:
@@ -134,8 +111,6 @@ class ChessGame():
 
         self._join_save()
 
-
-
     def get_player_color(self, username: str) -> Color | None:
         """
         Get the color of a player from its username.
@@ -154,7 +129,6 @@ class ChessGame():
     def get_best_move(self) -> str:
         game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MAKE_BEST_MOVE, None))
         return game_state.best_move
-
 
     def _check_times_up(self)->bool:
         if not self.using_timer:
@@ -180,26 +154,28 @@ class ChessGame():
             self.timer_black.start()
 
 
-    def move(self, move: str) -> None:
+    def move(self, move: str) -> str|None:
         self._stop_timer()
         self.__finished = self._check_times_up() 
 
         if not self.__finished:
             game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
-            self.__moves.append(move)
+            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE:
+                self.__moves.append(move)
+
             self._start_timer()
 
             self.__fen = game_state.fen
+
             self.__finished = self.__finished or game_state.finish
             self.__black_view = game_state.black_view
             self.__white_view = game_state.white_view
+            self.__messages.append(game_state.general_message)
 
         if self.__finished:
             self.save_and_update_elo()
 
-
-        
-
+        return game_state.general_message
 
     def get_player_response(self,
                             color: Color,
@@ -224,19 +200,39 @@ class ChessGame():
             time_start_white=None if self.timer_white.start_time==None else self.timer_white.start_time.isoformat(),
             time_left_black=str(self.timer_black.remaining_time),
             time_left_white=str(self.timer_white.remaining_time),
+            message=self.__messages
         )
     
-    def get_bot_move(self,event_loop:asyncio.AbstractEventLoop) -> None:
-        if self.__finished or (not self.__bot_player) \
-              or self.__calculating:
+    def get_bot_move(self, event_loop: asyncio.AbstractEventLoop) -> None:
+        if self.__finished or (not self.__bot_player) or self.__calculating:
             return
         bot_color = self.get_player_color(_BOT_USERNAME)
 
+        def make_bot_move(game: "ChessGame"):
+            def find_bot_move(possible_moves: list[str]) -> str:
+                while move not in possible_moves:  # kriegspiel mode
+                    print(f"[bot player]: move {move} not in valid")
 
-        def make_bot_move(game):
             game.__calculating = True
+            move = None
+            available_moves = game.get_moves()
             move = game.get_best_move()
-            game.move(move[0])
+
+            # NOTA: questa parte potrebbe essere migliorata, ma esattamente non so in che modo
+            # attualmente il bot di kriegspiel sbaglia mosse
+            while True:
+                if move not in available_moves:
+                    # TODO: check if this if-branch is necessary
+                    move = game.get_best_move()
+                    continue
+
+                message = game.move(move)
+                if message != utils.KRIEGSPIEL_INVALID_MOVE:
+                    break
+
+                print(f"[bot player]: move {move} is invalid with message {message}")
+                move = game.get_best_move()
+
             game.__calculating = False
             from backend.game.v1_socket_manager import SocketManager
             event_loop.create_task(SocketManager().notify_opponent(game.__id, bot_color))
@@ -278,9 +274,24 @@ class ChessGame():
         session.commit()
         session.close()
 
-         
-
-
     def __create_game_state_action(self, action:Actions, move: str|None=None) -> GameStateInput:
         return GameStateInput(self.__type, self.__fen, action, move)
-    
+
+    def _join_save(self):
+        session = get_db_without_close()
+        get_user = lambda user: session.query(User).\
+                            filter(User.user == user).first()
+        game = session.query(Game)\
+            .filter(Game.game_id == self.__id).first()
+        if self.__white_player is not None:
+            user = get_user(self.__white_player)
+            if user is not None:
+                game.white_player = user.user
+
+        if self.__black_player is not None:
+            user = get_user(self.__black_player)
+            if user is not None:
+                game.black_player = user.user
+        
+        session.commit()
+        session.close()
