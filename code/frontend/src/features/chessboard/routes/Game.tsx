@@ -1,3 +1,4 @@
+import { TwitterShareButton } from '@/features/social';
 import { useTokenContext } from '@/lib/tokenContext';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, List, Modal, Typography } from 'antd';
@@ -7,10 +8,9 @@ import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
-import { fen, gameEnded, isMyTurn, possibleMoves, winner } from '../hooks/gamestate';
+import { chatLog, fen, gameEnded, isMyTurn, possibleMoves, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime, parseTimings } from '../utils/time';
-import { TwitterShareButton } from '@/features/social';
 
 export const Game = () => {
     const { gameId } = useParams({ from: '/game/$gameId' as const });
@@ -41,6 +41,9 @@ export const Game = () => {
 
                 if (message.possible_moves !== null) possibleMoves.value = message.possible_moves;
                 else possibleMoves.value = [];
+
+                // updating chat log
+                chatLog.value = message.message;
 
                 /*
                     timer handling
@@ -165,7 +168,7 @@ export const Game = () => {
                     </Typography.Text>
                 }
                 bordered
-                dataSource={chatData}
+                dataSource={chatLog.value}
                 renderItem={(item) => (
                     <List.Item
                         style={{
@@ -208,54 +211,3 @@ export const Game = () => {
 const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../????????/????????/????????/????????';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
 // ^ white fen is '????????/????????/????????/????????/......../......../PPPPPPPP/RNBQKBNR';
-
-const chatData = [
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-    'ciao',
-    'come stai?',
-    'bene grazie',
-    'tu?',
-    'bene anche io',
-    'che fai?',
-    'niente',
-    'ok',
-];
