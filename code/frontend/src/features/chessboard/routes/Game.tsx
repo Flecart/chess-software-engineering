@@ -10,6 +10,7 @@ import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn, possibleMoves, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime, parseTimings } from '../utils/time';
+import { TwitterShareButton } from '@/features/social';
 
 export const Game = () => {
     const { gameId } = useParams({ from: '/game/$gameId' as const });
@@ -122,6 +123,10 @@ export const Game = () => {
                     >
                         Se giochi con una altra persona, condividi l'ID {gameId}!
                     </Typography.Paragraph>
+                    <Flex gap="small">
+                        <Typography.Paragraph>Oppure postalo sui social!</Typography.Paragraph>
+                        <TwitterShareButton gameId={gameId} />
+                    </Flex>
                 </section>
                 <Typography.Title level={3} type={isMyTurn.value ? 'success' : 'danger'}>
                     {isMyTurn.value ? 'È il tuo turno' : "È il turno dell'avversario"}

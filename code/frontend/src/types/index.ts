@@ -8,6 +8,7 @@ export type GameRouteSearch = {
 
 export type PregameRouteSearch = {
     bot: boolean;
+    sharedGameId?: string;
 };
 
 export type ErrorResponseData = {
