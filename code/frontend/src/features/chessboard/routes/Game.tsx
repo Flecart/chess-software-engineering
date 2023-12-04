@@ -54,25 +54,26 @@ export const Game = () => {
                     Se uno dei due è null, allora devo metterlo in pausa senza variare il tempo
                     mentre quello non null deve essere aggiornato e fatto partire
                 */
-                const { myTimeStart, opponentTimeStart, myTimeLeft, opponentTimeLeft } = parseTimings(
-                    boardOrientation,
-                    message,
-                );
+                if (message.using_timer) {
+                    const { myTimeStart, opponentTimeStart, myTimeLeft, opponentTimeLeft } = parseTimings(
+                        boardOrientation,
+                        message,
+                    );
+                    if (myTimeStart === null && opponentTimeStart === null) {
+                        const myNewTimestamp = createExpireTime(null, myTimeLeft);
+                        myTimer.restart(myNewTimestamp, false);
 
-                if (myTimeStart === null && opponentTimeStart === null) {
-                    const myNewTimestamp = createExpireTime(null, myTimeLeft);
-                    myTimer.restart(myNewTimestamp, false);
-
-                    const opponentNewTimestamp = createExpireTime(null, opponentTimeLeft);
-                    opponentTimer.restart(opponentNewTimestamp, false);
-                } else if (myTimeStart === null) {
-                    myTimer.restart(createExpireTime(null, myTimeLeft));
-                    myTimer.pause();
-                    opponentTimer.restart(createExpireTime(opponentTimeStart, opponentTimeLeft));
-                } else if (opponentTimeStart === null) {
-                    opponentTimer.restart(createExpireTime(null, opponentTimeLeft));
-                    opponentTimer.pause();
-                    myTimer.restart(createExpireTime(myTimeStart, myTimeLeft));
+                        const opponentNewTimestamp = createExpireTime(null, opponentTimeLeft);
+                        opponentTimer.restart(opponentNewTimestamp, false);
+                    } else if (myTimeStart === null) {
+                        myTimer.restart(createExpireTime(null, myTimeLeft));
+                        myTimer.pause();
+                        opponentTimer.restart(createExpireTime(opponentTimeStart, opponentTimeLeft));
+                    } else if (opponentTimeStart === null) {
+                        opponentTimer.restart(createExpireTime(null, opponentTimeLeft));
+                        opponentTimer.pause();
+                        myTimer.restart(createExpireTime(myTimeStart, myTimeLeft));
+                    }
                 }
             }
         },

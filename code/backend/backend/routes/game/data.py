@@ -18,6 +18,7 @@ class GameStatusResponse(BaseModel):
     view: str
     move_made: str | None
     turn: Literal["white", "black"]
+    using_timer: bool
     time_left_white:str|None  #should also be added from when
     time_left_black: str|None
     time_start_white: str|None
