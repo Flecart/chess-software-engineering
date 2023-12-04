@@ -12,3 +12,6 @@ export const fen = signal<string>('');
 export const winner = signal<boolean>(false);
 
 export const possibleMoves = signal<string[]>([]);
+
+// chat log
+export const chatLog = signal<string[]>([]);

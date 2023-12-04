@@ -6,6 +6,7 @@ type GameState = {
     view: string;
     move_made: null | string;
     turn: color;
+    message: string[];
 
     // TODO: refactor next sprint
     time_left_white: string;
