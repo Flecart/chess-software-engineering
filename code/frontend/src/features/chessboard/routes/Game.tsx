@@ -26,7 +26,14 @@ export const Game = () => {
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
 
-            if (message && 'ended' in message) {
+            if (message && 'waiting' in message && opponentTimer.totalSeconds <= 0) {
+                // è un messaggio di tipo waiting
+                // se il timer dell'avversario è scaduto, allora la partita è finita
+                gameEnded.value = true;
+                winner.value = true;
+            }
+
+            if (message && !('waiting' in message)) {
                 // è un messaggio di tipo gamestate
 
                 // turn handling
