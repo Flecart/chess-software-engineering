@@ -21,7 +21,7 @@ websocket-client = "^1.6.4"
 coverage = "^7.3.2"
 
 [tool.poetry.scripts]
-start = 'backend:start'
+start = 'bot:start'
 tests = 'tests:tests'
 
 
