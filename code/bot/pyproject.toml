@@ -17,20 +17,25 @@ schedule = "^1.2.1"
 aioschedule = "^0.5.2"
 websocket-client = "^1.6.4"
 
-[tool.poetry.scripts]
-start = "bot:start"
+[tool.poetry.group.test.dependencies]
+coverage = "^7.3.2"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
+[tool.poetry.scripts]
+start = 'backend:start'
+tests = 'tests:tests'
+
+
+[tool.coverage.run]
+branch = true
+source = ["bot"]
+command_line = "-m unittest"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-ra -q --capture=no"
-testpaths = [
-    "tests",
-]
-pythonpath = "." # adds the current directory to sys.path

@@ -1,12 +1,12 @@
 from telebot import types
 
-from utils import getUserAndChatFromMessage
+from bot.utils import getUserAndChatFromMessage
 from .singleton import SingletonMeta
 
-class BallotBoxCollection(metaclass=SingletonMeta):
 
-    _vote: dict[int,dict[str,list[int]]] = {}
-    '''
+class BallotBoxCollection(metaclass=SingletonMeta):
+    _vote: dict[int, dict[str, list[int]]] = {}
+    """
     _vote :: { (chat_id) -> { (move) -> ([user_id]) } }
     votes :: { (move) -> votes_given }  #TO CHANGE
 
@@ -15,9 +15,9 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         value a dictionary with
             key the move
             value a userid list of users that voted that move
-    '''
+    """
 
-    def _getBallotBox(self, ballotbox : int):
+    def _getBallotBox(self, ballotbox: int):
         chat = ballotbox
 
         if chat not in self._vote.keys():
@@ -25,8 +25,7 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
         return self._vote[chat]
 
-
-    def add_vote(self, ballotbox : int, user : int, vote : str) -> None:
+    def add_vote(self, ballotbox: int, user: int, vote: str) -> None:
         """
         Add a vote to a move
         """
@@ -42,16 +41,13 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
         votes[vote].append(user)
 
-
-    def reset_box(self, ballotbox : int):
+    def reset_box(self, ballotbox: int):
         """
-        Reset votes 
+        Reset votes
         """
         self._vote.pop(ballotbox)
 
-
-    def mostVoted(self, ballotbox : int):
-
+    def mostVoted(self, ballotbox: int):
         if ballotbox not in self._vote.keys():
             self._vote[ballotbox] = dict()
 
