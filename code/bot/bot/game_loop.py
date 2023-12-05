@@ -4,7 +4,7 @@ from telebot.async_telebot import AsyncTeleBot
 from bot.api_utils import create_game, delete_game, get_possible_moves, make_move, wait_opponent_move
 from bot.ws_utils import GameStatus, WebSocketWrapper
 from bot.src.ballot_box_collection import BallotBoxCollection
-
+from bot.display_board import custom_fen_to_svg
 
 async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
     """
@@ -23,7 +23,8 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
 
         # get bot move
 
-        await bot.send_message(chatid, gamestatus['view'] )
+        #await bot.send_message(chatid, gamestatus['view'] )
+        await bot.send_photo(chatid, custom_fen_to_svg(gamestatus['view'])) 
 
         if gamestatus['ended']:
             await bot.send_message(chatid,'partita finita!!!')
@@ -59,10 +60,13 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
         gamestatus = await make_move(ws,max_voted)
 
 
+        """
         await bot.send_message(
             chatid,
             f'ecco la board aggiornata {gamestatus["view"] }'
         )
+        """
+        await bot.send_photo(chatid, custom_fen_to_svg(gamestatus['view'])) 
 
         gamestatus = await wait_opponent_move(ws)
 

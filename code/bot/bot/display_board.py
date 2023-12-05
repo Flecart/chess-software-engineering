@@ -13,7 +13,7 @@ def _to_standard_fen(fen):
                 newFen += str(countEmptyCell)
             newFen += '/'
             countEmptyCell = 0
-        elif fen[0][i] == 'X':
+        elif fen[0][i] == '?':
             countEmptyCell += 1
         elif fen[0][i].isdigit():
             countEmptyCell += int(fen[0][i])
@@ -42,7 +42,7 @@ def _get_not_visible_squares(fen):
             col+=int(fen[i])
         else:
             col+=1
-            if fen[i] == 'X':
+            if fen[i] == '?':
                 position.append((row,col))
 
     return position
