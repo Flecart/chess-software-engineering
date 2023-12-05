@@ -1,6 +1,3 @@
-from telebot import types
-
-from bot.utils import getUserAndChatFromMessage
 from .singleton import SingletonMeta
 
 
