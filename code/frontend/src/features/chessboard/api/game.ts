@@ -37,3 +37,10 @@ export async function joinGame(token: jwt_token, gameId: string, color: null | c
 export function getWsUrl(gameId: string): string {
     return `${wsUrl}/api/v1/game/${parseCode(gameId)}/ws`;
 }
+
+// Darkboard related functions
+
+export async function poll(): Promise<string> {
+    const response = await axios.get<string>(`${apiBaseUrl}/darkboard/poll`);
+    return response.data;
+}

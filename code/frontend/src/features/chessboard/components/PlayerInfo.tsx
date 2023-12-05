@@ -13,11 +13,15 @@ type Props = Readonly<{
         hours: number;
         days: number;
     };
+    givenUsername?: string;
 }>;
 
-export const PlayerInfo = ({ myTurn, opponent, time }: Props) => {
+// NOTA: per ragioni di refactorabilità sarebbe meglio usare un componente in stile funzionale
+// ossia che non abbia dipendenze esterne come l'uso di Hooks.
+// però va bene anche così, la priorità è che funzioni.
+export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => {
     const { isGuest, username: myUsername } = useAuth();
-    const username = opponent ? 'Avversario' : myUsername;
+    const username = givenUsername ?? (opponent ? 'Avversario' : myUsername);
     const { seconds, minutes, hours, days } = time;
 
     const { data: user } = useUserQuery(username, !isGuest && !opponent);

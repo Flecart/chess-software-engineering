@@ -36,6 +36,17 @@ export const Landing = () => {
                     Gioca Online
                 </Button>
             </Flex>
+            <Flex justify="center" gap={100} wrap="wrap" style={{ width: '100%', marginTop: '2rem' }}>
+                <Button
+                    type="primary"
+                    size="large"
+                    onClick={() => {
+                        navigate({ to: '/darkboard' });
+                    }}
+                >
+                    Guarda Darkboard - OpenSpiel
+                </Button>
+            </Flex>
         </Flex>
     );
 };
