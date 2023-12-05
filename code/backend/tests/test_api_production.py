@@ -31,7 +31,6 @@ def _play_moves(websocket,name,moves):
         time.sleep(0.1)
         websocket.send(json.dumps({"kind": "move", "data":move }))
         message = json.loads(websocket.recv())
-        print(name,message)
         if checked(message):
             return i
         message = _go_listening_until_move(websocket,name)
@@ -40,6 +39,7 @@ def _play_moves(websocket,name,moves):
         
     return None
 
+@unittest.skip('Old api')
 class TestApiGame(unittest.TestCase):
     
     def _two_player_play(self,white,black,moves_white,moves_black,game_id):
@@ -72,7 +72,6 @@ class TestApiGame(unittest.TestCase):
             'username':user,
             'password':psw
         }).json()
-        print(data)
         return data
 
 
@@ -100,6 +99,7 @@ class TestApiGame(unittest.TestCase):
 
 
 
+    @unittest.skip("Only used for first population")
     def test_leaderboard(self):
         credentials = [['gio','gio'], ['pische','pische'], ['angi','angi'], ['fil','fil'],
                        ['diego','diego'],['alle','alle'],['berny','berny'],
@@ -129,7 +129,6 @@ class TestApiGame(unittest.TestCase):
 
         for (w,b) in versus:
             game_id = requests.post(self.base_url_api + "/game",headers=_auth(jwt[w]),json=default_game_body(False)).json()
-            print('created ',game_id)
             requests.put(self.base_url_api + f"/game/{game_id}/join/white",headers=_auth(jwt[w])).json()
             requests.put(self.base_url_api + f"/game/{game_id}/join/black",headers=_auth(jwt[b])).json()
             self._two_player_play(jwt[w],jwt[b],moves_white,moves_black,game_id)
