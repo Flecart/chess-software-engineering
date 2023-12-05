@@ -7,7 +7,7 @@ def _to_standard_fen(fen):
     fen = fen.split(" ")
     count_empty_cell = 0
     new_fen = ""
-    # we transform the first part of fen that contains X to a normal fen
+    # we transform the first part of fen that contains ? to a normal fen
     for i in range(len(fen[0])):
         if fen[0][i] == "/":
             if count_empty_cell > 0:
