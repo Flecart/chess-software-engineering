@@ -1,4 +1,5 @@
 import websocket
+import asyncio
 
 from bot.config import backend as backend_url
 
@@ -42,4 +43,32 @@ def sendReceiveMessage(url: str, message: str):
 
 
 def getWsUrl(gameId: str, token: str) -> str:
-    return f"ws://{backend_url}/api/v1/game/{gameId}/{token}/ws"
+    return f"ws://{backend_url}/api/v1/game/{gameId}/ws/?token={token}"
+
+
+class WebSocketWrapper:
+    def __init__(self, game_id: str, token: str):
+        self.game_id = game_id
+        self.token = token
+        self.ws = None
+        self.url = (
+            f"ws://{backend_url}/api/v1/game/{self.game_id}/ws/?token={self.token}"
+        )
+
+    def connect(self):
+        self.ws = websocket.WebSocket()
+        self.ws.connect(self.get_ws_url())
+
+    def get_ws_url(self) -> str:
+        return self.url
+
+    def close(self):
+        if self.ws:
+            self.ws.close()
+
+    def send(self, msg: str):
+        self.ws.send(msg)
+
+    async def recv(self):
+        result = await asyncio.get_event_loop().run_in_executor(None, self.ws.recv)
+        return result
