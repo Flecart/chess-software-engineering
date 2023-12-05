@@ -51,4 +51,15 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         votes = self._getBallotBox(ballotbox)
         if len(votes) == 0:
             return None
-        return max(votes, key=lambda k: len(votes[k]))
+        
+        conteggio = {}
+
+        for elemento in votes:
+            if elemento in conteggio:
+                conteggio[elemento] += 1
+            else:
+                conteggio[elemento] = 1
+        max_freq = max(conteggio.values())
+        max_freq_arr: list[str] = [elemento for elemento, frequenza in conteggio.items() if frequenza == max_freq]
+
+        return max_freq_arr

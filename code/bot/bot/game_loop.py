@@ -81,7 +81,7 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
             await bot.send_message(chatid, "Partita finita.")
             break
 
-        gamestatus = await make_move(ws, max_voted)
+        gamestatus = await make_move(ws, random.choice(max_voted))
 
         await bot.send_photo(chatid, custom_fen_to_svg(gamestatus["view"]))
 
