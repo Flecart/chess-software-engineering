@@ -13,6 +13,7 @@ from bot.utils import pretty_print_time
 from bot.ws_utils import WebSocketWrapper
 from bot.src.ballot_box_collection import BallotBoxCollection
 from bot.display_board import custom_fen_to_svg
+from bot.src.valid_moves_mapper import ValidMovesMapper
 
 
 async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
@@ -40,6 +41,7 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
             break
 
         possible_moves = await get_possible_moves(ws)
+        ValidMovesMapper().add(chatid, possible_moves)
         ws.close()
 
         # start time to vote
@@ -88,4 +90,5 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
         # get bot move
         gamestatus = await wait_opponent_move(ws)
 
+    ValidMovesMapper().remove(chatid)
     delete_game(chatid)

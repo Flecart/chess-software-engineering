@@ -9,6 +9,7 @@ from bot.game_loop import game_loop
 from bot.config import API_TOKEN, DEBUG, TIME_TO_VOTE_IN_SECONDS
 from bot.src.ballot_box_collection import BallotBoxCollection
 from bot.utils import get_user_and_chat_from_message
+from bot.src.valid_moves_mapper import ValidMovesMapper
 
 # logger = telebot.logger
 
@@ -50,6 +51,11 @@ async def vote(message: types.Message):
     else:
         pass
     (chad_id, user_id) = get_user_and_chat_from_message(message)
+    valid_moves = ValidMovesMapper().get(chad_id)
+    if valid_moves is not None:
+        if args not in valid_moves:
+            await bot.reply_to(message, "Mossa invalida")
+            return
     try:  # demo
         BallotBoxCollection().add_vote(chad_id, user_id, vote=args)
     except Exception as e:
