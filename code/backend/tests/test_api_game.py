@@ -93,7 +93,7 @@ class TestApiGame(unittest.TestCase):
         self.host =f"{config['host']}:{config['port']}"
         self.base_url = f'http://{self.host}'
         self.base_url_api = f'{self.base_url}/api/v1'
-        self.websocket_url = lambda game_id,x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
+        self.websocket_url = lambda game_id, token: f"ws://{self.host}/api/v1/game/{game_id}/ws?token={token}"
     
 
     def _create_guest_user(self)->str:

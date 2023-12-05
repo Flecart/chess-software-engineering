@@ -40,7 +40,7 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         return ChessGameManager().create_new_game(req)
 
     @app.websocket(prefix + "/{game_id}/ws")
-    async def web_socket(game_id: int,token:str, websocket: WebSocket):
+    async def web_socket(game_id: int, token: str, websocket: WebSocket):
         """
         this web socket should be joined by a user to play
 
