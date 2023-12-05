@@ -8,6 +8,7 @@ import asyncio
 from bot.game_loop import game_loop
 from bot.config import API_TOKEN, DEBUG, TIME_TO_VOTE_IN_SECONDS
 from bot.src.ballot_box_collection import BallotBoxCollection
+from bot.utils import getUserAndChatFromMessage
 
 # logger = telebot.logger
 
@@ -48,15 +49,15 @@ async def vote(message: types.Message):
         _, args = message.text.split(" ", 1)
     else:
         pass
-
+    (chadId,userId) = getUserAndChatFromMessage(message)
     try:  # demo
-        BallotBoxCollection().add_vote(message, vote=args)
+        BallotBoxCollection().add_vote(chadId, userId, vote=args)
     except Exception as e:
         await bot.reply_to(message, str(e))
     else:
         await bot.reply_to(
             message,
-            f"non implemtato, ma per il momento la mossa più votata è {BallotBoxCollection().mostVoted(message)}",
+            f"non implemtato, ma per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chadId)}",
         )
 
 

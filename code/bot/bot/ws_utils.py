@@ -72,9 +72,16 @@ class WebSocketWrapper:
         self.ws = None
         self.url = f"{ws_url}{api_base_url}/game/{self.game_id}/ws?token={self.token}"
 
-    def connect(self):
+    async def connect(self) -> GameStatus:
         self.ws = websocket.WebSocket()
         self.ws.connect(self.get_ws_url())
+        
+        response = await self.recv()
+        
+        if "waiting" in response:
+            raise ValueError("Unexpected waiting status")
+
+        return response
 
     def get_ws_url(self) -> str:
         return self.url

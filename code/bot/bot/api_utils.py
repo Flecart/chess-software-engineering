@@ -49,12 +49,14 @@ async def make_move(ws: WebSocketWrapper, move: str):
     return response
 
 
-async def get_possible_moves(ws: WebSocketWrapper):
+async def get_possible_moves(ws: WebSocketWrapper) -> list[str]:
     ws.send({"kind": "list_move", "data": ""})
     response = await ws.recv()
     if "waiting" in response:
         raise ValueError("Unexpected waiting status")
-    return response
+    if response['possible_moves'] is None:
+        raise TypeError()
+    return response['possible_moves']
 
 
 async def wait_opponent_move(ws: WebSocketWrapper):
