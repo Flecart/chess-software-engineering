@@ -1,4 +1,3 @@
-import random
 import telebot
 from telebot import async_telebot as as_telebot
 import telebot.types as types

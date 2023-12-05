@@ -1,5 +1,6 @@
 from .singleton import SingletonMeta
 
+
 class GameMapper(metaclass=SingletonMeta):
     """
     Maps the chatid to the game
@@ -7,7 +8,7 @@ class GameMapper(metaclass=SingletonMeta):
 
     _games: dict[int, int] = {}
 
-    def add(self, chatid:int ,game:int):
+    def add(self, chatid: int, game: int):
         self._games[chatid] = game
 
     def get(self, chatid: int):
@@ -15,4 +16,3 @@ class GameMapper(metaclass=SingletonMeta):
 
     def remove(self, chatid: int):
         self._games.pop(chatid)
-

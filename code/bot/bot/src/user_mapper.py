@@ -1,14 +1,14 @@
 from .singleton import SingletonMeta
 
+
 class UserMapper(metaclass=SingletonMeta):
     """
-    Used to Map chatid to token
+    Maps the chatid to the token
     """
 
     _paired_users: dict[int, str] = {}
 
-
-    def add(self, chatid:int ,token:str):
+    def add(self, chatid: int, token: str):
         self._paired_users[chatid] = token
 
     def get(self, chatid: int):
