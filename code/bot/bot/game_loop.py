@@ -1,5 +1,6 @@
 import asyncio
 from datetime import timedelta
+import random
 from telebot.async_telebot import AsyncTeleBot
 from bot.api_utils import (
     create_game,
@@ -61,6 +62,24 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
         BallotBoxCollection().reset_box(chatid)
 
         await ws.connect()
+
+        # funny easter egg for the time
+        mid_time = round(time / 2)
+        remaining_mid_time = timedelta(seconds=mid_time)
+        if max_voted is None:
+            await bot.send_message(chatid, "Hey! C'è ancora qualcuno?")
+            await bot.send_message(chatid, f'Va bhe, sono buono, vi darò ancora tempo, ma solo {pretty_print_time(remaining_mid_time)}')
+            await asyncio.sleep(mid_time)
+            max_voted = BallotBoxCollection().mostVoted(chatid)
+        if max_voted is None:
+            await bot.send_message(chatid, "Ehi! Non mi prendete in giro!")
+            await bot.send_message(chatid, "Se non votate, vi do una mossa a caso(ricordatevi la legge di Murphy!)")
+            await asyncio.sleep(mid_time)
+            max_voted = BallotBoxCollection().mostVoted(chatid)
+        if max_voted is None:
+            await bot.send_message(chatid, "Ok, basta, io me ne vado!")
+            await bot.send_message(chatid, "Partita finita.")
+            break
 
         gamestatus = await make_move(ws, max_voted)
 

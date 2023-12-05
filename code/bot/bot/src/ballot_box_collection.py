@@ -49,4 +49,6 @@ class BallotBoxCollection(metaclass=SingletonMeta):
             self._vote[ballotbox] = dict()
 
         votes = self._getBallotBox(ballotbox)
+        if len(votes) == 0:
+            return None
         return max(votes, key=lambda k: len(votes[k]))
