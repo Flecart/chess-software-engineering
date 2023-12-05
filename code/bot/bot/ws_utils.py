@@ -44,7 +44,7 @@ def sendReceiveMessage(url: str, message: str):
     return response_message
 
 
-def getWsUrl(gameId: str, token: str) -> str:
+def getWsUrl(gameId: int, token: str) -> str:
     return f"{ws_url}/api/v1/game/{gameId}/ws/?token={token}"
 
 
@@ -66,7 +66,7 @@ class WaitingStatus(TypedDict):
 
 
 class WebSocketWrapper:
-    def __init__(self, game_id: str, token: str):
+    def __init__(self, game_id: int, token: str):
         self.game_id = game_id
         self.token = token
         self.ws = None
@@ -84,8 +84,12 @@ class WebSocketWrapper:
             self.ws.close()
 
     def send(self, msg: Message):
+        if self.ws is None:
+            raise TypeError('ws is None')
         self.ws.send(json.dumps(msg))
 
     async def recv(self) -> GameStatus | WaitingStatus:
+        if self.ws is None:
+            raise TypeError('ws is None')
         result = await asyncio.get_event_loop().run_in_executor(None, self.ws.recv)
         return json.loads(result)

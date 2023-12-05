@@ -2,17 +2,17 @@ from .singleton import SingletonMeta
 
 class GameMapper(metaclass=SingletonMeta):
     """
-    Maps the userId to the game
+    Maps the chatid to the game
     """
 
-    _games: dict[str, str] = {}
+    _games: dict[int, int] = {}
 
-    def add(self, user:str ,game:str):
-        self._games[user] = game
+    def add(self, chatid:int ,game:int):
+        self._games[chatid] = game
 
-    def get(self, user: str):
-        return self._games.get(user)
+    def get(self, chatid: int):
+        return self._games.get(chatid)
 
-    def remove(self, user: str):
-        self._games.pop(user)
+    def remove(self, chatid: int):
+        self._games.pop(chatid)
 

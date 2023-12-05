@@ -6,8 +6,7 @@ from bot.src.game_mapper import GameMapper
 from bot.src.user_mapper import UserMapper
 from bot.ws_utils import WebSocketWrapper
 
-
-def get_user(chat_id: str):
+def get_user(chat_id: int):
     token = UserMapper().get(chat_id)
     if token is not None:
         return token
@@ -16,7 +15,7 @@ def get_user(chat_id: str):
     return token
 
 
-def create_game(chat_id: str, color: str = "white"):
+def create_game(chat_id: int, color: str = "white") -> tuple[str,int]:
     token = get_user(chat_id)
     current_game = GameMapper().get(chat_id)
     if current_game is not None:
@@ -35,7 +34,7 @@ def create_game(chat_id: str, color: str = "white"):
     return token, game
 
 
-def delete_game(chat_id: str):
+def delete_game(chat_id: int):
     current_game = GameMapper().get(chat_id)
     if current_game is None:
         return

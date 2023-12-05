@@ -13,11 +13,10 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
     """
     token, game_id = create_game(chatid)
     ws = WebSocketWrapper(game_id, token)
-    while True:  # TODO chiudere il loop quando finisce la partita
-        # Get the current time
-        current_time = datetime.now()
 
-        # Add five minutes
+    while True:  # TODO chiudere il loop quando finisce la partita
+
+        current_time = datetime.now()
         end_vote_time = current_time + timedelta(seconds=time)
 
         await bot.send_message(
