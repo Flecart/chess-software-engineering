@@ -40,7 +40,21 @@ export function getWsUrl(gameId: string): string {
 
 // Darkboard related functions
 
-export async function poll(): Promise<string> {
-    const response = await axios.get<string>(`${apiBaseUrl}/darkboard/poll`);
-    return response.data;
+type PollResponse = {
+    fen: string
+}
+
+export async function startDarkboard(): Promise<void> {
+    console.log("starting darkboard");
+    await axios.post(`${apiBaseUrl}/darkboard/start`);
+}
+
+export async function poll(): Promise<PollResponse> {
+    const response = await axios.get<PollResponse>(`${apiBaseUrl}/darkboard/status`);
+    console.log("here is the data" + JSON.stringify(response.data));
+    return response.data as unknown as PollResponse;
+}
+
+export async function makeBotMove(): Promise<void> {
+    await axios.post(`${apiBaseUrl}/darkboard/move`);
 }

@@ -10,6 +10,7 @@ from backend.bot.data.enums import GameType, Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.MCST_player_config import MCSTPlayerConfig
+from backend. 
 
 
 def _init_bot(bot_type, game, config):
@@ -195,9 +196,14 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
     
     case Actions.LIST_MOVE:
       out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
-  
-  # TODO: you should refactor this maybe with builder pattern??
 
+    case Actions.GET_VALID_MOVE:
+      for i in state.legal_actions():
+        newState =  state.apply_action(i)
+
+        out.best_move = action_to_uci(game_state_input.game_type,state,fen,i)
+    
+  # TODO: you should refactor this maybe with builder pattern??
   out.finish = state.is_terminal()
   out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
   out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)

@@ -5,6 +5,7 @@ import { useTimer, type TimerSettings } from 'react-timer-hook';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
+import {poll, startDarkboard, makeBotMove} from '@/features/chessboard/api/game';
 
 export const Darkboard = () => {
     // const { token } = useTokenContext();
@@ -17,6 +18,7 @@ export const Darkboard = () => {
     const opponentTimer = useTimer(timerSettings);
 
     const [isAskingForMove, setisAskingForMove] = useState(false);
+    const [hasGameStarted, setHasGameStarted] = useState(false);
 
     const setUpNewGame = useCallback(() => {
         gameEnded.value = false;
@@ -24,13 +26,29 @@ export const Darkboard = () => {
     }, [navigate]);
 
     const handleNewMove = useCallback(() => {
-        // TODO:
         setisAskingForMove(true);
+        makeBotMove();
     }, []);
 
     useEffect(() => {
         fen.value = startWhiteFEN;
+        startDarkboard()
+        .then(() => {
+            setHasGameStarted(true);
+        });
     }, []);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const data = await poll();
+            if (data.fen != fen.value) {
+                setisAskingForMove(false);
+            }
+            fen.value = data.fen;
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [hasGameStarted]);
 
     return (
         <Flex wrap="wrap">

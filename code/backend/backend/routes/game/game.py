@@ -10,12 +10,11 @@ from backend.game.v1_socket_manager import SocketManager
 
 from backend.routes.exception import JSONException
 from backend.routes.auth import decode_access_token
-from .data import CreateGameRequest,GameStatusResponse
+from .data import CreateGameRequest, GameStatusResponse
 
 from pydantic import BaseModel
 from typing import Literal
 import asyncio
-import json
 
 # TODO: move me to request nad responses file
 class WebsocketRequests(BaseModel):

@@ -5,13 +5,14 @@ from dotenv import load_dotenv
 defConfig = {
     'port': 8000,
     'host': "127.0.0.1",
-    'db_local': 'False',
+    'db_local': 'True',
     'db_password': 'password',
     'db_user': 'root',
     'db_url': 'localhost',
     'bot_username' : 'bot',
     'ssl_keyfile': './privkey.pem',
-    'ssl_certfile': './cert.pem'
+    'ssl_certfile': './cert.pem',
+    'URL_KRIEGSPER': 'http://0.0.0.0:8085/?'
 }
 
 class Config():

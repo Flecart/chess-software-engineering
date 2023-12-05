@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from backend.routes.user.user import create_user_routes
+from backend.routes.darkboard.game import create_game_routes as create_darkboard_routes
 
 from .game.game import create_game_routes
 from .exception import install_exception_handler
@@ -31,9 +32,9 @@ logging.getLogger('main').info('Creating routes')
 
 install_exception_handler(app)
 
-create_game_routes(app,prefix='/api/v1')
-create_user_routes(app,prefix='/api/v1')
-
+create_game_routes(app, prefix='/api/v1')
+create_user_routes(app, prefix='/api/v1')
+create_darkboard_routes(app, prefix='/api/v1')
 
 # TODO OLD TO DELETE AS SOON AS THE PORTING IS DONE
 oldroute(app)

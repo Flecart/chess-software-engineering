@@ -1,48 +1,73 @@
 import socketio 
 import random
 import uuid
+from backend.bot.data.game_state_input import GameStateInput
+from backend.bot.data.enums import Actions
+from backend.bot.mcts import dispatch
+from backend.config import Config
+from enum import StrEnum, auto
 
+class DarkBoardStates(StrEnum):
+    DISCONNECTED = auto()
+    WAITING_FOR_MOVE = auto()
+    WAITING_FOR_COMPUTER_BEST_MOVE  = auto()
+    GAME_OVER  = auto()
+    WAITING_FOR_OPPONENT_MOVE = auto()
+
+game_type = 'kriegspiel'
 class DarkBoard():
+
     def __init__(self, ):
         self.__fen: str = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0'
+        self._state = DarkBoardStates.DISCONNECTED
         self.__old_fen: str | None = None
         self.sio = socketio.Client()
+        self.messages = []
 
 
         # Socket events
         @self.sio.event
         def connect():
             print("Connected!")
-            # Chess instance to keep track of the game
+            # TODO qui do per scontato di essere il bianco
+            self._state = DarkBoardStates.WAITING_FOR_MOVE
             self.sio.emit("start_game")
         
         @self.sio.event
         def game_over(pgn):
+            self._state = DarkBoardStates.GAME_OVER
             print("Game over!")
         
         @self.sio.event
         def read_message(message):
-            print('prova '+ message)
+            print('message', message)
+            self.messages.append(message)
+            
         
         @self.sio.event
         def chessboard_changed(fen):
             self.__old_fen = self.__fen
             self.__fen = fen
-            print('arrived fen ', fen)
+            # TODO checks e qua manda tipo 3 messaggi di fila verificare che sia il proprio turno
+            print('chessboard_changed', fen)
+            self._state = DarkBoardStates.WAITING_FOR_MOVE
+            
         
         @self.sio.event
         def error(err):
             print("Error: ", err)
+            #TODO gestire errori
 
         @self.sio.event
         def disconnect():
+            self._state = DarkBoardStates.DISCONNECTED
             print("Disconnected!")
 
     @property
     def fen(self):
         return self.__fen
 
-    def connect(self, connection_string: str = 'http://0.0.0.0:8085/?'):
+    def connect(self, connection_string: str = Config()['URL_KRIEGSPER']): #TODO sosituirlo con un env
 
         connection_payload = {
             "username": "gianlo"+str(random.randint(0,1000)),
@@ -56,9 +81,7 @@ class DarkBoard():
 
     def send_move(self, move: str):
         """ A move in algebraic notation, e.g. e2e4
-        
         """
-
         assert len(move) == 4, "Invalid move"
         assert move[0].isalpha() and move[1].isdigit() and move[2].isalpha() and move[3].isdigit(), "Invalid move"
 
@@ -100,40 +123,59 @@ class DarkBoard():
         final_board: list[list[str]] = [["."] * 8 for _ in range(8)]
 
         for i in range(len(curr_board)):
+            offset = 0
             for j in range(len(curr_board[i])):
                 if not curr_board[i][j].isdigit():
-                    final_board[i][j] = curr_board[i][j]
+                    final_board[i][j + offset] = curr_board[i][j]
+                else:
+                    offset += int(curr_board[i][j]) - 1
 
         print(final_board)
         return final_board
     
-if __name__ == "__main__":
-    from backend.bot.data.game_state_input import GameStateInput
-    from backend.bot.data.enums import Actions
-    from mcts import dispatch
+    @property
+    def state(self):
+        return self._state
 
-    game_type = 'kriegspiel'
-
-    def make_move(fen,move):
-        input = GameStateInput(game_type,fen,Actions.MOVE,move)    
+    def make_move(self,move):
+        input = GameStateInput(game_type,self.fen,Actions.MOVE,move)    
         return dispatch(input)
     
-    def best_move(fen):
-        input = GameStateInput(game_type,fen,Actions.MAKE_BEST_MOVE,None)    
+    def best_move(self):
+        print('start computing move')
+        self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
+        input = GameStateInput(game_type,self.fen,Actions.MAKE_BEST_MOVE,None)    
+        print('finish computing move')
         return dispatch(input).best_move[0]
- 
-    print("creating game state")
 
-    darkboard = DarkBoard()
-    darkboard.connect()
 
-    while True:
-        command = input("Command: ")
-        if command == "move":
-            # NOTA: per risolvere il problema del stateful, si potrebbe estendere dispatch ad accettare un GameState di OpenSpiel,
-            # se ha il gamestate invece di stringa, prova a runnare in altro modo per dire.
+class DarkBoardSingleton:
+    _instance = None
+   
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.__init()
+        return cls._instance
+    
+    def __init(self):
+        self.darkboard = None
+        
+    def create_game(self):
+        if self.darkboard is None or self.darkboard.state == DarkBoardStates.GAME_OVER:
+            self.darkboard = DarkBoard()
+            self.darkboard.connect()
+    
+    @property
+    def get_fen(self):
+        return self.darkboard.fen
 
-            my_move = best_move(darkboard.fen)
-            darkboard.send_move(my_move)
-        else:
-            print("Invalid command!")
+    @property
+    def get_state(self):
+        return self.darkboard.state
+
+    def make_best_move(self) :
+        if self.get_state == DarkBoardStates.WAITING_FOR_MOVE:
+            best = self.darkboard.best_move()
+            self.darkboard.send_move(best)
+        
