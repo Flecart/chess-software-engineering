@@ -5,7 +5,6 @@ from bot.config import backend_url, api_base_url
 from bot.src.game_mapper import GameMapper
 from bot.src.user_mapper import UserMapper
 from bot.ws_utils import WebSocketWrapper
-import json
 
 
 def get_user(chat_id: str):
@@ -44,12 +43,23 @@ def delete_game(chat_id: str):
 
 
 async def make_move(ws: WebSocketWrapper, move: str):
-    json_data = json.dumps({"kind": "move", "data": move})
-    ws.send(json_data)
-    return await ws.recv()
+    ws.send({"kind": "move", "data": move})
+    response = await ws.recv()
+    if "waiting" in response:
+        raise ValueError("Unexpected waiting status")
+    return response
 
 
 async def get_possible_moves(ws: WebSocketWrapper):
-    json_data = json.dumps({"kind": "list_move", "data": ""})
-    ws.send(json_data)
-    return await ws.recv()
+    ws.send({"kind": "list_move", "data": ""})
+    response = await ws.recv()
+    if "waiting" in response:
+        raise ValueError("Unexpected waiting status")
+    return response
+
+
+async def wait_opponent_move(ws: WebSocketWrapper):
+    while True:
+        message = await ws.recv()
+        if "waiting" not in message:
+            return message

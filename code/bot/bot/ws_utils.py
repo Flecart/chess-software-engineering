@@ -1,5 +1,7 @@
 import websocket
 import asyncio
+import json
+from typing import TypedDict, Literal
 
 from bot.config import ws_url, api_base_url
 
@@ -46,6 +48,23 @@ def getWsUrl(gameId: str, token: str) -> str:
     return f"{ws_url}/api/v1/game/{gameId}/ws/?token={token}"
 
 
+class Message(TypedDict):
+    kind: Literal["move", "list_move"]
+    data: str
+
+
+class GameStatus(TypedDict):
+    ended: bool
+    possible_moves: list[str] | None
+    view: str
+    move_made: str | None
+    turn: str
+
+
+class WaitingStatus(TypedDict):
+    waiting: bool
+
+
 class WebSocketWrapper:
     def __init__(self, game_id: str, token: str):
         self.game_id = game_id
@@ -64,9 +83,9 @@ class WebSocketWrapper:
         if self.ws:
             self.ws.close()
 
-    def send(self, msg: str):
-        self.ws.send(msg)
+    def send(self, msg: Message):
+        self.ws.send(json.dumps(msg))
 
-    async def recv(self):
+    async def recv(self) -> GameStatus | WaitingStatus:
         result = await asyncio.get_event_loop().run_in_executor(None, self.ws.recv)
-        return result
+        return json.loads(result)
