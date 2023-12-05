@@ -1,5 +1,7 @@
 import chess
 import numpy as np
+from copy import deepcopy
+import random
 
 from open_spiel.python.algorithms import mcts
 from open_spiel.python.bots import human
@@ -10,7 +12,7 @@ from backend.bot.data.enums import GameType, Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.MCST_player_config import MCSTPlayerConfig
-from backend. 
+from backend.game.utils import KRIEGSPIEL_INVALID_MOVE 
 
 
 def _init_bot(bot_type, game, config):
@@ -198,11 +200,21 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
       out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
 
     case Actions.GET_VALID_MOVE:
-      for i in state.legal_actions():
-        newState =  state.apply_action(i)
-
+      # make shuffle
+      actions = state.legal_actions()
+      random.shuffle(actions)
+      for i in actions:
+        _, newState = _create_state(game_state_input.game_type, fen)
+        # newState = deepcopy(state)
+        newState.apply_action(i)
+        if newState.observation_string(1) == KRIEGSPIEL_INVALID_MOVE:
+          continue
+        if newState.observation_string(0) == KRIEGSPIEL_INVALID_MOVE:
+          continue
         out.best_move = action_to_uci(game_state_input.game_type,state,fen,i)
-    
+        state = newState
+        break
+
   # TODO: you should refactor this maybe with builder pattern??
   out.finish = state.is_terminal()
   out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)

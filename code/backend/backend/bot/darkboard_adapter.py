@@ -6,6 +6,7 @@ from backend.bot.data.enums import Actions
 from backend.bot.mcts import dispatch
 from backend.config import Config
 from enum import StrEnum, auto
+from backend.game.utils import KRIEGSPIEL_INVALID_MOVE
 
 class DarkBoardStates(StrEnum):
     DISCONNECTED = auto()
@@ -40,19 +41,21 @@ class DarkBoard():
         
         @self.sio.event
         def read_message(message):
-            print('message', message)
+            print(f'message -{message}-', )
             self.messages.append(message)
+            if 'White\'s turn;' in  message:
+                self._state = DarkBoardStates.WAITING_FOR_MOVE
+                print("It's my turn!")
             
         
         @self.sio.event
         def chessboard_changed(fen):
             self.__old_fen = self.__fen
-            self.__fen = fen
             # TODO checks e qua manda tipo 3 messaggi di fila verificare che sia il proprio turno
-            print('chessboard_changed', fen)
-            self._state = DarkBoardStates.WAITING_FOR_MOVE
-            
-        
+            print("FEN: ", fen)
+            if fen != self.__fen:
+                self.__fen = fen
+
         @self.sio.event
         def error(err):
             print("Error: ", err)
@@ -142,11 +145,21 @@ class DarkBoard():
         return dispatch(input)
     
     def best_move(self):
-        print('start computing move')
-        self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
-        input = GameStateInput(game_type,self.fen,Actions.MAKE_BEST_MOVE,None)    
-        print('finish computing move')
-        return dispatch(input).best_move[0]
+        invalid_counter = 0
+        # Temporary value just used not to infinite loop
+        while invalid_counter < 1:
+            print("Waiting for best move", invalid_counter)
+            self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
+            input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
+            state = dispatch(input)
+            if state.white_view != KRIEGSPIEL_INVALID_MOVE or state.black_view != KRIEGSPIEL_INVALID_MOVE:
+                invalid_counter += 1
+                continue
+            return state.best_move[0]
+            
+        input = GameStateInput(game_type, self.fen, Actions.GET_VALID_MOVE, None)    
+        state = dispatch(input)
+        return state.best_move
 
 
 class DarkBoardSingleton:
@@ -178,4 +191,4 @@ class DarkBoardSingleton:
         if self.get_state == DarkBoardStates.WAITING_FOR_MOVE:
             best = self.darkboard.best_move()
             self.darkboard.send_move(best)
-        
+

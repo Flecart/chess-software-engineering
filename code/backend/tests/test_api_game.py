@@ -76,8 +76,6 @@ class TestApiGame(unittest.TestCase):
         print(data)
         return data
 
-
-
     def _sing_up(self,user,psw)->str:
         data = requests.post(self.base_url_api+'/user/signup',json={
             'username':user,
@@ -87,7 +85,6 @@ class TestApiGame(unittest.TestCase):
             raise Exception()
         return data
 
-
     def setUp(self):
         config = Config()
         self.host =f"{config['host']}:{config['port']}"
@@ -95,7 +92,6 @@ class TestApiGame(unittest.TestCase):
         self.base_url_api = f'{self.base_url}/api/v1'
         self.websocket_url = lambda game_id, token: f"ws://{self.host}/api/v1/game/{game_id}/ws?token={token}"
     
-
     def _create_guest_user(self)->str:
         jwt=requests.post(self.base_url_api + '/user/guest').json()
         return jwt

@@ -4,4 +4,4 @@ from dataclasses import dataclass
 class MCSTPlayerConfig:
     roll_outs: int =1
     utc:int  = 25
-    max_sim: int =1000
+    max_sim: int = 333
