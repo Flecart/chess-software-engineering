@@ -7,8 +7,8 @@ type GameState = {
     move_made: null | string;
     turn: color;
     message: string[];
+    using_timer: boolean;
 
-    // TODO: refactor next sprint
     time_left_white: string;
     time_left_black: string;
     time_start_white: string | null;

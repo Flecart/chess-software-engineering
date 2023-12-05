@@ -196,6 +196,7 @@ class ChessGame():
             possible_moves=  possible_moves,
             turn = self.current_player.name.__str__().lower(),
             view=view,
+            using_timer=self.using_timer,
             time_start_black=None if self.timer_black.start_time==None else self.timer_black.start_time.isoformat(), 
             time_start_white=None if self.timer_white.start_time==None else self.timer_white.start_time.isoformat(),
             time_left_black=str(self.timer_black.remaining_time),
