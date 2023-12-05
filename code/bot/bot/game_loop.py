@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 from telebot.async_telebot import AsyncTeleBot
-from bot.api_utils import create_game
+from bot.api_utils import create_game, delete_game
 from bot.ws_utils import WebSocketWrapper
 
 
@@ -36,3 +36,4 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
         await asyncio.sleep(time)
 
         # chiudere votazione e inviare la mossa scelta
+    delete_game(chatid)

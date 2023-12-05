@@ -36,6 +36,13 @@ def create_game(chat_id: str, color: str = "white"):
     return token, game
 
 
+def delete_game(chat_id: str):
+    current_game = GameMapper().get(chat_id)
+    if current_game is None:
+        return
+    GameMapper().remove(chat_id)
+
+
 async def make_move(ws: WebSocketWrapper, move: str):
     json_data = json.dumps({"kind": "move", "data": move})
     ws.send(json_data)
