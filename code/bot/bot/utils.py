@@ -18,6 +18,5 @@ def pretty_print_time(td):
     if minutes > 0:
         parts.append(f"{minutes} minuti")
     seconds = td.seconds % 60
-    if seconds > 0:
-        parts.append(f"{seconds} secondi")
+    parts.append(f"{seconds} secondi")
     return " ".join(parts)
