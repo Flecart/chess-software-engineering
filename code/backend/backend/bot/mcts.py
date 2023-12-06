@@ -1,5 +1,7 @@
 import chess
 import numpy as np
+from copy import deepcopy
+import random
 
 from open_spiel.python.algorithms import mcts
 from open_spiel.python.bots import human
@@ -10,6 +12,7 @@ from backend.bot.data.enums import GameType, Actions
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.MCST_player_config import MCSTPlayerConfig
+from backend.game.utils import KRIEGSPIEL_INVALID_MOVE 
 
 
 def _init_bot(bot_type, game, config):
@@ -169,7 +172,7 @@ def _create_observation_string(state, player_id: int, input_struct: GameStateInp
     case GameType.KRIEGSPIEL:
       return state.observation_string(player_id)
     case GameType.DARK_CHESS:
-      return "TODO: implement me"
+      return ""
       # return _create_chat_bot_message(state, player_id, input_struct)
 
 def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
@@ -195,9 +198,24 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
     
     case Actions.LIST_MOVE:
       out.possible_moves = _legal_action_to_uci(game_state_input.game_type, state, fen)
-  
-  # TODO: you should refactor this maybe with builder pattern??
 
+    case Actions.GET_VALID_MOVE:
+      # make shuffle
+      actions = state.legal_actions()
+      random.shuffle(actions)
+      for i in actions:
+        _, newState = _create_state(game_state_input.game_type, fen)
+        # newState = deepcopy(state)
+        newState.apply_action(i)
+        if newState.observation_string(1) == KRIEGSPIEL_INVALID_MOVE:
+          continue
+        if newState.observation_string(0) == KRIEGSPIEL_INVALID_MOVE:
+          continue
+        out.best_move = action_to_uci(game_state_input.game_type,state,fen,i)
+        state = newState
+        break
+
+  # TODO: you should refactor this maybe with builder pattern??
   out.finish = state.is_terminal()
   out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
   out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)

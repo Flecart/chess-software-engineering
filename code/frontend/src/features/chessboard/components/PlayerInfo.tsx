@@ -3,22 +3,31 @@ import { useUserQuery } from '@/features/user';
 import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Flex } from 'antd';
 import { displayTimer } from '../utils/time';
+import { useMemo } from 'react';
 
 type Props = Readonly<{
     myTurn: boolean;
     opponent?: boolean;
-    time: {
+    time?: {
         seconds: number;
         minutes: number;
         hours: number;
         days: number;
     };
+    givenUsername?: string;
 }>;
 
-export const PlayerInfo = ({ myTurn, opponent, time }: Props) => {
+// NOTA: per ragioni di refactorabilità sarebbe meglio usare un componente in stile funzionale
+// ossia che non abbia dipendenze esterne come l'uso di Hooks.
+// però va bene anche così, la priorità è che funzioni.
+export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => {
     const { isGuest, username: myUsername } = useAuth();
-    const username = opponent ? 'Avversario' : myUsername;
-    const { seconds, minutes, hours, days } = time;
+    const username = givenUsername ?? (opponent ? 'Avversario' : myUsername);
+
+    const { seconds, minutes, hours, days } = useMemo(() => {
+        if (!time) return { seconds: 0, minutes: 0, hours: 0, days: 0 };
+        return time;
+    }, []);
 
     const { data: user } = useUserQuery(username, !isGuest && !opponent);
     return (
@@ -46,8 +55,12 @@ export const PlayerInfo = ({ myTurn, opponent, time }: Props) => {
                     fontSize: '1.5rem',
                 }}
             >
-                <ClockCircleOutlined />
-                <span>{displayTimer(days, hours, minutes, seconds)}</span>
+                { time && 
+                <>
+                    <ClockCircleOutlined />
+                    <span>{displayTimer(days, hours, minutes, seconds)}</span>
+                </>
+                }
             </Flex>
         </Flex>
     );

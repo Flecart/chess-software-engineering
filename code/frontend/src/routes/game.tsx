@@ -1,4 +1,4 @@
-import { Game, Pregame } from '@/features/chessboard';
+import { Game, Pregame, Darkboard } from '@/features/chessboard';
 import type { GameRouteSearch, PregameRouteSearch } from '@/types';
 import { Route } from '@tanstack/react-router';
 import { rootRoute } from '.';
@@ -26,4 +26,10 @@ const specificGameRoute = new Route({
     },
 });
 
-export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute]);
+const darkboardRoute = new Route({
+    getParentRoute: () => rootRoute,
+    path: 'darkboard',
+    component: Darkboard,
+});
+
+export const gameRoutes = gameRoute.addChildren([indexGameRoute, specificGameRoute, darkboardRoute]);

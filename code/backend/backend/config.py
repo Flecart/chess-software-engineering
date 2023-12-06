@@ -11,7 +11,8 @@ defConfig = {
     'db_url': 'localhost',
     'bot_username' : 'bot',
     'ssl_keyfile': './privkey.pem',
-    'ssl_certfile': './cert.pem'
+    'ssl_certfile': './cert.pem',
+    'URL_KRIEGSPER': 'http://app.t1-check-mates.mooo.com:8085/?'
 }
 
 class Config():

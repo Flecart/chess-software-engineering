@@ -37,3 +37,27 @@ export async function joinGame(token: jwt_token, gameId: string, color: null | c
 export function getWsUrl(gameId: string): string {
     return `${wsUrl}/api/v1/game/${parseCode(gameId)}/ws`;
 }
+
+// Darkboard related functions
+
+type PollResponse = {
+    fen: string
+    error_message: string | null
+    message: string[] | null
+    state: string;
+}
+
+export async function startDarkboard(): Promise<void> {
+    console.log("starting darkboard");
+    await axios.post(`${apiBaseUrl}/darkboard/start`);
+}
+
+export async function poll(): Promise<PollResponse> {
+    const response = await axios.get<PollResponse>(`${apiBaseUrl}/darkboard/status`);
+    // console.log("here is the data" + JSON.stringify(response.data));
+    return response.data as unknown as PollResponse;
+}
+
+export async function makeBotMove(): Promise<void> {
+    await axios.post(`${apiBaseUrl}/darkboard/move`);
+}

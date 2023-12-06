@@ -918,6 +918,24 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-engineio"
+version = "3.14.2"
+description = "Engine.IO server"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-engineio-3.14.2.tar.gz", hash = "sha256:eab4553f2804c1ce97054c8b22cf0d5a9ab23128075248b97e1a5b2f29553085"},
+    {file = "python_engineio-3.14.2-py2.py3-none-any.whl", hash = "sha256:5a9e6086d192463b04a1428ff1f85b6ba631bbb19d453b144ffc04f530542b84"},
+]
+
+[package.dependencies]
+six = ">=1.9.0"
+
+[package.extras]
+asyncio-client = ["aiohttp (>=3.4)"]
+client = ["requests (>=2.21.0)", "websocket-client (>=0.54.0)"]
+
+[[package]]
 name = "python-jose"
 version = "3.3.0"
 description = "JOSE implementation in Python"
@@ -951,6 +969,25 @@ files = [
 
 [package.extras]
 dev = ["atomicwrites (==1.2.1)", "attrs (==19.2.0)", "coverage (==6.5.0)", "hatch", "invoke (==1.7.3)", "more-itertools (==4.3.0)", "pbr (==4.3.0)", "pluggy (==1.0.0)", "py (==1.11.0)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-timeout (==2.1.0)", "pyyaml (==5.1)"]
+
+[[package]]
+name = "python-socketio"
+version = "4.6.1"
+description = "Socket.IO server"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-socketio-4.6.1.tar.gz", hash = "sha256:cd1f5aa492c1eb2be77838e837a495f117e17f686029ebc03d62c09e33f4fa10"},
+    {file = "python_socketio-4.6.1-py2.py3-none-any.whl", hash = "sha256:5a21da53fdbdc6bb6c8071f40e13d100e0b279ad997681c2492478e06f370523"},
+]
+
+[package.dependencies]
+python-engineio = ">=3.13.0,<4"
+six = ">=1.9.0"
+
+[package.extras]
+asyncio-client = ["aiohttp (>=3.4)", "websockets (>=7.0)"]
+client = ["requests (>=2.21.0)", "websocket-client (>=0.54.0)"]
 
 [[package]]
 name = "pyyaml"
@@ -1354,4 +1391,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "de746166ce513969c081cc33ae3a48477f6e9c6e8e6147dfaae939c13232b87e"
+content-hash = "9cc7cc8ce4f1a94c603b0c2df8ffa9685f65f7a2c1ef35824ccc7ccfa1301a68"
