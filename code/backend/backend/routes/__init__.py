@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from backend.routes.user.user import create_user_routes
-from backend.routes.darkboard.game import create_game_routes as create_darkboard_routes
+from backend.routes.darkboard.darkboardgame import create_game_routes as create_darkboard_routes
 
 from .game.game import create_game_routes
 from .exception import install_exception_handler

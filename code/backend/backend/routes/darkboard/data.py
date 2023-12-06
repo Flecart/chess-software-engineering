@@ -8,3 +8,5 @@ class GameStatusResponse(BaseModel):
     state: DarkBoardStates
     fen: str
     message: list[str]|None
+    error_message: str|None = None
+

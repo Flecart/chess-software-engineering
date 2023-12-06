@@ -9,39 +9,38 @@ from enum import StrEnum, auto
 from backend.game.utils import KRIEGSPIEL_INVALID_MOVE
 
 class DarkBoardStates(StrEnum):
-    DISCONNECTED = auto()
     WAITING_FOR_MOVE = auto()
     WAITING_FOR_COMPUTER_BEST_MOVE  = auto()
     GAME_OVER  = auto()
     WAITING_FOR_OPPONENT_MOVE = auto()
+    ERROR = auto()
 
 game_type = 'kriegspiel'
 class DarkBoard():
 
     def __init__(self, ):
         self.__fen: str = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0'
-        self._state = DarkBoardStates.DISCONNECTED
+        self._state = DarkBoardStates.GAME_OVER
         self.__old_fen: str | None = None
         self.sio = socketio.Client()
         self.messages = []
+        self.last_interaction = None
+        self.error_message = None
 
 
         # Socket events
         @self.sio.event
         def connect():
-            print("Connected!")
-            # TODO qui do per scontato di essere il bianco
             self._state = DarkBoardStates.WAITING_FOR_MOVE
-            self.sio.emit("start_game")
+            self.sio.emit("ready")
         
         @self.sio.event
         def game_over(pgn):
             self._state = DarkBoardStates.GAME_OVER
-            print("Game over!")
         
         @self.sio.event
         def read_message(message):
-            print(f'message -{message}-', )
+            print('message', message)
             self.messages.append(message)
             if 'White\'s turn;' in  message:
                 self._state = DarkBoardStates.WAITING_FOR_MOVE
@@ -51,31 +50,33 @@ class DarkBoard():
         @self.sio.event
         def chessboard_changed(fen):
             self.__old_fen = self.__fen
-            # TODO checks e qua manda tipo 3 messaggi di fila verificare che sia il proprio turno
-            print("FEN: ", fen)
             if fen != self.__fen:
                 self.__fen = fen
 
         @self.sio.event
         def error(err):
-            print("Error: ", err)
-            #TODO gestire errori
+            self._state = DarkBoardStates.ERROR
+            self.error_message = 'Error from the other server '+err
 
         @self.sio.event
         def disconnect():
-            self._state = DarkBoardStates.DISCONNECTED
-            print("Disconnected!")
+            print("Disconneted")
+            self._state = DarkBoardStates.ERROR
+            self.error_message = 'The other server has disconnected'
 
     @property
     def fen(self):
         return self.__fen
 
     def connect(self, connection_string: str = Config()['URL_KRIEGSPER']): #TODO sosituirlo con un env
+        # const connectionPayloadDeveloper f 0 username, .TestBot., gameType, .developer., token: .bec635e710d6cdd5t3d3aa2b1c2e7007e45881eaf5d4g6b. 
+        # 5 const connectionPayload f username: .gianlo., gameType: .darkboard., room: .test., 
+
 
         connection_payload = {
-            "username": "gianlo"+str(random.randint(0,1000)),
-            "gameType": "darkboard",
-            "room": uuid.uuid4().hex
+            "username": "checkmates-"+str(random.randint(0,1000)),
+            "gameType": "developer",
+            "token": "bec635e710d6cdd5t3d3aa2b1c2e7007e45881eaf5d4g6b"
         }
 
         query_string = "&".join([f"{key}={value}" for key, value in connection_payload.items()])
@@ -133,7 +134,6 @@ class DarkBoard():
                 else:
                     offset += int(curr_board[i][j]) - 1
 
-        print(final_board)
         return final_board
     
     @property
@@ -147,7 +147,7 @@ class DarkBoard():
     def best_move(self):
         invalid_counter = 0
         # Temporary value just used not to infinite loop
-        while invalid_counter < 1:
+        while invalid_counter < 0:
             print("Waiting for best move", invalid_counter)
             self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
             input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
@@ -155,10 +155,12 @@ class DarkBoard():
             if state.white_view != KRIEGSPIEL_INVALID_MOVE or state.black_view != KRIEGSPIEL_INVALID_MOVE:
                 invalid_counter += 1
                 continue
+            print("Best move", state.best_move)
             return state.best_move[0]
             
         input = GameStateInput(game_type, self.fen, Actions.GET_VALID_MOVE, None)    
         state = dispatch(input)
+        print("Best move", state.best_move)
         return state.best_move
 
 
@@ -172,10 +174,10 @@ class DarkBoardSingleton:
         return cls._instance
     
     def __init(self):
-        self.darkboard = None
+        self.darkboard = DarkBoard()
         
     def create_game(self):
-        if self.darkboard is None or self.darkboard.state == DarkBoardStates.GAME_OVER:
+        if self.darkboard is None or self.darkboard.state == DarkBoardStates.GAME_OVER or self.darkboard.state == DarkBoardStates.ERROR:
             self.darkboard = DarkBoard()
             self.darkboard.connect()
     
@@ -184,11 +186,19 @@ class DarkBoardSingleton:
         return self.darkboard.fen
 
     @property
+    def get_error_message(self):
+        return self.darkboard.error_message
+
+    @property
+    def get_message(self):
+        return self.darkboard.messages
+
+    @property
     def get_state(self):
         return self.darkboard.state
 
     def make_best_move(self) :
-        if self.get_state == DarkBoardStates.WAITING_FOR_MOVE:
+        if self.get_state == DarkBoardStates.WAITING_FOR_MOVE :
             best = self.darkboard.best_move()
             self.darkboard.send_move(best)
 
