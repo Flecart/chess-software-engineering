@@ -9,6 +9,7 @@ from bot.config import API_TOKEN, DEBUG, TIME_TO_VOTE_IN_SECONDS
 from bot.src.ballot_box_collection import BallotBoxCollection
 from bot.utils import get_user_and_chat_from_message
 from bot.src.valid_moves_mapper import ValidMovesMapper
+from bot.src.game_mapper import GameMapper
 from bot.texts import help_text,rules_text
 # logger = telebot.logger
 
@@ -23,6 +24,8 @@ else:
 
 @bot.message_handler(commands=["newGame"])
 async def startNewGame(message: types.Message):
+    if GameMapper().get(message.chat.id) is None:
+        await bot.reply_to(message,"C'è un'altra partita in corso, usa /leave se vuoi votare la resa")
     time_to_choose = TIME_TO_VOTE_IN_SECONDS
     args = [10*60] # hardcoded just in case .env explode
 
