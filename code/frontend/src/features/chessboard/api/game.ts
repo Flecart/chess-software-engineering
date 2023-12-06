@@ -42,6 +42,8 @@ export function getWsUrl(gameId: string): string {
 
 type PollResponse = {
     fen: string
+    error_message: string[] | null
+    message: string[] | null
 }
 
 export async function startDarkboard(): Promise<void> {

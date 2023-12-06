@@ -9,6 +9,7 @@ from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.enums import Actions
 import backend.game.utils as utils
+from backend.game.utils import MAX_KRIEGSPIEL_MOVES
 
 from backend.bot.data.enums import GameType
 from .utils import START_POSITION_FEN, Color 
@@ -130,6 +131,10 @@ class ChessGame():
         game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MAKE_BEST_MOVE, None))
         return game_state.best_move
 
+    def get_working_move(self) -> str:
+        game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.GET_VALID_MOVE, None))
+        return game_state.best_move
+
     def _check_times_up(self)->bool:
         if not self.using_timer:
             return False
@@ -221,16 +226,22 @@ class ChessGame():
 
             # NOTA: questa parte potrebbe essere migliorata, ma esattamente non so in che modo
             # attualmente il bot di kriegspiel sbaglia mosse
+            counter = 1
             while True:
+                if counter > MAX_KRIEGSPIEL_MOVES:
+                    move = game.get_working_move()
+                    break
+
                 if move not in available_moves:
-                    # TODO: check if this if-branch is necessary
                     move = game.get_best_move()
+                    counter += 1 
                     continue
 
                 message = game.move(move)
                 if message != utils.KRIEGSPIEL_INVALID_MOVE:
                     break
 
+                counter += 1
                 print(f"[bot player]: move {move} is invalid with message {message}")
                 move = game.get_best_move()
 

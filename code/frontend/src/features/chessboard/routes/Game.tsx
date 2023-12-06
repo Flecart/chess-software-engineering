@@ -1,7 +1,7 @@
 import { TwitterShareButton } from '@/features/social';
 import { useTokenContext } from '@/lib/tokenContext';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
-import { Button, Flex, List, Modal, Typography } from 'antd';
+import { Button, Flex, Modal, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTimer, type TimerSettings } from 'react-timer-hook';
 import useWebSocket from 'react-use-websocket';
@@ -11,6 +11,7 @@ import { PlayerInfo } from '../components/PlayerInfo';
 import { chatLog, fen, gameEnded, isMyTurn, possibleMoves, winner } from '../hooks/gamestate';
 import type { wsMessage } from '../types';
 import { createExpireTime, parseTimings } from '../utils/time';
+import { Chat } from '../components/Chat';
 
 export const Game = () => {
     const { gameId } = useParams({ from: '/game/$gameId' as const });
@@ -170,30 +171,7 @@ export const Game = () => {
                         <TwitterShareButton gameId={gameId} />
                     </Flex>
                 </section>
-                <List
-                    header={
-                        <Typography.Text strong style={{ fontSize: '1.5em' }}>
-                            CHAT
-                        </Typography.Text>
-                    }
-                    bordered
-                    dataSource={chatLog.value}
-                    renderItem={(item) => (
-                        <List.Item
-                            style={{
-                                backgroundColor: '#e5e4e2',
-                                border: '0.5px solid',
-                                borderColor: 'ActiveBorder',
-                                margin: '10px',
-                                borderRadius: '7px',
-                                boxShadow: '1px 1px 4px rgba(0, 0, 0, 0.2)',
-                            }}
-                        >
-                            <Typography.Text>{item}</Typography.Text>
-                        </List.Item>
-                    )}
-                    className="chatbox"
-                />
+                <Chat messages={chatLog.value} />
             </Flex>
 
             {/* Modal to show when game ends */}

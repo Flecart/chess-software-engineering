@@ -1,24 +1,19 @@
 import { useNavigate } from '@tanstack/react-router';
-import { Button, Flex, Modal } from 'antd';
+import { Button, Flex, Modal, Select } from 'antd';
 import { useEffect, useCallback, useState } from 'react';
-import { useTimer, type TimerSettings } from 'react-timer-hook';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { fen, gameEnded, isMyTurn, winner } from '../hooks/gamestate';
 import {poll, startDarkboard, makeBotMove} from '@/features/chessboard/api/game';
+import { Chat } from '../components/Chat';
 
 export const Darkboard = () => {
-    // const { token } = useTokenContext();
-    // if (!token) throw new Error('Token not found');
     const navigate = useNavigate();
-
-    const timerSettings: TimerSettings = { expiryTimestamp: new Date(), autoStart: false };
-
-    const myTimer = useTimer(timerSettings);
-    const opponentTimer = useTimer(timerSettings);
 
     const [isAskingForMove, setisAskingForMove] = useState(false);
     const [hasGameStarted, setHasGameStarted] = useState(false);
+    const [messages, setMessages] = useState<string[]>([]);
+    const [view, setView] = useState<"openspiel" | "darkboard" | "full">('full');
 
     const setUpNewGame = useCallback(() => {
         gameEnded.value = false;
@@ -30,6 +25,20 @@ export const Darkboard = () => {
         makeBotMove();
     }, []);
 
+    const handleViewSelect = useCallback((value: "openspiel" | "darkboard" | "full") => {
+        setView(value);
+    }, []);
+
+    const fenCalculator = useCallback((currentFen: string) => {
+        if (view === 'darkboard') {
+            return showOnlyAColor(currentFen, 'black');
+        } else if (view === 'openspiel') {
+            return showOnlyAColor(currentFen, 'white');
+        } else {
+            return currentFen;
+        }
+    }, [view]);
+
     useEffect(() => {
         fen.value = startWhiteFEN;
         startDarkboard()
@@ -38,6 +47,7 @@ export const Darkboard = () => {
         });
     }, []);
 
+
     useEffect(() => {
         const interval = setInterval(async () => {
             const data = await poll();
@@ -45,44 +55,36 @@ export const Darkboard = () => {
                 setisAskingForMove(false);
             }
             fen.value = data.fen;
+            setMessages(data.message ?? []);
         }, 1000);
 
         return () => clearInterval(interval);
     }, [hasGameStarted]);
 
     return (
-        <Flex wrap="wrap">
-            <Flex vertical gap="small" style={{ margin: '4rem 0 0 30%' }}>
+        <Flex wrap="wrap" gap="large" align="center" justify="space-around">
+            <Flex vertical gap="small" style={{marginTop: "4rem"}}>
                 <PlayerInfo
                     myTurn={!isMyTurn.value}
-                    time={{
-                        seconds: opponentTimer.seconds,
-                        minutes: opponentTimer.minutes,
-                        hours: opponentTimer.hours,
-                        days: opponentTimer.days,
-                    }}
                     givenUsername="Darkboard"
                     opponent
                 />
                 <Chessboard
-                    fen={fen.value}
+                    fen={fenCalculator(fen.value)}
                     boardOrientation={'white'}
+                    possibleMoves={[]}
                     makeMove={() => console.log('Can´t  make move!')}
                 />
                 <PlayerInfo
                     myTurn={isMyTurn.value}
-                    time={{
-                        seconds: myTimer.seconds,
-                        minutes: myTimer.minutes,
-                        hours: myTimer.hours,
-                        days: myTimer.days,
-                    }}
                     givenUsername="OpenSpiel"
                 />
+
+                <Flex gap="small" justify="space-between" align='center'>
                 <Button
                     type="primary"
                     size="large"
-                    style={{ marginTop: '1rem', maxWidth: '10rem' }}
+                    style={{ maxWidth: '10rem' }}
                     onClick={() => {
                         handleNewMove();
                     }}
@@ -90,7 +92,22 @@ export const Darkboard = () => {
                 >
                     Make Move
                 </Button>
+                <Select
+                    defaultValue="full"
+                    style={{ width: "12rem" }}
+                    onChange={handleViewSelect}
+                    options={[
+                        { value: 'darkboard', label: 'Darkboard view' },
+                        { value: 'full', label: 'Full view' },
+                        { value: 'openspiel', label: 'Openspiel view' },
+                    ]}
+                    />
+                </Flex>
             </Flex>
+            <Flex vertical gap="small" style={{ minWidth: '300px', maxWidth: '35%' }}>
+                <Chat messages={messages} />
+            </Flex>
+
 
             {/* Modal to show when game ends */}
             <Modal
@@ -113,5 +130,15 @@ export const Darkboard = () => {
     );
 };
 
-const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../......../......../......../........';
+const startBlackFEN = 'rnbqkbnr/pppppppp/......../......../......../......../PPPPPPPP/RNBQKBNR';
 const startWhiteFEN = startBlackFEN.toUpperCase().split('/').reverse().join('/');
+
+function showOnlyAColor(fen:string, color: string|undefined) {
+    if (color === 'white') {
+        return fen.replace(/[a-z]/g, '.')
+    } else if (color === 'black'){
+        return fen.replace(/[A-Z]/g, '.')
+    }
+
+    return fen
+}

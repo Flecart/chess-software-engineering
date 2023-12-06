@@ -3,11 +3,12 @@ import { useUserQuery } from '@/features/user';
 import { ClockCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Flex } from 'antd';
 import { displayTimer } from '../utils/time';
+import { useMemo } from 'react';
 
 type Props = Readonly<{
     myTurn: boolean;
     opponent?: boolean;
-    time: {
+    time?: {
         seconds: number;
         minutes: number;
         hours: number;
@@ -22,7 +23,11 @@ type Props = Readonly<{
 export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => {
     const { isGuest, username: myUsername } = useAuth();
     const username = givenUsername ?? (opponent ? 'Avversario' : myUsername);
-    const { seconds, minutes, hours, days } = time;
+
+    const { seconds, minutes, hours, days } = useMemo(() => {
+        if (!time) return { seconds: 0, minutes: 0, hours: 0, days: 0 };
+        return time;
+    }, []);
 
     const { data: user } = useUserQuery(username, !isGuest && !opponent);
     return (
@@ -50,8 +55,12 @@ export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => 
                     fontSize: '1.5rem',
                 }}
             >
-                <ClockCircleOutlined />
-                <span>{displayTimer(days, hours, minutes, seconds)}</span>
+                { time && 
+                <>
+                    <ClockCircleOutlined />
+                    <span>{displayTimer(days, hours, minutes, seconds)}</span>
+                </>
+                }
             </Flex>
         </Flex>
     );
