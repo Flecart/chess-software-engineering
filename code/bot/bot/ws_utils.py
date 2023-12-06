@@ -23,6 +23,9 @@ class WaitingStatus(TypedDict):
     waiting: bool
 
 
+none_ws_error = TypeError("ws is None, call connect() first")
+
+
 class WebSocketWrapper:
     def __init__(self, game_id: int, token: str):
         self.game_id = game_id
@@ -45,16 +48,17 @@ class WebSocketWrapper:
         return self.url
 
     def close(self):
-        if self.ws:
-            self.ws.close()
+        if self.ws is None:
+            raise none_ws_error
+        self.ws.close()
 
     def send(self, msg: Message):
         if self.ws is None:
-            raise TypeError("ws is None")
+            raise none_ws_error
         self.ws.send(json.dumps(msg))
 
     async def recv(self) -> GameStatus | WaitingStatus:
         if self.ws is None:
-            raise TypeError("ws is None")
+            raise none_ws_error
         result = await asyncio.get_event_loop().run_in_executor(None, self.ws.recv)
         return json.loads(result)
