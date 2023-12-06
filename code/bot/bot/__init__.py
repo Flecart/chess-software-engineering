@@ -25,10 +25,11 @@ else:
 
 @bot.message_handler(commands=["newGame"])
 async def startNewGame(message: types.Message):
-    if GameMapper().get(message.chat.id) is None:
+    if GameMapper().get(message.chat.id) is not None:
         await bot.reply_to(
             message, "C'è un'altra partita in corso, usa /leave se vuoi votare la resa"
         )
+        return
     time_to_choose = TIME_TO_VOTE_IN_SECONDS
     args = [10 * 60]  # hardcoded just in case .env explode
 
