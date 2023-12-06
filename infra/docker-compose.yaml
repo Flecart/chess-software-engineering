@@ -17,6 +17,7 @@ services:
       - db_user=${db_user}
       - db_url=${db_url}
       - bot_username=${bot_username}
+      - TZ=Europe/Rome
     networks:
       - deploy
     restart: unless-stopped
