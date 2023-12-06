@@ -1,4 +1,4 @@
-FROM python:3.11 as builder
+FROM python:3.11 AS builder
 
 RUN pip install poetry
 
@@ -13,27 +13,23 @@ COPY pyproject.toml poetry.lock ./
 
 RUN touch README.md
 
-RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --no-root && rm -rf "$POETRY_CACHE_DIR"
 
-FROM python:3.11-slim-buster as runtime
+FROM python:3.11-slim-buster AS runtime
 
 WORKDIR /app
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-# TODO: define environment variables
-ENV TELEGRAM_TOKEN=""
-ENV PROTOCOL=""
-ENV WS_PROTOCOL=""
-ENV HOST=""
+ENV PROTOCOL=https
+ENV WS_PROTOCOL=wss
+ENV HOST=app.t1-check-mates.mooo.com/backend
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY src/ ./src
-COPY *.py ./
+COPY bot/ ./bot/
 
-RUN apt update
-RUN apt install -y libffi-dev libcairo2
+RUN apt update && apt install -y libffi-dev libcairo2 && apt clean
 
-ENTRYPOINT ["python", "-m", "bot"]
+ENTRYPOINT ["python", "-m", "bot.__init__"]
