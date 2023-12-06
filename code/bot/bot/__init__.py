@@ -9,7 +9,7 @@ from bot.config import API_TOKEN, DEBUG, TIME_TO_VOTE_IN_SECONDS
 from bot.src.ballot_box_collection import BallotBoxCollection
 from bot.utils import get_user_and_chat_from_message
 from bot.src.valid_moves_mapper import ValidMovesMapper
-
+from bot.texts import help_text,rules_text
 # logger = telebot.logger
 
 if DEBUG:
@@ -22,10 +22,12 @@ else:
 
 
 @bot.message_handler(commands=["newGame"])
-async def startNewGame(message: types.Message):  #
+async def startNewGame(message: types.Message):
     time_to_choose = TIME_TO_VOTE_IN_SECONDS
+    args = [10*60] # hardcoded just in case .env explode
 
-    args = message.text.split(" ")
+    if message.text is not None:
+        args = message.text.split(" ")
     if len(args) > 1:
         try:
             time_to_choose = int(args[1])
@@ -65,6 +67,13 @@ async def vote(message: types.Message):
             f"per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chad_id)}",
         )
 
+@bot.message_handler(commands=["help"])
+async def help(message: types.Message):
+    await bot.reply_to(message, help_text)
+
+@bot.message_handler(commands=["rules"])
+async def rules(message: types.Message):
+    await bot.reply_to(message, rules_text)
 
 def start():
     print("Ready")
