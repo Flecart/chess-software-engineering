@@ -76,11 +76,11 @@ export const Game = () => {
                     } else if (myTimeStart === null) {
                         myTimer.restart(createExpireTime(null, myTimeLeft));
                         myTimer.pause();
-                        opponentTimer.restart(createExpireTime(opponentTimeStart, opponentTimeLeft));
+                        opponentTimer.restart(createExpireTime(null, opponentTimeLeft));
                     } else if (opponentTimeStart === null) {
                         opponentTimer.restart(createExpireTime(null, opponentTimeLeft));
                         opponentTimer.pause();
-                        myTimer.restart(createExpireTime(myTimeStart, myTimeLeft));
+                        myTimer.restart(createExpireTime(null, myTimeLeft));
                     }
                 }
             }
