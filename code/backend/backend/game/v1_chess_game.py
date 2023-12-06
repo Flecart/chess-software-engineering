@@ -165,7 +165,8 @@ class ChessGame():
 
         if not self.__finished:
             game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
-            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE:
+            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE and \
+                game_state.general_message != "":
                 self.__moves.append(move)
 
             self._start_timer()

@@ -172,7 +172,7 @@ def _create_observation_string(state, player_id: int, input_struct: GameStateInp
     case GameType.KRIEGSPIEL:
       return state.observation_string(player_id)
     case GameType.DARK_CHESS:
-      return "TODO: implement me"
+      return ""
       # return _create_chat_bot_message(state, player_id, input_struct)
 
 def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
