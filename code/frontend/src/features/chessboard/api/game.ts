@@ -42,8 +42,9 @@ export function getWsUrl(gameId: string): string {
 
 type PollResponse = {
     fen: string
-    error_message: string[] | null
+    error_message: string | null
     message: string[] | null
+    state: string;
 }
 
 export async function startDarkboard(): Promise<void> {
@@ -53,7 +54,7 @@ export async function startDarkboard(): Promise<void> {
 
 export async function poll(): Promise<PollResponse> {
     const response = await axios.get<PollResponse>(`${apiBaseUrl}/darkboard/status`);
-    console.log("here is the data" + JSON.stringify(response.data));
+    // console.log("here is the data" + JSON.stringify(response.data));
     return response.data as unknown as PollResponse;
 }
 

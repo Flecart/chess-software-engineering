@@ -1,11 +1,10 @@
 import { List, Typography } from 'antd';
 
-
 type Props = Readonly<{
     messages: string[];
 }>;
 
-export const Chat = ({messages}: Props) => {
+export const Chat = ({ messages }: Props) => {
     const reversed_messages = [...messages].reverse();
     return (
         <List

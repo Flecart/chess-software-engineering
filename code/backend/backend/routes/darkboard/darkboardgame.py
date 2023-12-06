@@ -17,8 +17,6 @@ def create_game_routes(app: FastAPI,prefix:str=''):
         return  "ok"
     
     def check_valid_status():
-        if DarkBoardSingleton().get_state == DarkBoardStates.GAME_OVER:
-            raise JSONException(status_code=400, error=GameOverMessage)
         if DarkBoardSingleton().get_state == DarkBoardStates.ERROR:
             raise JSONException(status_code=400, error=DarkBoardSingleton().get_error_message)
 
