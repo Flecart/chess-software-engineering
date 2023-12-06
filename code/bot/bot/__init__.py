@@ -62,7 +62,7 @@ async def vote(message: types.Message):
     else:
         await bot.reply_to(
             message,
-            f"non implemtato, ma per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chad_id)}",
+            f"per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chad_id)}",
         )
 
 

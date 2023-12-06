@@ -42,7 +42,8 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         """
         Reset votes
         """
-        self._vote.pop(ballotbox)
+        if ballotbox in self._vote:
+            self._vote.pop(ballotbox)
 
     def mostVoted(self, ballotbox: int):
         if ballotbox not in self._vote.keys():
@@ -55,10 +56,10 @@ class BallotBoxCollection(metaclass=SingletonMeta):
         conteggio = {}
 
         for elemento in votes:
-            if elemento in conteggio:
-                conteggio[elemento] += 1
-            else:
-                conteggio[elemento] = 1
+            conteggio[elemento] = len(votes[elemento])
+
+
+
         max_freq = max(conteggio.values())
         max_freq_arr: list[str] = [elemento for elemento, frequenza in conteggio.items() if frequenza == max_freq]
 
