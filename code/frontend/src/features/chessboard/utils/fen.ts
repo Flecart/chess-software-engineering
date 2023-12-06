@@ -90,7 +90,7 @@ export function generateFogObject(customFen: string): CustomSquareStyles {
                 const number = i + 1;
                 const letter = labels.at(j);
                 const key = `${letter}${number}` as Square; // even if I define unexsisting square's key, it's fine because they will be ignored
-                fogObject[key] = { backgroundColor: 'rgba(21, 21, 21, 0.95)' }; // TODO: create cooler custom fog
+                fogObject[key] = { backgroundColor: 'rgba(21, 21, 21, 0.95)' };
             }
         }
     });

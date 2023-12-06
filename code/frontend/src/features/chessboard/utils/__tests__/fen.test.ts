@@ -181,6 +181,13 @@ describe('getPieceAtSquare', () => {
         const result = getPieceAtSquare(fen, square);
         expect(result).toBeNull();
     });
+
+    it('should handle uncomplete fen string', () => {
+        const fen = '????????/????????/????????/8/8/PPPPPPPP/RNBQKBNR';
+        const square = 'e8';
+        const result = getPieceAtSquare(fen, square);
+        expect(result).toBeNull();
+    });
 });
 
 describe('isSquareOccupiedByColor', () => {
