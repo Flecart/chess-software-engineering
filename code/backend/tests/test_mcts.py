@@ -3,7 +3,23 @@ import unittest
 from backend.bot.data.game_state_input import GameStateInput
 from backend.bot.data.game_state_output import GameStateOutput
 from backend.bot.data.enums import GameType, Actions
-from backend.bot.mcts import dispatch
+from backend.bot.mcts import dispatch, _check_castling
+
+
+class TestKrisperg(unittest.TestCase):
+    def setUp(self):
+        self.game = GameStateInput(GameType.KRIEGSPIEL, "", [], None)
+        self.game.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    def test_initialisation(self):
+        self.assertEqual(
+            self.game.fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        )
+        self.assertEqual(self.game.game_type, GameType.KRIEGSPIEL)
+
+        with self.subTest("Test mosse valide all'appertura"):
+            self.game.action = Actions.LIST_MOVE
+            dispatch(self.game)
 
 
 class TestMCTS(unittest.TestCase):
@@ -234,6 +250,8 @@ class TestSpecialSituation(unittest.TestCase):  # TODO pensare ad un nome miglio
         game.game_type = GameType.DARK_CHESS
         game.fen = "k7/8/8/8/8/8/8/R3K2R w KQ - 0 1"
         game.action = Actions.LIST_MOVE
+
+        _check_castling("o-o-o")
 
         val = dispatch(game)
 
