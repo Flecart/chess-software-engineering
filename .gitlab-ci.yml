@@ -70,6 +70,8 @@ test_telegram_bot:
   image: python:3.11-bookworm
   <<: *poetry_setup
   script:
+    - export TIME_TO_VOTE_IN_SECONDS="60"
+    - export BACKEND_URL='127.0.0.1:8000'
     - cd code/bot
     - poetry lock
     - poetry install
