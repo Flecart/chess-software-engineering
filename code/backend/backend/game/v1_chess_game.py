@@ -165,8 +165,7 @@ class ChessGame():
 
         if not self.__finished:
             game_state: GameStateOutput = engine.dispatch(self.__create_game_state_action(Actions.MOVE, move))
-            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE and \
-                game_state.general_message != "":
+            if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE:
                 self.__moves.append(move)
 
             self._start_timer()
@@ -176,7 +175,9 @@ class ChessGame():
             self.__finished = self.__finished or game_state.finish
             self.__black_view = game_state.black_view
             self.__white_view = game_state.white_view
-            self.__messages.append(game_state.general_message)
+
+            if game_state.general_message != "":
+                self.__messages.append(game_state.general_message)
 
         if self.__finished:
             self.save_and_update_elo()
