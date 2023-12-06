@@ -28,4 +28,6 @@ ENV host=0.0.0.0
 
 EXPOSE 8000
 
+RUN sudo timedatectl set-timezone Europe/Rome
+
 ENTRYPOINT ["python", "-m", "backend.__init__"]
