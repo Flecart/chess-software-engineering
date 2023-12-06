@@ -22,8 +22,11 @@ WORKDIR /app
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
+# TODO: define environment variables
 ENV TELEGRAM_TOKEN=""
-ENV BACKEND_URL=""
+ENV PROTOCOL=""
+ENV WS_PROTOCOL=""
+ENV HOST=""
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 

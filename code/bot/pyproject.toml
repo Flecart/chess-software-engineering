@@ -11,21 +11,31 @@ pytelegrambotapi = "^4.14.0"
 python-dotenv = "^1.0.0"
 python-chess = "^1.999"
 cairosvg = "^2.7.1"
+asyncio = "^3.4.3"
+aiohttp = "^3.9.1"
+schedule = "^1.2.1"
+aioschedule = "^0.5.2"
+websocket-client = "^1.6.4"
+
+[tool.poetry.group.test.dependencies]
+coverage = "^7.3.2"
 
 [tool.poetry.scripts]
-start = "bot:start"
+start = 'bot:start'
+tests = 'tests:tests'
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
+
+[tool.coverage.run]
+branch = true
+source = ["bot"]
+command_line = "-m unittest"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-ra -q --capture=no"
-testpaths = [
-    "tests",
-]
-pythonpath = "." # adds the current directory to sys.path

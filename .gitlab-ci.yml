@@ -65,6 +65,26 @@ test_backend:
         coverage_format: cobertura
         path: 'code/backend/coverage.xml'
 
+test_telegram_bot:
+  stage: test
+  image: python:3.11-bookworm
+  <<: *poetry_setup
+  script:
+    - cd code/bot
+    - poetry lock
+    - poetry install
+    - poetry run coverage run
+    - poetry run coverage report
+    - poetry run coverage xml
+  artifacts:
+    paths:
+      - 'code/bot/.coverage'
+      - 'code/bot/coverage.xml'
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: 'code/bot/coverage.xml'
+
 sonarqube_check:
   stage: quality_gate
   image:
@@ -74,6 +94,8 @@ sonarqube_check:
     - job: test_frontend
       artifacts: true
     - job: test_backend
+      artifacts: true
+    - job: test_telegram_bot
       artifacts: true
   variables:
     SONAR_USER_HOME: '${CI_PROJECT_DIR}/.sonar' # Defines the location of the analysis task cache
