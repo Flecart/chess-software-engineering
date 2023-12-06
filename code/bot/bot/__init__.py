@@ -39,9 +39,6 @@ async def startNewGame(message: types.Message):
     await game_loop(time_to_choose, message.chat.id, bot)
 
 
-@bot.message_handler(commands=["leave", "surrender", "end"])
-async def surrender(message: types.Message):
-    await bot.reply_to(message, "not implemented")
 
 
 @bot.message_handler(commands=["vote"])
@@ -74,6 +71,15 @@ async def help(message: types.Message):
 @bot.message_handler(commands=["rules"])
 async def rules(message: types.Message):
     await bot.reply_to(message, rules_text)
+
+@bot.message_handler(commands=["leave", "surrender", "end"])
+async def vote_for_leave_game(message: types.Message):
+    (chat_id,user_id) = get_user_and_chat_from_message(message)
+
+    BallotBoxCollection().add_vote(chat_id,user_id,"leave")
+
+    await bot.reply_to(message,
+                       "hai votato per chiudere la partita")
 
 def start():
     print("Ready")

@@ -81,9 +81,14 @@ async def game_loop(time: int, chatid: int, bot: AsyncTeleBot):
         if max_voted is None:
             await bot.send_message(chatid, "Ok, basta, io me ne vado!")
             await bot.send_message(chatid, "Partita finita.")
+            ws.close()
             break
 
-        gamestatus = await make_move(ws, random.choice(max_voted))
+        selected_move = random.choice(max_voted)
+        if selected_move == "leave":
+            ws.close()
+            break
+        gamestatus = await make_move(ws, selected_move)
 
         await bot.send_photo(chatid, custom_fen_to_svg(gamestatus["view"]))
 
