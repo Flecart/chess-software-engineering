@@ -62,10 +62,21 @@ async def vote(message: types.Message):
     except Exception as e:
         await bot.reply_to(message, str(e))
     else:
+<<<<<<< Updated upstream
         await bot.reply_to(
             message,
             f"per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chad_id)}",
         )
+=======
+        most_voted = BallotBoxCollection().mostVoted(chad_id)
+        if most_voted is None:
+            await bot.reply_to(message, "Nessuna mossa votata")
+        else:
+            await bot.reply_to(
+                message,
+                f"Per il momento la mossa più votata è {', '.join(most_voted)}",
+            )
+>>>>>>> Stashed changes
 
 @bot.message_handler(commands=["help"])
 async def help(message: types.Message):

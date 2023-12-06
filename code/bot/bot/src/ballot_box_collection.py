@@ -15,12 +15,14 @@ class BallotBoxCollection(metaclass=SingletonMeta):
     """
 
     def _getBallotBox(self, ballotbox: int):
-        chat = ballotbox
+        """
+        Get the ballotbox of a chat
+        """
 
-        if chat not in self._vote.keys():
-            self._vote[chat] = dict()
+        if ballotbox not in self._vote.keys():
+            self._vote[ballotbox] = dict()
 
-        return self._vote[chat]
+        return self._vote[ballotbox]
 
     def add_vote(self, ballotbox: int, user: int, vote: str) -> None:
         """
@@ -46,15 +48,19 @@ class BallotBoxCollection(metaclass=SingletonMeta):
             self._vote.pop(ballotbox)
 
     def mostVoted(self, ballotbox: int):
-        if ballotbox not in self._vote.keys():
-            self._vote[ballotbox] = dict()
+        """
+        Get the most voted moves
+        """
 
         votes = self._getBallotBox(ballotbox)
+
         if len(votes) == 0:
             return None
         
-        conteggio = {}
+        max_vote = 0
+        most_voted: list[str]= []
 
+<<<<<<< Updated upstream
         for elemento in votes:
             conteggio[elemento] = len(votes[elemento])
 
@@ -62,5 +68,14 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
         max_freq = max(conteggio.values())
         max_freq_arr: list[str] = [elemento for elemento, frequenza in conteggio.items() if frequenza == max_freq]
+=======
+        for move in votes.keys():
+            if len(votes[move]) > max_vote:
+                max_vote = len(votes[move])
+                most_voted = [move]
+            elif len(votes[move]) == max_vote:
+                most_voted.append(move)
+>>>>>>> Stashed changes
 
-        return max_freq_arr
+        else:
+            return most_voted
