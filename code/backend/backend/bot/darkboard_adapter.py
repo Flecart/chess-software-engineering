@@ -147,7 +147,7 @@ class DarkBoard():
     def best_move(self):
         invalid_counter = 0
         # Temporary value just used not to infinite loop
-        while invalid_counter < 0:
+        while invalid_counter < 2:
             print("Waiting for best move", invalid_counter)
             self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
             input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
