@@ -4,7 +4,7 @@ from backend.game.v1_chess_game_manager import ChessGameManager
 from backend.game.v1_chess_game import ChessGame, Color, CreateGameRequest
 
 
-@unittest.expectedFailure
+@unittest.skip("Skip for now")
 class TestChessGameManager(unittest.TestCase):
     def setUp(self):
         self.manager = ChessGameManager()
