@@ -82,5 +82,10 @@ class TestBallotBoxCollection(unittest.TestCase):
         self.ballot_box_collection.add_vote(1, 102, "d2d4")
         self.assertEqual(self.ballot_box_collection.mostVoted(1), ["e2e4"])
 
+    def test_most_voted_tie(self):
+        self.ballot_box_collection.add_vote(1, 100, "e2e4")
+        self.ballot_box_collection.add_vote(1, 101, "d2d4")
+        self.assertEqual(self.ballot_box_collection.mostVoted(1), ["e2e4", "d2d4"])
+
     def test_most_voted_empty(self):
         self.assertEqual(self.ballot_box_collection.mostVoted(3), None)
