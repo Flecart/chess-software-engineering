@@ -27,7 +27,7 @@ export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => 
     const { seconds, minutes, hours, days } = useMemo(() => {
         if (!time) return { seconds: 0, minutes: 0, hours: 0, days: 0 };
         return time;
-    }, []);
+    }, [time]);
 
     const { data: user } = useUserQuery(username, !isGuest && !opponent);
     return (
@@ -55,12 +55,12 @@ export const PlayerInfo = ({ myTurn, opponent, time, givenUsername }: Props) => 
                     fontSize: '1.5rem',
                 }}
             >
-                { time && 
-                <>
-                    <ClockCircleOutlined />
-                    <span>{displayTimer(days, hours, minutes, seconds)}</span>
-                </>
-                }
+                {time && (
+                    <>
+                        <ClockCircleOutlined />
+                        <span>{displayTimer(days, hours, minutes, seconds)}</span>
+                    </>
+                )}
             </Flex>
         </Flex>
     );

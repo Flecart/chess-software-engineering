@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { Chessboard } from '../components/Chessboard';
 import { PlayerInfo } from '../components/PlayerInfo';
 import { isMyTurn } from '../hooks/gamestate';
-import {poll, startDarkboard, makeBotMove} from '@/features/chessboard/api/game';
+import { poll, startDarkboard, makeBotMove } from '../api/game';
 import { Chat } from '../components/Chat';
 
 const startFEN = 'rnbqkbnr/pppppppp/......../......../......../......../PPPPPPPP/RNBQKBNR';
@@ -17,7 +17,7 @@ export const Darkboard = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [messages, setMessages] = useState<string[]>([]);
-    const [view, setView] = useState<"openspiel" | "darkboard" | "full">('full');
+    const [view, setView] = useState<'openspiel' | 'darkboard' | 'full'>('full');
     const [currentFen, setCurrentFen] = useState<string>(startFEN);
 
     const handleNewMove = useCallback(() => {
@@ -25,87 +25,81 @@ export const Darkboard = () => {
         makeBotMove();
     }, []);
 
-    const handleViewSelect = useCallback((value: "openspiel" | "darkboard" | "full") => {
+    const handleViewSelect = useCallback((value: 'openspiel' | 'darkboard' | 'full') => {
         setView(value);
     }, []);
 
-    const fenCalculator = useCallback((currentFen: string) => {
-        if (view === 'darkboard') {
-            return showOnlyAColor(currentFen, 'black');
-        } else if (view === 'openspiel') {
-            return showOnlyAColor(currentFen, 'white');
-        } else {
-            return currentFen;
-        }
-    }, [view]);
+    const fenCalculator = useCallback(
+        (currentFen: string) => {
+            if (view === 'darkboard') {
+                return showOnlyAColor(currentFen, 'black');
+            } else if (view === 'openspiel') {
+                return showOnlyAColor(currentFen, 'white');
+            } else {
+                return currentFen;
+            }
+        },
+        [view],
+    );
 
     useEffect(() => {
         setCurrentFen(startFEN);
-        startDarkboard()
-        .then(() => {
+        startDarkboard().then(() => {
             setHasGameStarted(true);
         });
     }, []);
-
 
     useEffect(() => {
         const interval = setInterval(async () => {
             const data = await poll();
             if (data.fen != currentFen) {
                 setisAskingForMove(false);
+                setCurrentFen(data.fen);
             }
-            setCurrentFen(data.fen);
             setErrorMessage(data.error_message ?? null);
             setMessages(data.message ?? []);
 
-            if (data.state == "game_over" || data.error_message != null) {
+            if (data.state == 'game_over' || data.error_message != null) {
                 setModalOpen(true);
             }
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [hasGameStarted]);
+    }, [hasGameStarted, currentFen]);
 
     return (
         <Flex wrap="wrap" gap="large" align="center" justify="space-around">
-            <Flex vertical gap="small" style={{marginTop: "4rem"}}>
-                <PlayerInfo
-                    myTurn={!isMyTurn.value}
-                    givenUsername="Darkboard"
-                    opponent
-                />
+            <Flex vertical gap="small" style={{ marginTop: '4rem' }}>
+                <PlayerInfo myTurn={!isMyTurn.value} givenUsername="Darkboard" opponent />
                 <Chessboard
                     fen={fenCalculator(currentFen)}
                     boardOrientation={'white'}
                     possibleMoves={[]}
                     makeMove={() => console.log('Can´t  make move!')}
                 />
-                <PlayerInfo
-                    myTurn={isMyTurn.value}
-                    givenUsername="OpenSpiel"
-                />
+                <PlayerInfo myTurn={isMyTurn.value} givenUsername="OpenSpiel" />
 
-                <Flex gap="small" justify="space-between" align='center'>
-                <Button
-                    type="primary"
-                    size="large"
-                    style={{ maxWidth: '10rem' }}
-                    onClick={() => {
-                        handleNewMove();
-                    }}
-                    loading={isAskingForMove}
-                >
-                    Make Move
-                </Button>
-                <Select
-                    defaultValue="full"
-                    style={{ width: "12rem" }}
-                    onChange={handleViewSelect}
-                    options={[
-                        { value: 'darkboard', label: 'Darkboard view' },
-                        { value: 'full', label: 'Full view' },
-                        { value: 'openspiel', label: 'Openspiel view' },
-                    ]}
+                <Flex gap="small" justify="space-between" align="center">
+                    <Button
+                        type="primary"
+                        size="large"
+                        style={{ maxWidth: '10rem' }}
+                        onClick={() => {
+                            handleNewMove();
+                        }}
+                        loading={isAskingForMove}
+                    >
+                        Make Move
+                    </Button>
+                    <Select
+                        defaultValue="full"
+                        style={{ width: '12rem' }}
+                        onChange={handleViewSelect}
+                        options={[
+                            { value: 'darkboard', label: 'Darkboard view' },
+                            { value: 'full', label: 'Full view' },
+                            { value: 'openspiel', label: 'Openspiel view' },
+                        ]}
                     />
                 </Flex>
             </Flex>
@@ -115,7 +109,7 @@ export const Darkboard = () => {
 
             {/* Modal to show when game ends */}
             <Modal
-                title={"La partità è finita!"}
+                title={'La partità è finita!'}
                 open={modalOpen}
                 centered
                 footer={[
@@ -132,13 +126,12 @@ export const Darkboard = () => {
     );
 };
 
-
-function showOnlyAColor(fen:string, color: string|undefined) {
+function showOnlyAColor(fen: string, color: string | undefined) {
     if (color === 'white') {
-        return fen.replace(/[a-z]/g, '.')
-    } else if (color === 'black'){
-        return fen.replace(/[A-Z]/g, '.')
+        return fen.replace(/[a-z]/g, '.');
+    } else if (color === 'black') {
+        return fen.replace(/[A-Z]/g, '.');
     }
 
-    return fen
+    return fen;
 }
