@@ -1,7 +1,5 @@
-from logging import Logger
-from fastapi import  FastAPI,  WebSocket, Depends, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, Depends, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
-from fastapi.websockets import WebSocketState
 from websockets import ConnectionClosedError, ConnectionClosedOK
 from backend.game.utils import Color
 from backend.game.v1_chess_game_manager import ChessGameManager
@@ -10,23 +8,23 @@ from backend.game.v1_socket_manager import SocketManager
 
 from backend.routes.exception import JSONException
 from backend.routes.auth import decode_access_token
-from .data import CreateGameRequest, GameStatusResponse
+from backend.routes.game.data import (
+    CreateGameRequest,
+    GameStatusResponse,
+    WebsocketRequests,
+)
 
-from pydantic import BaseModel
 from typing import Literal
 import asyncio
 
-# TODO: move me to request nad responses file
-class WebsocketRequests(BaseModel):
-    kind: Literal["move", "list_move", "status"]
-    data: str # ha senso solamente per la move, e definisce la mossa e.g. e2e4
 
-
-def create_game_routes(app: FastAPI,prefix:str=''):
-    prefix = f'{prefix}/game'
+def create_game_routes(app: FastAPI, prefix: str = ""):
+    prefix = f"{prefix}/game"
 
     @app.post(prefix)
-    def create_game(req: CreateGameRequest, user_data: Annotated[dict, Depends(decode_access_token)]) -> int:
+    def create_game(
+        req: CreateGameRequest, user_data: Annotated[dict, Depends(decode_access_token)]
+    ) -> int:
         """
         Create a new game.
         Is't important to notice that the player
@@ -76,31 +74,35 @@ def create_game_routes(app: FastAPI,prefix:str=''):
                             # che ho messo a chess manager e chess game
                             try:
                                 game.move(request.data)
-                                await SocketManager().notify_opponent(game_id, player_color) 
+                                await SocketManager().notify_opponent(
+                                    game_id, player_color
+                                )
                                 move = request.data
                             except Exception as e:
                                 print(e)
                         case "status":
                             # rispondi con lo stato attuale a chi lo ha chiesto, con solamente una fen
                             # TODO: nello status bisogna mettere anche il nome dei giocatori.
-                            if not (player_color == Color.WHITE and player_color == Color.BLACK):
+                            if not (
+                                player_color == Color.WHITE
+                                and player_color == Color.BLACK
+                            ):
                                 raise Exception("Watching player not supported yet")
                         case "list_move":
-                            # rispondi con la lista delle mosse 
+                            # rispondi con la lista delle mosse
 
-                            # trova colore fai check colore player corrente 
+                            # trova colore fai check colore player corrente
                             if player_color == game.current_player:
                                 list_moves = game.get_moves()
 
-                    data = game.get_player_response(player_color, 
-                        possible_moves=list_moves, 
-                        move_made=move
+                    data = game.get_player_response(
+                        player_color, possible_moves=list_moves, move_made=move
                     )
                     await websocket.send_json(jsonable_encoder(data))
 
                 else:
                     await websocket.send_json({"waiting": True})
-                    await asyncio.sleep(1) 
+                    await asyncio.sleep(1)
 
         except WebSocketDisconnect:
             await SocketManager().remove(game_id, username, websocket)
@@ -110,50 +112,56 @@ def create_game_routes(app: FastAPI,prefix:str=''):
             await SocketManager().remove(game_id, username, websocket)
 
     @app.put(prefix + "/{game_id}/join/")
-    def join_game(game_id: int, user_data: Annotated[dict, Depends(decode_access_token)]):
+    def join_game(
+        game_id: int, user_data: Annotated[dict, Depends(decode_access_token)]
+    ):
         """
         Join a game with a user.
         token:
             dict of username string, and guest boolean
-        """ 
+        """
         try:
-            return join_game_with_color(game_id,user_data,'white')
+            return join_game_with_color(game_id, user_data, "white")
         except JSONException as e:
-            return join_game_with_color(game_id,user_data,'black')
-
+            return join_game_with_color(game_id, user_data, "black")
 
     @app.put(prefix + "/{game_id}/join/{color}")
-    def join_game_with_color(game_id: int, user_data: Annotated[dict, Depends(decode_access_token)],\
-                             color:Literal['black','white']):
+    def join_game_with_color(
+        game_id: int,
+        user_data: Annotated[dict, Depends(decode_access_token)],
+        color: Literal["black", "white"],
+    ):
         """
         Join a game with a user.
         token:
             dict of username string, and guest boolean
-        """ 
+        """
 
         # it check first if he can join as white
-        # if an error is thrown it try to join as black 
+        # if an error is thrown it try to join as black
         # TODO: refactor me with pydantic
-        try: 
-            ChessGameManager().get_game(game_id).\
-                join(user_data['username'], Color(color))
+        try:
+            ChessGameManager().get_game(game_id).join(
+                user_data["username"], Color(color)
+            )
         except ValueError as e:
-            raise JSONException(error={'error': str(e)}, status_code=400)
-        
-        return {"data": f"user has correctly joined game {game_id} as {color}", "color": color}
-     
-    
+            raise JSONException(error={"error": str(e)}, status_code=400)
+
+        return {
+            "data": f"user has correctly joined game {game_id} as {color}",
+            "color": color,
+        }
+
     @app.get(prefix + "/{game_id}")
-    def status_game(game_id: int)-> GameStatusResponse:
+    def status_game(game_id: int) -> GameStatusResponse:
         """
         Get the status of a game.
         """
         pass
 
     @app.post(prefix + "{game_id}/move")
-    def move(game_id:int)-> GameStatusResponse:
+    def move(game_id: int) -> GameStatusResponse:
         """
         Get the status of a game.
         """
-        raise JSONException(error={'error':'error'}) 
-
+        raise JSONException(error={"error": "error"})

@@ -9,6 +9,7 @@ class Color(StrEnum):
     WHITE = "white"
     BLACK = "black"
 
+
 class GameTypes(StrEnum):
     DARK_CHESS = "dark_chess"
     # TODO: add other game types
