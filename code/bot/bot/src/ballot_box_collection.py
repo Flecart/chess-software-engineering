@@ -56,26 +56,15 @@ class BallotBoxCollection(metaclass=SingletonMeta):
 
         if len(votes) == 0:
             return None
-        
+
         max_vote = 0
-        most_voted: list[str]= []
+        most_voted: list[str] = []
 
-<<<<<<< Updated upstream
-        for elemento in votes:
-            conteggio[elemento] = len(votes[elemento])
-
-
-
-        max_freq = max(conteggio.values())
-        max_freq_arr: list[str] = [elemento for elemento, frequenza in conteggio.items() if frequenza == max_freq]
-=======
         for move in votes.keys():
             if len(votes[move]) > max_vote:
                 max_vote = len(votes[move])
                 most_voted = [move]
             elif len(votes[move]) == max_vote:
                 most_voted.append(move)
->>>>>>> Stashed changes
 
-        else:
-            return most_voted
+        return most_voted

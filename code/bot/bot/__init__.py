@@ -10,7 +10,8 @@ from bot.src.ballot_box_collection import BallotBoxCollection
 from bot.utils import get_user_and_chat_from_message
 from bot.src.valid_moves_mapper import ValidMovesMapper
 from bot.src.game_mapper import GameMapper
-from bot.texts import help_text,rules_text
+from bot.texts import help_text, rules_text
+
 # logger = telebot.logger
 
 if DEBUG:
@@ -25,9 +26,11 @@ else:
 @bot.message_handler(commands=["newGame"])
 async def startNewGame(message: types.Message):
     if GameMapper().get(message.chat.id) is None:
-        await bot.reply_to(message,"C'è un'altra partita in corso, usa /leave se vuoi votare la resa")
+        await bot.reply_to(
+            message, "C'è un'altra partita in corso, usa /leave se vuoi votare la resa"
+        )
     time_to_choose = TIME_TO_VOTE_IN_SECONDS
-    args = [10*60] # hardcoded just in case .env explode
+    args = [10 * 60]  # hardcoded just in case .env explode
 
     if message.text is not None:
         args = message.text.split(" ")
@@ -40,8 +43,6 @@ async def startNewGame(message: types.Message):
     # initialisation
 
     await game_loop(time_to_choose, message.chat.id, bot)
-
-
 
 
 @bot.message_handler(commands=["vote"])
@@ -62,12 +63,6 @@ async def vote(message: types.Message):
     except Exception as e:
         await bot.reply_to(message, str(e))
     else:
-<<<<<<< Updated upstream
-        await bot.reply_to(
-            message,
-            f"per il momento la mossa più votata è {BallotBoxCollection().mostVoted(chad_id)}",
-        )
-=======
         most_voted = BallotBoxCollection().mostVoted(chad_id)
         if most_voted is None:
             await bot.reply_to(message, "Nessuna mossa votata")
@@ -76,24 +71,26 @@ async def vote(message: types.Message):
                 message,
                 f"Per il momento la mossa più votata è {', '.join(most_voted)}",
             )
->>>>>>> Stashed changes
+
 
 @bot.message_handler(commands=["help"])
 async def help(message: types.Message):
     await bot.reply_to(message, help_text)
 
+
 @bot.message_handler(commands=["rules"])
 async def rules(message: types.Message):
     await bot.reply_to(message, rules_text)
 
+
 @bot.message_handler(commands=["leave", "surrender", "end"])
 async def vote_for_leave_game(message: types.Message):
-    (chat_id,user_id) = get_user_and_chat_from_message(message)
+    (chat_id, user_id) = get_user_and_chat_from_message(message)
 
-    BallotBoxCollection().add_vote(chat_id,user_id,"leave")
+    BallotBoxCollection().add_vote(chat_id, user_id, "leave")
 
-    await bot.reply_to(message,
-                       "hai votato per chiudere la partita")
+    await bot.reply_to(message, "hai votato per chiudere la partita")
+
 
 def start():
     print("Ready")
