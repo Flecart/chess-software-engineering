@@ -12,7 +12,6 @@ from bot.src.valid_moves_mapper import ValidMovesMapper
 from bot.src.game_mapper import GameMapper
 from bot.texts import help_text, rules_text
 
-# logger = telebot.logger
 
 if DEBUG:
     telebot.logger.setLevel(logging.DEBUG)
@@ -24,7 +23,7 @@ else:
 
 
 @bot.message_handler(commands=["newgame"])
-async def startNewGame(message: types.Message):
+async def start_new_game(message: types.Message):
     if GameMapper().get(message.chat.id) is not None:
         await bot.reply_to(
             message, "C'è un'altra partita in corso, usa /leave se vuoi votare la resa"
@@ -38,7 +37,7 @@ async def startNewGame(message: types.Message):
     if len(args) > 1:
         try:
             time_to_choose = int(args[1])
-        except:
+        except Exception:
             pass
 
     # initialisation
@@ -52,14 +51,16 @@ async def vote(message: types.Message):
     if message.text is not None:
         _, args = message.text.split(" ", 1)
     else:
-        pass
+        return
+
     (chad_id, user_id) = get_user_and_chat_from_message(message)
     valid_moves = ValidMovesMapper().get(chad_id)
-    if valid_moves is not None:
-        if args not in valid_moves:
-            await bot.reply_to(message, "Mossa invalida")
-            return
-    try:  # demo
+
+    if valid_moves is not None and args not in valid_moves:
+        await bot.reply_to(message, "Mossa invalida")
+        return
+
+    try:
         BallotBoxCollection().add_vote(chad_id, user_id, vote=args)
     except Exception as e:
         await bot.reply_to(message, str(e))

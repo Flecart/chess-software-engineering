@@ -87,7 +87,7 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
                                 player_color == Color.WHITE
                                 and player_color == Color.BLACK
                             ):
-                                raise Exception("Watching player not supported yet")
+                                raise NotImplementedError("Watching player not supported yet")
                         case "list_move":
                             # rispondi con la lista delle mosse
 
@@ -122,7 +122,7 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
         """
         try:
             return join_game_with_color(game_id, user_data, "white")
-        except JSONException as e:
+        except JSONException:
             return join_game_with_color(game_id, user_data, "black")
 
     @app.put(prefix + "/{game_id}/join/{color}")

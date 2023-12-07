@@ -26,7 +26,6 @@ export const Pregame = () => {
     };
 
     const startGame = async (values: GameOptions) => {
-        console.log(values);
         const sureToken = await checkAndSetToken();
 
         const realGameId = await gameApi.createGame(sureToken, bot, values.variant, values.time);

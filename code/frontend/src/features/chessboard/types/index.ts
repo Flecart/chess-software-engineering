@@ -32,3 +32,10 @@ export type CreateGameParams = {
     type: 'dark_chess' | 'kriegspiel';
     time: number;
 };
+
+export type PollResponse = {
+    fen: string;
+    error_message: string | null;
+    message: string[] | null;
+    state: string;
+};

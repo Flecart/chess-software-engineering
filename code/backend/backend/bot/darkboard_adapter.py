@@ -91,7 +91,7 @@ class DarkBoard():
 
         self.sio.emit("make_move", DarkBoard.move_to_san(self.__fen, move))
 
-    def is_move_valid(self, move: str) -> bool:
+    def is_move_valid(self, _move: str) -> bool:
         """ Check if a move is valid
         
         """
@@ -104,7 +104,7 @@ class DarkBoard():
         squares = DarkBoard.fen_to_squares(fen)
         
         # Parse the move
-        from_square, to_square = move[0:2], move[2:]
+        from_square, _to_square = move[0:2], move[2:]
 
         from_rank, from_file = 8 - int(from_square[1]), ord(from_square[0]) - ord('a')
         
@@ -141,8 +141,8 @@ class DarkBoard():
         return self._state
 
     def make_move(self,move):
-        input = GameStateInput(game_type,self.fen,Actions.MOVE,move)    
-        return dispatch(input)
+        game_input = GameStateInput(game_type,self.fen,Actions.MOVE,move)    
+        return dispatch(game_input)
     
     def best_move(self):
         invalid_counter = 0
@@ -150,16 +150,16 @@ class DarkBoard():
         while invalid_counter < 2:
             print("Waiting for best move", invalid_counter)
             self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
-            input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
-            state = dispatch(input)
+            game_input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
+            state = dispatch(game_input)
             if state.white_view != KRIEGSPIEL_INVALID_MOVE or state.black_view != KRIEGSPIEL_INVALID_MOVE:
                 invalid_counter += 1
                 continue
             print("Best move", state.best_move)
             return state.best_move[0]
             
-        input = GameStateInput(game_type, self.fen, Actions.GET_VALID_MOVE, None)    
-        state = dispatch(input)
+        game_input = GameStateInput(game_type, self.fen, Actions.GET_VALID_MOVE, None)    
+        state = dispatch(game_input)
         print("Best move", state.best_move)
         return state.best_move
 

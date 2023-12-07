@@ -12,4 +12,5 @@ class Color(StrEnum):
 
 class GameTypes(StrEnum):
     DARK_CHESS = "dark_chess"
-    # TODO: add other game types
+    KRIEGSPIEL = "kriegspiel"
+    CHESS = "chess"

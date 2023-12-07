@@ -25,3 +25,7 @@ class GameStatusResponse(BaseModel):
 class WebsocketRequests(BaseModel):
     kind: Literal["move", "list_move", "status"]
     data: str  # ha senso solamente per la move, e definisce la mossa e.g. e2e4
+
+class GameResponse(BaseModel):
+    kind: Literal["status"] # add with other types
+    data: GameStatusResponse

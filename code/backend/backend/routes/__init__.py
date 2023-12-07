@@ -28,8 +28,10 @@ logging.getLogger("main").info("Creating routes")
 
 install_exception_handler(app)
 
-create_game_routes(app, prefix="/api/v1")
-create_user_routes(app, prefix="/api/v1")
-create_darkboard_routes(app, prefix="/api/v1")
+v1_prefix = "/api/v1"
+
+create_game_routes(app, prefix=v1_prefix)
+create_user_routes(app, prefix=v1_prefix)
+create_darkboard_routes(app, prefix=v1_prefix)
 
 logging.getLogger("main").info("Createe routes")

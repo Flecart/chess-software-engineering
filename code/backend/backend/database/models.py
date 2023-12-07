@@ -23,7 +23,7 @@ class User(Base):
     __tablename__ = "users"
     user = Column(String, primary_key=True, index=True)
     profile_image = Column(LargeBinary, default=None)
-    profile_image_url = Column(String, default=f"https://api.dicebear.com/7.x/lorelei/png?seed=12")
+    profile_image_url = Column(String, default=lambda context: f"https://api.dicebear.com/7.x/lorelei/png?seed={context.get_current_parameters()['user']}")
     profile_image_type = Column(Enum("link", "blob", name="image_type"), default="link")
     auth = relationship("Auth", back_populates="user_instance")
     rating = Column(Integer, default=1500)
