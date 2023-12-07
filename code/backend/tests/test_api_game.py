@@ -22,11 +22,13 @@ def _go_listening_until_move(ws, name=None):
 
 
 def _play_moves(websocket, name, moves):
-    checked = (
-        lambda message: type(message) == dict
-        and "ended" in message
-        and message["ended"] == True
-    )
+    def checked(message):
+        return (
+            isinstance(message, dict)
+            and "ended" in message
+            and message["ended"] is True
+        )
+
     for i, move in enumerate(moves):
         time.sleep(2)
         websocket.send(json.dumps({"kind": "move", "data": move}))
@@ -40,8 +42,16 @@ def _play_moves(websocket, name, moves):
     return None
 
 
-@unittest.skip("temp")
 class TestApiGame(unittest.TestCase):
+    def setUp(self):
+        config = Config()
+        self.host = f"{config['host']}:{config['port']}"
+        self.base_url = f"http://{self.host}"
+        self.base_url_api = f"{self.base_url}/api/v1"
+        self.websocket_url = (
+            lambda game_id, token: f"ws://{self.host}/api/v1/game/{game_id}/ws?token={token}"
+        )
+
     def _two_player_play(self, white, black, moves_white, moves_black, game_id):
         def first_player(auth_token):
             with connect(self.websocket_url(game_id, auth_token)) as websocket:
@@ -74,28 +84,19 @@ class TestApiGame(unittest.TestCase):
         ).json()
         return data
 
-    def _sing_up(self, user, psw) -> str:
+    def _sign_up(self, user, psw) -> str:
         data = requests.post(
             self.base_url_api + "/user/signup", json={"username": user, "password": psw}
         ).json()
-        if type(data) != str:
+        if not isinstance(data, str):
             raise Exception()
         return data
-
-    def setUp(self):
-        config = Config()
-        self.host = f"{config['host']}:{config['port']}"
-        self.base_url = f"http://{self.host}"
-        self.base_url_api = f"{self.base_url}/api/v1"
-        self.websocket_url = (
-            lambda game_id, token: f"ws://{self.host}/api/v1/game/{game_id}/ws?token={token}"
-        )
 
     def _create_guest_user(self) -> str:
         jwt = requests.post(self.base_url_api + "/user/guest").json()
         return jwt
 
-    def _test_join_game_bot_black(self):
+    def test_join_game_bot_black(self):
         jwt = self._create_guest_user()
 
         game_id = requests.post(
@@ -109,13 +110,13 @@ class TestApiGame(unittest.TestCase):
 
         def player(auth_token):
             with connect(self.websocket_url(game_id, auth_token)) as websocket:
-                message = websocket.recv()
+                websocket.recv()
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
-                message = websocket.recv()
+                websocket.recv()
                 _go_listening_until_move(websocket, "black player ")
                 websocket.send(json.dumps({"kind": "move", "data": "a6a5"}))
-                message = websocket.recv()
+                websocket.recv()
 
             websocket.close()
 
@@ -125,7 +126,7 @@ class TestApiGame(unittest.TestCase):
         t.start()
         t.join()
 
-    def _test_join_game_bot_wrong_move(self):
+    def test_join_game_bot_wrong_move(self):
         jwt = self._create_guest_user()
 
         game_id = requests.post(
@@ -134,16 +135,16 @@ class TestApiGame(unittest.TestCase):
             json=default_game_body(True),
         ).json()
         requests.put(
-            self.base_url_api + f"/game/{game_id}/join", headers=_auth(jwt)
+            self.base_url_api + f"/game/{game_id}/join/", headers=_auth(jwt)
         ).json()
 
         def player(auth_token):
             with connect(self.websocket_url(game_id, auth_token)) as websocket:
-                message = websocket.recv()
+                websocket.recv()
                 websocket.send(json.dumps({"kind": "move", "data": "a1a3"}))
-                message = websocket.recv()
+                websocket.recv()
                 websocket.send(json.dumps({"kind": "move", "data": "a3a4"}))
-                message = websocket.recv()
+                websocket.recv()
 
             websocket.close()
 
@@ -153,7 +154,7 @@ class TestApiGame(unittest.TestCase):
         t.start()
         t.join()
 
-    def _test_join_game_bot(self):
+    def test_join_game_bot(self):
         jwt = self._create_guest_user()
 
         game_id = requests.post(
@@ -162,17 +163,17 @@ class TestApiGame(unittest.TestCase):
             json=default_game_body(True),
         ).json()
         requests.put(
-            self.base_url_api + f"/game/{game_id}/join", headers=_auth(jwt)
+            self.base_url_api + f"/game/{game_id}/join/", headers=_auth(jwt)
         ).json()
 
         def player(auth_token):
             with connect(self.websocket_url(game_id, auth_token)) as websocket:
-                message = websocket.recv()
+                websocket.recv()
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
-                message = websocket.recv()
+                websocket.recv()
                 _go_listening_until_move(websocket, "first player ")
                 websocket.send(json.dumps({"kind": "move", "data": "a3a4"}))
-                message = websocket.recv()
+                websocket.recv()
 
             websocket.close()
 
@@ -182,7 +183,7 @@ class TestApiGame(unittest.TestCase):
         t.start()
         t.join()
 
-    def _test_join_game(self):
+    def test_join_game(self):
         jwt1 = self._create_guest_user()
         jwt2 = self._create_guest_user()
 
@@ -190,33 +191,31 @@ class TestApiGame(unittest.TestCase):
             self.base_url_api + "/game", headers=_auth(jwt1), json=default_game_body()
         ).json()
         requests.put(
-            self.base_url_api + f"/game/{game_id}/join", headers=_auth(jwt1)
+            self.base_url_api + f"/game/{game_id}/join/", headers=_auth(jwt1)
         ).json()
         requests.put(
-            self.base_url_api + f"/game/{game_id}/join", headers=_auth(jwt2)
+            self.base_url_api + f"/game/{game_id}/join/", headers=_auth(jwt2)
         ).json()
 
-        server_url = lambda x: f"ws://{self.host}/api/v1/game/{game_id}/{x}/ws"
-
         def first_player(auth_token):
-            with connect(server_url(auth_token)) as websocket:
-                message = websocket.recv()
+            with connect(self.websocket_url(game_id, auth_token)) as websocket:
+                websocket.recv()
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
-                message = websocket.recv()
+                websocket.recv()
                 _go_listening_until_move(websocket, "first")
             websocket.close()
 
         def second_player(auth_token):
-            with connect(server_url(auth_token)) as websocket:
-                message = websocket.recv()
+            with connect(self.websocket_url(game_id, auth_token)) as websocket:
+                websocket.recv()
                 _go_listening_until_move(websocket, "second player ")
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a2a3"}))
-                message = websocket.recv()
+                websocket.recv()
                 time.sleep(1)
                 websocket.send(json.dumps({"kind": "move", "data": "a7a6"}))
-                message = websocket.recv()
+                websocket.recv()
 
             websocket.close()
 
@@ -243,8 +242,8 @@ class TestApiGame(unittest.TestCase):
         jwt = []
         for [user, psw] in credentials:
             try:
-                jwt.append(self._sing_up(user, psw))
-            except:
+                jwt.append(self._sign_up(user, psw))
+            except Exception:
                 jwt.append(self._login(user, psw))
 
         versus = [(0, 1), (1, 2), (1, 3), (1, 0)]
