@@ -23,7 +23,7 @@ else:
     exit(-1)
 
 
-@bot.message_handler(commands=["newGame"])
+@bot.message_handler(commands=["newgame"])
 async def startNewGame(message: types.Message):
     if GameMapper().get(message.chat.id) is not None:
         await bot.reply_to(
