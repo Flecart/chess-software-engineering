@@ -1,7 +1,19 @@
 import unittest
-from bot.display_board import _to_standard_fen, _get_not_visible_squares
+from bot.display_board import (
+    _to_standard_fen,
+    _get_not_visible_squares,
+    custom_fen_to_svg,
+)
 
-test_fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq 0 1"
+test_fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
+
+
+class TestCustomFenToSvg(unittest.TestCase):
+    def test_image_with_correct_fen(self):
+        png = custom_fen_to_svg(
+            "rnbqkbnr/????????/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
+        )
+        self.assertIsNotNone(png)
 
 
 class TestToStandardFen(unittest.TestCase):
@@ -14,7 +26,7 @@ class TestToStandardFen(unittest.TestCase):
     def test_fen_with_question_marks(self):
         self.assertEqual(
             _to_standard_fen(
-                "rnbqkbnr/pppppppp/8/8/4P?2/8/PPPP1PPP/RNBQKBNR b KQkq 0 1"
+                "rnbqkbnr/pppppppp/8/8/4P?2/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1"
             ),
             test_fen,
         )
