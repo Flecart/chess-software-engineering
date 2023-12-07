@@ -1,6 +1,7 @@
 import unittest
 from bot.src.user_mapper import UserMapper
 from bot.src.game_mapper import GameMapper
+from bot.src.valid_moves_mapper import ValidMovesMapper
 from bot.src.ballot_box_collection import BallotBoxCollection
 
 
@@ -54,6 +55,31 @@ class TestUserMapper(unittest.TestCase):
         self.assertEqual(id(mapper1), id(mapper2))
 
 
+class TestValidMovesMapper(unittest.TestCase):
+    def setUp(self):
+        self.valid_moves_mapper = ValidMovesMapper()
+
+    def test_add(self):
+        self.valid_moves_mapper.add(1, ["e2e4", "e2e3"])
+        self.assertEqual(self.valid_moves_mapper.get(1), ["e2e4", "e2e3"])
+
+    def test_get(self):
+        self.valid_moves_mapper.add(2, ["e2e4", "e2e3"])
+        self.assertEqual(self.valid_moves_mapper.get(2), ["e2e4", "e2e3"])
+        self.assertIsNone(self.valid_moves_mapper.get(3))
+
+    def test_remove(self):
+        self.valid_moves_mapper.add(3, ["e2e4", "e2e3"])
+        self.assertEqual(self.valid_moves_mapper.get(3), ["e2e4", "e2e3"])
+        self.valid_moves_mapper.remove(3)
+        self.assertIsNone(self.valid_moves_mapper.get(3))
+
+    def test_singleton(self):
+        mapper1 = ValidMovesMapper()
+        mapper2 = ValidMovesMapper()
+        self.assertEqual(id(mapper1), id(mapper2))
+
+
 class TestBallotBoxCollection(unittest.TestCase):
     def setUp(self):
         self.ballot_box_collection = BallotBoxCollection()
@@ -72,6 +98,7 @@ class TestBallotBoxCollection(unittest.TestCase):
         self.ballot_box_collection.add_vote(1, 100, "e2e4")
         self.ballot_box_collection.add_vote(2, 100, "e2e4")
         self.ballot_box_collection.reset_box(1)
+        self.ballot_box_collection.reset_box(10)  # no error
         self.assertEqual(self.ballot_box_collection._vote.get(1), None)
         self.assertEqual(self.ballot_box_collection._vote[2]["e2e4"], [100])
 
