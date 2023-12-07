@@ -8,8 +8,6 @@
 stages:
   - test
   - quality_gate
-  # - build
-  - deploy
 
 variables:
   GIT_STRATEGY: fetch
@@ -111,18 +109,3 @@ sonarqube_check:
       - .sonar/cache
   script:
     - sonar-scanner
-  allow_failure: true
-
-# build_frontend:
-#   stage: build
-#   script:
-#     - cd code/frontend
-#     - npm install
-#     - npm run build
-
-deploy_to_production:
-  stage: deploy
-  script:
-    - echo "Deploying!"
-  only:
-    - main

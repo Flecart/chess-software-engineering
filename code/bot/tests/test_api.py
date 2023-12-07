@@ -1,6 +1,13 @@
 import unittest
-from unittest.mock import patch, MagicMock
-from bot.api_utils import create_game, delete_game, get_user, make_move
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from bot.api_utils import (
+    create_game,
+    delete_game,
+    get_user,
+    get_possible_moves,
+    make_move,
+    wait_opponent_move,
+)
 from bot.config import backend_url, api_base_url
 from bot.ws_utils import GameStatus, WaitingStatus, WebSocketWrapper
 
@@ -196,40 +203,76 @@ class TestGameApi(unittest.TestCase):
         mock_game_mapper_instance.remove.assert_not_called()
 
 
-@unittest.skip("Not implemented")
 class TestWsApi(unittest.IsolatedAsyncioTestCase):
-    @patch("bot.api_utils.WebSocketWrapper")
-    async def test_make_move(self, mock_websocket_wrapper):
-        # Set up the mock objects
-        mock_websocket_instance = MagicMock()
-        mock_websocket_wrapper.return_value = mock_websocket_instance
-        mock_websocket_instance.recv.return_value = test_game_status
+    async def test_get_possible_moves(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.send = Mock()
+        mock_ws.recv = AsyncMock(
+            return_value={"possible_moves": ["e2e4", "e2e3", "g1f3", "b1c3"]}
+        )
 
-        # Call the function with a test WebSocketWrapper and move
-        result = await make_move(mock_websocket_instance, test_move)
+        # Call the function with the mocked WebSocketWrapper
+        result = await get_possible_moves(mock_ws)
 
         # Check that the mocks were called with the correct arguments
-        mock_websocket_instance.send.assert_called_once_with(
-            {"kind": "move", "data": test_move}
-        )
-        mock_websocket_instance.recv.assert_awaited_once()
+        mock_ws.send.assert_called_once_with({"kind": "list_move", "data": ""})
 
         # Check that the function returned the correct result
-        self.assertEqual(result, test_game_status)
+        self.assertEqual(result, ["e2e4", "e2e3", "g1f3", "b1c3"])
 
-    @patch("bot.api_utils.WebSocketWrapper")
-    async def test_make_move_with_waiting_status(self, mock_websocket_wrapper):
-        # Set up the mock objects
-        mock_websocket_instance = MagicMock()
-        mock_websocket_wrapper.return_value = mock_websocket_instance
-        mock_websocket_instance.recv.return_value = test_waiting_status
+    async def test_get_possible_moves_with_waiting_status(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.send = Mock()
+        mock_ws.recv = AsyncMock(return_value={"waiting": True})
 
-        # Call the function with a test WebSocketWrapper and move
+        # Call the function with the mocked WebSocketWrapper and check for ValueError
         with self.assertRaises(ValueError):
-            await make_move(mock_websocket_instance, test_move)
+            await get_possible_moves(mock_ws)
+
+    async def test_get_possible_moves_with_no_possible_moves(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.send = Mock()
+        mock_ws.recv = AsyncMock(return_value={"possible_moves": None})
+
+        # Call the function with the mocked WebSocketWrapper and check for TypeError
+        with self.assertRaises(TypeError):
+            await get_possible_moves(mock_ws)
+
+    async def test_make_move(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.send = Mock()
+        mock_ws.recv = AsyncMock(return_value={"move_made": "e2e4"})
+
+        # Call the function with the mocked WebSocketWrapper
+        result = await make_move(mock_ws, "e2e4")
 
         # Check that the mocks were called with the correct arguments
-        mock_websocket_instance.send.assert_called_once_with(
-            {"kind": "move", "data": test_move}
-        )
-        mock_websocket_instance.recv.assert_awaited_once()
+        mock_ws.send.assert_called_once_with({"kind": "move", "data": "e2e4"})
+
+        # Check that the function returned the correct result
+        self.assertEqual(result, {"move_made": "e2e4"})
+
+    async def test_make_move_with_waiting_status(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.send = Mock()
+        mock_ws.recv = AsyncMock(return_value={"waiting": True})
+
+        # Call the function with the mocked WebSocketWrapper and check for ValueError
+        with self.assertRaises(ValueError):
+            await make_move(mock_ws, "e2e4")
+
+    async def test_wait_opponent_move(self):
+        # Mock WebSocketWrapper and its methods
+        mock_ws = MagicMock(WebSocketWrapper)
+        mock_ws.recv = AsyncMock(side_effect=[{"waiting": True}, {"move_made": "e2e4"}])
+
+        # Call the function with the mocked WebSocketWrapper
+        result = await wait_opponent_move(mock_ws)
+
+        # Check that the function returned the correct result
+        self.assertEqual(result, {"move_made": "e2e4"})
