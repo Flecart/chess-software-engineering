@@ -153,7 +153,10 @@ class TestChessGame(unittest.TestCase):
         chess_game.get_player_response(Color.BLACK)
         chess_game.get_player_response(Color.WHITE)
 
-        chess_game.get_bot_move(asyncio.get_event_loop())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        chess_game.get_bot_move(loop)
+        loop.close()
 
     @unittest.skip("TODO: fix this test")
     @patch("backend.game.v1_chess_game.engine")
