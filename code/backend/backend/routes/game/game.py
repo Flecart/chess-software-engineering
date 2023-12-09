@@ -152,16 +152,3 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
             "color": color,
         }
 
-    @app.get(prefix + "/{game_id}")
-    def status_game(game_id: int) -> GameStatusResponse:
-        """
-        Get the status of a game.
-        """
-        pass
-
-    @app.post(prefix + "{game_id}/move")
-    def move(game_id: int) -> GameStatusResponse:
-        """
-        Get the status of a game.
-        """
-        raise JSONException(error={"error": "error"})
