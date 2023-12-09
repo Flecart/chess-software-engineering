@@ -48,6 +48,7 @@ test_backend:
   image: python:3.11-bookworm
   <<: *poetry_setup
   script:
+    - export db_local="True"
     - cd code/backend
     - poetry lock
     - poetry install
