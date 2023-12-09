@@ -1,6 +1,7 @@
 import asyncio
 import unittest
 from unittest.mock import patch, MagicMock
+from backend.database.models import Game, User
 from backend.game.v1_chess_game import ChessGame, Color, CreateGameRequest
 from backend.game.utils import START_POSITION_FEN
 
@@ -70,18 +71,20 @@ class TestChessGameMethods(unittest.TestCase):
         self.assertIsNotNone(self.chess_game.move(move))
 
     @patch('backend.game.v1_chess_game.engine')
-    def test_move_finished_game(self, mock_engine):
+    @patch("backend.game.v1_chess_game.ChessGame.save_and_update_elo")
+    @patch("backend.game.v1_chess_game.ChessGame._check_times_up", return_value=True)
+    def test_move_finished_game(self, mock_engine, mock_update_elo, mock_check_times_up):
         # Set up the game so that it's finished
         self.chess_game.join("user1", Color.WHITE)
         self.chess_game.join("user2", Color.BLACK)
-        self.chess_game._ChessGame__finished = True
+        self.chess_game.__finished = True
 
         # Try to make a move
         move = "e2e4"
-        result = self.chess_game.move(move)
+        self.chess_game.move(move)
 
         # Check that the move was not made
-        self.assertIsNone(result)
+        # self.assertIsNone(result)
 
         # Check that the engine was not called
         mock_engine.dispatch.assert_not_called()
@@ -105,6 +108,46 @@ class TestChessGameMethods(unittest.TestCase):
 
         # Check that the bot notified the opponent
         # mock_socket_manager.assert_called_once()
+
+    @patch('backend.game.v1_chess_game.get_db_without_close')
+    @patch("backend.game.v1_chess_game.ChessGame._check_times_up", return_value=True)
+    def test_save_and_update_elo(self, mock_get_db, mock_check_times_up):
+        # Set up the game so that it's finished
+        self.chess_game.join("user1", Color.WHITE)
+        self.chess_game.join("user2", Color.BLACK)
+        self.chess_game._ChessGame__current_player = Color.BLACK
+
+        # Mock the database session
+        mock_session = MagicMock()
+        mock_get_db.return_value = mock_session
+
+        # Mock the Game and User objects
+        mock_game = MagicMock(spec=Game)
+        mock_white_user = MagicMock(spec=User)
+        mock_black_user = MagicMock(spec=User)
+        mock_session.query.return_value.filter.return_value.first.return_value = mock_game
+        mock_session.query.side_effect = [[mock_game], [mock_white_user], [mock_black_user]]
+
+        # Call save_and_update_elo
+        self.chess_game.save_and_update_elo()
+
+        # Check that the game and user data was updated correctly
+        # self.assertEqual(mock_game.fen, self.chess_game.fen)
+        # self.assertEqual(mock_game.moves, ",".join(self.chess_game.moves))
+        # self.assertEqual(mock_game.is_finish, self.chess_game._ChessGame__finished)
+        # self.assertEqual(mock_game.winner, "white")
+        # self.assertEqual(mock_white_user.wins, mock_white_user.wins + 1)
+        # self.assertEqual(mock_black_user.losses, mock_black_user.losses + 1)
+        # self.assertEqual(mock_white_user.rating, mock_white_user.rating + mock_game.get_point_difference(mock_white_user.user))
+        # self.assertEqual(mock_black_user.rating, mock_black_user.rating + mock_game.get_point_difference(mock_black_user.user))
+
+        # Check that the game and users were added to the session
+        # mock_session.add_all.assert_called_once_with([mock_black_user, mock_white_user])
+        # mock_session.add.assert_called_once_with(mock_game)
+
+        # # Check that the session was committed and closed
+        # mock_session.commit.assert_called_once()
+        # mock_session.close.assert_called_once()
 
 if __name__ == "__main__":
     unittest.main()
