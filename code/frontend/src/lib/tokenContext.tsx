@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 import usePersistState from '@/hooks/usePersistState';
 import type { jwt_token } from '@/types';
+import { jwtDecode } from 'jwt-decode';
 
 type TokenContextProps = {
     token: jwt_token | null;
@@ -22,6 +23,11 @@ export const useTokenContext = () => {
 
 export const TokenProvider = ({ children }: { children: ReactNode }) => {
     const [token, setToken] = usePersistState<jwt_token | null>('jwt_token', null);
+
+    // check if token is expired
+    if (token && (jwtDecode(token).exp ?? Date.now() / 1000) < Date.now() / 1000) {
+        setToken(null);
+    }
 
     const value = useMemo(
         () => ({
