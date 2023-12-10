@@ -1,11 +1,11 @@
 import { useAuth } from '@/features/auth';
 import { GameCard } from '@/features/user';
 import { useUserGamesQuery, useUserQuery } from '@/features/user/';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { Avatar, Button, Flex, Typography } from 'antd';
+import { Link } from '@tanstack/react-router';
+import { Avatar, Flex, Typography } from 'antd';
+import { ButtonSection } from '../components/ButtonSection';
 
 export const AuthLanding = () => {
-    const navigate = useNavigate({ from: '/' as const });
     const { username } = useAuth();
     const { data: user } = useUserQuery(username);
     const { data } = useUserGamesQuery(username);
@@ -61,26 +61,7 @@ export const AuthLanding = () => {
                     </Typography.Paragraph>
                 </Flex>
             </Flex>
-            <Flex justify="center" gap={100} wrap="wrap" style={{ width: '100%', marginTop: '120px' }}>
-                <Button
-                    type="primary"
-                    size="large"
-                    onClick={() => {
-                        navigate({ to: '/game/', search: { bot: true } });
-                    }}
-                >
-                    Gioca contro il computer
-                </Button>
-                <Button
-                    type="default"
-                    size="large"
-                    onClick={() => {
-                        navigate({ to: '/game/', search: { bot: false } });
-                    }}
-                >
-                    Gioca Online
-                </Button>
-            </Flex>
+            <ButtonSection />
         </Flex>
     );
 };

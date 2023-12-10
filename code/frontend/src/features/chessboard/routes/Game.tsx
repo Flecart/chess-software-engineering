@@ -15,7 +15,7 @@ import { Chat } from '../components/Chat';
 
 export const Game = () => {
     const { gameId } = useParams({ from: '/game/$gameId' as const });
-    const { boardOrientation } = useSearch({ from: '/game/$gameId' as const });
+    const { boardOrientation, bot } = useSearch({ from: '/game/$gameId' as const });
     const navigate = useNavigate({ from: '/game/$gameId' as const });
     const { token } = useTokenContext();
     if (!token) throw new Error('Token not found');
@@ -158,19 +158,21 @@ export const Game = () => {
             </Flex>
 
             <Flex vertical gap="small" style={{ minWidth: '300px', maxWidth: '35%' }}>
-                <section>
-                    <Typography.Paragraph
-                        copyable={{
-                            text: gameId,
-                        }}
-                    >
-                        Se giochi con una altra persona, condividi l'ID {gameId}!
-                    </Typography.Paragraph>
-                    <Flex gap="small">
-                        <Typography.Paragraph>Oppure postalo sui social!</Typography.Paragraph>
-                        <TwitterShareButton gameId={gameId} />
-                    </Flex>
-                </section>
+                {!bot && (
+                    <section>
+                        <Typography.Paragraph
+                            copyable={{
+                                text: gameId,
+                            }}
+                        >
+                            Se giochi con una altra persona, condividi l'ID {gameId}!
+                        </Typography.Paragraph>
+                        <Flex gap="small">
+                            <Typography.Paragraph>Oppure postalo sui social!</Typography.Paragraph>
+                            <TwitterShareButton gameId={gameId} />
+                        </Flex>
+                    </section>
+                )}
                 <Chat messages={chatLog.value} />
             </Flex>
 

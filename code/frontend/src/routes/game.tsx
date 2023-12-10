@@ -22,7 +22,10 @@ const specificGameRoute = new Route({
     path: '$gameId',
     component: Game,
     validateSearch: (search): GameRouteSearch => {
-        return { boardOrientation: search.boardOrientation === 'white' ? 'white' : 'black' };
+        return {
+            bot: 'bot' in search && (search.bot === 'true' || search.bot === true),
+            boardOrientation: search.boardOrientation === 'white' ? 'white' : 'black',
+        };
     },
 });
 

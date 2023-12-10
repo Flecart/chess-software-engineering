@@ -1,10 +1,8 @@
 import { StaticChessboard } from '@/features/chessboard';
-import { useNavigate } from '@tanstack/react-router';
-import { Button, Flex, Typography } from 'antd';
+import { Flex, Typography } from 'antd';
+import { ButtonSection } from '../components/ButtonSection';
 
 export const Landing = () => {
-    const navigate = useNavigate({ from: '/game' as const });
-
     return (
         <Flex align="center" justify="center" gap={'large'} wrap="wrap" style={{ marginTop: '50px' }}>
             <StaticChessboard customFEN="??????.?/??n???.?/??.p1p2/??...P.?/pp1PNB2/...?.?.P/PP5Q/K1R3R1" />
@@ -16,37 +14,7 @@ export const Landing = () => {
                     solo i propri pezzi e le caselle in cui può legalmente muoversi.
                 </Typography.Paragraph>
             </Flex>
-            <Flex justify="center" gap={100} wrap="wrap" style={{ width: '100%', marginTop: '120px' }}>
-                <Button
-                    type="primary"
-                    size="large"
-                    onClick={() => {
-                        navigate({ to: '/game/', search: { bot: true } });
-                    }}
-                >
-                    Gioca contro il computer
-                </Button>
-                <Button
-                    type="default"
-                    size="large"
-                    onClick={() => {
-                        navigate({ to: '/game/', search: { bot: false } });
-                    }}
-                >
-                    Gioca Online
-                </Button>
-            </Flex>
-            <Flex justify="center" gap={100} wrap="wrap" style={{ width: '100%', marginTop: '2rem' }}>
-                <Button
-                    type="primary"
-                    size="large"
-                    onClick={() => {
-                        navigate({ to: '/darkboard' });
-                    }}
-                >
-                    Guarda Darkboard - OpenSpiel
-                </Button>
-            </Flex>
+            <ButtonSection />
         </Flex>
     );
 };
