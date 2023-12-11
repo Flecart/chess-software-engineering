@@ -51,16 +51,21 @@ export const Darkboard = () => {
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            const data = await poll();
-            if (data.fen != currentFen) {
-                setisAskingForMove(false);
-                setCurrentFen(data.fen);
-            }
-            setErrorMessage(data.error_message ?? null);
-            setMessages(data.message ?? []);
-
-            if (data.state == 'game_over' || data.error_message != null) {
-                setModalOpen(true);
+            try {
+                const data = await poll();
+                if (data.fen != currentFen) {
+                    setisAskingForMove(false);
+                    setCurrentFen(data.fen);
+                }
+                setErrorMessage(data.error_message ?? null);
+                setMessages(data.message ?? []);
+    
+                if (data.state == 'game_over' || data.error_message != null) {
+                    setModalOpen(true);
+                }
+            } catch (e) {
+                const message = e.response.data as string;
+                setErrorMessage(message);
             }
         }, 1000);
 
@@ -110,7 +115,7 @@ export const Darkboard = () => {
             {/* Modal to show when game ends */}
             <Modal
                 title={'La partità è finita!'}
-                open={modalOpen}
+                open={modalOpen || errorMessage != null}
                 centered
                 footer={[
                     <Button key="backToHome" onClick={() => navigate({ to: '/' })}>
@@ -120,7 +125,7 @@ export const Darkboard = () => {
                 onCancel={() => navigate({ to: '/' })}
             >
                 <p>Speriamo che la partita fra i due bot sia stato di gradimento!</p>
-                <p>{errorMessage}</p>
+                {errorMessage == null ? null : <p>Error: {errorMessage}</p>}
             </Modal>
         </Flex>
     );
