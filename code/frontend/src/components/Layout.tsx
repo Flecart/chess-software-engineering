@@ -7,6 +7,7 @@ import {
     RobotOutlined,
     TrophyOutlined,
     UserOutlined,
+    UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { Link, Outlet } from '@tanstack/react-router';
 import { Button, Flex, Layout as LibLayout, Menu, type MenuProps } from 'antd';
@@ -46,6 +47,7 @@ const menuItemsClassic: MenuProps['items'] = [
         'bot',
         <RobotOutlined />,
     ),
+    getItem(<Link to="/darkboard">Darkboard</Link>, 'darkboard', <UsergroupAddOutlined />),
     getItem(<Link to="/leaderboard">Classifica</Link>, 'leaderboard', <TrophyOutlined />),
 ];
 

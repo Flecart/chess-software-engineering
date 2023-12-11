@@ -46,7 +46,7 @@ export async function startDarkboard(): Promise<void> {
 
 export async function poll(): Promise<PollResponse> {
     const response = await axios.get<PollResponse>(`${apiBaseUrl}/darkboard/status`);
-    return response.data as unknown as PollResponse;
+    return response.data;
 }
 
 export async function makeBotMove(): Promise<void> {

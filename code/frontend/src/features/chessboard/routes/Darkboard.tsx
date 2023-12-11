@@ -1,18 +1,19 @@
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Flex, Modal, Select } from 'antd';
-import { useEffect, useCallback, useState } from 'react';
-import { Chessboard } from '../components/Chessboard';
-import { PlayerInfo } from '../components/PlayerInfo';
-import { isMyTurn } from '../hooks/gamestate';
-import { poll, startDarkboard, makeBotMove } from '../api/game';
+import { isAxiosError } from 'axios';
+import { useCallback, useEffect, useState } from 'react';
+import { makeBotMove, poll, startDarkboard } from '../api/game';
 import { Chat } from '../components/Chat';
+import { PlayerInfo } from '../components/PlayerInfo';
+import { StaticChessboard } from '../components/StaticChessboard';
+import { isMyTurn } from '../hooks/gamestate';
 
 const startFEN = 'rnbqkbnr/pppppppp/......../......../......../......../PPPPPPPP/RNBQKBNR';
 
 export const Darkboard = () => {
     const navigate = useNavigate();
 
-    const [isAskingForMove, setisAskingForMove] = useState(false);
+    const [isAskingForMove, setIsAskingForMove] = useState(false);
     const [hasGameStarted, setHasGameStarted] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,26 +22,13 @@ export const Darkboard = () => {
     const [currentFen, setCurrentFen] = useState<string>(startFEN);
 
     const handleNewMove = useCallback(() => {
-        setisAskingForMove(true);
+        setIsAskingForMove(true);
         makeBotMove();
     }, []);
 
     const handleViewSelect = useCallback((value: 'openspiel' | 'darkboard' | 'full') => {
         setView(value);
     }, []);
-
-    const fenCalculator = useCallback(
-        (currentFen: string) => {
-            if (view === 'darkboard') {
-                return showOnlyAColor(currentFen, 'black');
-            } else if (view === 'openspiel') {
-                return showOnlyAColor(currentFen, 'white');
-            } else {
-                return currentFen;
-            }
-        },
-        [view],
-    );
 
     useEffect(() => {
         setCurrentFen(startFEN);
@@ -54,18 +42,19 @@ export const Darkboard = () => {
             try {
                 const data = await poll();
                 if (data.fen != currentFen) {
-                    setisAskingForMove(false);
+                    setIsAskingForMove(false);
                     setCurrentFen(data.fen);
                 }
                 setErrorMessage(data.error_message ?? null);
                 setMessages(data.message ?? []);
-    
+
                 if (data.state == 'game_over' || data.error_message != null) {
                     setModalOpen(true);
                 }
             } catch (e) {
-                const message = e.response.data as string;
-                setErrorMessage(message);
+                if (isAxiosError(e)) setErrorMessage(e.response?.data as string);
+                else if (e instanceof Error) setErrorMessage(e.message);
+                else setErrorMessage('Errore sconosciuto');
             }
         }, 1000);
 
@@ -76,11 +65,9 @@ export const Darkboard = () => {
         <Flex wrap="wrap" gap="large" align="center" justify="space-around">
             <Flex vertical gap="small" style={{ marginTop: '4rem' }}>
                 <PlayerInfo myTurn={!isMyTurn.value} givenUsername="Darkboard" opponent />
-                <Chessboard
-                    fen={fenCalculator(currentFen)}
-                    boardOrientation={'white'}
-                    possibleMoves={[]}
-                    makeMove={() => console.log('Can´t  make move!')}
+                <StaticChessboard
+                    customFEN={fenCalculator(view, currentFen)}
+                    style={{ width: 'max(70vw, 250px)', maxWidth: '70vh' }}
                 />
                 <PlayerInfo myTurn={isMyTurn.value} givenUsername="OpenSpiel" />
 
@@ -140,3 +127,13 @@ function showOnlyAColor(fen: string, color: string | undefined) {
 
     return fen;
 }
+
+const fenCalculator = (view: string, currentFen: string) => {
+    if (view === 'darkboard') {
+        return showOnlyAColor(currentFen, 'black');
+    } else if (view === 'openspiel') {
+        return showOnlyAColor(currentFen, 'white');
+    } else {
+        return currentFen;
+    }
+};
