@@ -84,6 +84,10 @@ export const Game = () => {
                     }
                 }
             }
+            if (gameEnded.value) {
+                myTimer.pause();
+                opponentTimer.pause();
+            }
         },
     });
 
@@ -121,7 +125,7 @@ export const Game = () => {
 
     const setUpNewGame = () => {
         gameEnded.value = false;
-        navigate({ to: '/game', search: { bot: true } });
+        navigate({ to: '/game', search: { bot } });
     };
 
     return (
