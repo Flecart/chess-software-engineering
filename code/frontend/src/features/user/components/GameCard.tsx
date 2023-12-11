@@ -29,7 +29,6 @@ export const GameCard = ({ game, size = 'large' }: Props) => {
                     <Typography.Text type={gameResultColor} strong style={{ fontSize: '1rem' }}>
                         {gameResult} {eloGain}
                     </Typography.Text>
-                    <Typography.Link href={`#${game.id}`}>Dettagli Partita</Typography.Link>
                 </Flex>
             </Flex>
         </Card>

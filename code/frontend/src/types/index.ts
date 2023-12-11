@@ -3,6 +3,7 @@ import { color } from '@/features/chessboard';
 export type jwt_token = string;
 
 export type GameRouteSearch = {
+    bot: boolean;
     boardOrientation: color;
 };
 

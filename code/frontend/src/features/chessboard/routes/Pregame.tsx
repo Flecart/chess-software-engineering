@@ -34,7 +34,7 @@ export const Pregame = () => {
         navigate({
             to: '/game/$gameId',
             params: { gameId: realGameId },
-            search: { boardOrientation: color },
+            search: { boardOrientation: color, bot },
         });
     };
 
@@ -84,7 +84,7 @@ export const Pregame = () => {
                             navigate({
                                 to: '/game/$gameId',
                                 params: { gameId: gameId },
-                                search: { boardOrientation: color },
+                                search: { boardOrientation: color, bot },
                             });
                         }}
                     />
