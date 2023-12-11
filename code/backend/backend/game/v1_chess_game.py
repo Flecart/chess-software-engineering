@@ -286,7 +286,7 @@ class ChessGame:
         game.fen = self.__fen
         game.moves = ",".join(self.__moves)
         game.is_finish = self.__finished
-        game.winner = Color.BLACK if Color.BLACK == self.current_player else Color.WHITE
+        game.winner = Color.WHITE if Color.BLACK == self.current_player else Color.BLACK
 
         if (
             self.__finished
