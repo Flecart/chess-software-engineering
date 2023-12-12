@@ -77,31 +77,30 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
             db.query(Game)
             .filter(
                 or_(Game.white_player == user, Game.black_player == user),
-                Game.white_player != None,
-                Game.black_player != None,
-                Game.winner != None,
+                Game.white_player is not None,
+                Game.black_player is not None,
+                Game.winner is not None,
+
             )
             .all()
         )
 
-        return reversed(
-            list(
-                map(
-                    lambda x: GameInfo(
-                        id=x.game_id,
-                        opponentName=x.get_opponent(user),
-                        opponentAvatar=db.query(User)
-                        .filter(User.user == x.get_opponent(user))
-                        .first()
-                        .profile_image_url,
-                        eloGain=round(x.get_point_difference(user)),
-                        opponentElo=round(x.get_opponent_rating(user)),
-                        result=x.get_state_game(user),
-                    ),
-                    games,
-                )
-            )
+        gameinfo_list = map(
+            lambda x: GameInfo(
+                id=x.game_id,
+                opponentName=x.get_opponent(user),
+                opponentAvatar=db.query(User)
+                .filter(User.user == x.get_opponent(user))
+                .first()
+                .profile_image_url,
+                eloGain=round(x.get_point_difference(user)),
+                opponentElo=round(x.get_opponent_rating(user)),
+                result=x.get_state_game(user),
+            ),
+            games,
         )
+
+        return list(reversed(list(gameinfo_list)))
 
     @app.get(prefix + "/leaderboard")
     def leaderboard(db: Session = Depends(get_db)) -> list[LeaderBoardResponse]:
@@ -109,7 +108,7 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         Get all games of a user
         """
         rating = db.query(User).order_by(User.rating.desc()).all()
-        if rating == None or len(rating) == 0:
+        if rating is None or len(rating) == 0:
             return []
 
         return list(

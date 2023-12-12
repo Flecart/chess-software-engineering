@@ -39,7 +39,7 @@ def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
-        if not ("guest" in payload) or not ("sub" in payload):
+        if "guest" not in payload or "sub" not in payload:
             raise credentials_exception
         username: dict = payload.get("sub")
         guest: dict = payload.get("guest")
@@ -51,7 +51,7 @@ def decode_access_token(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 def decode_user_token(token: Annotated[dict, Depends(decode_access_token)]):
-    if token["guest"] == True:
+    if token["guest"] is True:
         raise JSONException(
             status_code=401,
             error={"message": "this route is only for authenticated users"},

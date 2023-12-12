@@ -7,15 +7,7 @@ from .utils import Color
 from fastapi.encoders import jsonable_encoder
 
 from backend.game.v1_chess_game_manager import ChessGameManager
-from backend.routes.game.data import GameStatusResponse
 
-from pydantic import BaseModel
-from typing import Literal
-
-# TODO: refactor, move me to response and answer format folder
-class GameResponse(BaseModel):
-    kind: Literal["status"] # add with other types
-    data: GameStatusResponse
 
 
 class SocketManager:
@@ -80,7 +72,7 @@ class SocketManager:
             if ws.client_state == WebSocketState.DISCONNECTED:
                 to_remove.append((name, ws))
                 continue
-            if player_color != None and player_color != current_player_color:
+            if player_color is not None and player_color != current_player_color:
                 ren = game.get_player_response(player_color)
                 await ws.send_json(jsonable_encoder(ren))
 

@@ -1,8 +1,7 @@
 import { apiBaseUrl, wsUrl } from '@/config';
 import { axios } from '@/lib/axios';
 import type { jwt_token } from '@/types';
-import type { color } from '../types';
-import { CreateGameParams } from '../types';
+import type { PollResponse, color, CreateGameParams } from '../types';
 import { createCode, parseCode } from '../utils/code';
 
 export async function loginAsGuest(): Promise<jwt_token> {
@@ -40,22 +39,14 @@ export function getWsUrl(gameId: string): string {
 
 // Darkboard related functions
 
-type PollResponse = {
-    fen: string
-    error_message: string | null
-    message: string[] | null
-    state: string;
-}
-
 export async function startDarkboard(): Promise<void> {
-    console.log("starting darkboard");
+    console.log('starting darkboard');
     await axios.post(`${apiBaseUrl}/darkboard/start`);
 }
 
 export async function poll(): Promise<PollResponse> {
     const response = await axios.get<PollResponse>(`${apiBaseUrl}/darkboard/status`);
-    // console.log("here is the data" + JSON.stringify(response.data));
-    return response.data as unknown as PollResponse;
+    return response.data;
 }
 
 export async function makeBotMove(): Promise<void> {

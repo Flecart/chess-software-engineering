@@ -18,12 +18,12 @@ defConfig = {
 
 
 class Config:
-    config: dict
+    config_data: dict
     __instance = None
 
     def __getitem__(self, name):
-        if name in self.config:
-            return self.config[name]
+        if name in self.config_data:
+            return self.config_data[name]
         return None
 
     def __new__(cls):
@@ -34,7 +34,7 @@ class Config:
 
     def __init(self):
         load_dotenv()
-        self.config = defConfig
+        self.config_data = defConfig
         for key in defConfig.keys():
             if key in os.environ:
-                self.config[key] = os.environ[key]
+                self.config_data[key] = os.environ[key]
