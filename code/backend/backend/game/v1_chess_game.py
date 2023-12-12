@@ -176,10 +176,10 @@ class ChessGame:
         self._stop_timer()
         self.__finished = self._check_times_up()
 
-        if not self.__finished:
-            game_state: GameStateOutput = engine.dispatch(
+        game_state: GameStateOutput = engine.dispatch(
                 self.__create_game_state_action(Actions.MOVE, move)
             )
+        if not self.__finished:
             if game_state.general_message != utils.KRIEGSPIEL_INVALID_MOVE:
                 self.__moves.append(move)
 
@@ -197,7 +197,7 @@ class ChessGame:
         if self.__finished:
             self.save_and_update_elo()
 
-        return game_state.general_message
+        return game_state.general_message 
 
     def get_player_response(
         self,
