@@ -237,10 +237,15 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
                 break
 
     # TODO: you should refactor this maybe with builder pattern??
+    out.fen = _fen(state, game_state_input.game_type)
+
+
     out.finish = state.is_terminal()
     out.white_view = _custom_observation_string(state, 1, game_state_input.game_type)
     out.black_view = _custom_observation_string(state, 0, game_state_input.game_type)
-    out.fen = _fen(state, game_state_input.game_type)
+    if game_state_input.game_type == GameType.KRIEGSPIEL:
+        _, statechess = _create_state(GameType.CHESS, fen)
+        out.finish = statechess.is_terminal()
 
     player_id = 0 if fen.split(" ")[1] == "w" else 1
     out.general_message = _create_observation_string(state, player_id, game_state_input)
