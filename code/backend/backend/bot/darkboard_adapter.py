@@ -1,3 +1,4 @@
+import time
 import socketio 
 import random
 import uuid
@@ -12,7 +13,6 @@ class DarkBoardStates(StrEnum):
     WAITING_FOR_MOVE = auto()
     WAITING_FOR_COMPUTER_BEST_MOVE  = auto()
     GAME_OVER  = auto()
-    WAITING_FOR_OPPONENT_MOVE = auto()
     ERROR = auto()
 
 game_type = 'kriegspiel'
@@ -24,6 +24,7 @@ class DarkBoard():
         self._state = DarkBoardStates.GAME_OVER
         self.__old_fen: str | None = None
         self.sio = socketio.Client()
+        self.last_interaction = time.time()
         self.messages = []
         self.error_message = None
 
@@ -34,18 +35,19 @@ class DarkBoard():
             if self._state != DarkBoardStates.ERROR:
                 self.sio.emit("ready")
                 self._state = DarkBoardStates.WAITING_FOR_MOVE
+                self.set_state(DarkBoardStates.WAITING_FOR_MOVE)
         
         @self.sio.event
         def game_over(pgn):
-            self._state = DarkBoardStates.GAME_OVER
+            self.set_state(DarkBoardStates.GAME_OVER)
             print("Game over")
-       
+        
         @self.sio.event
         def read_message(message):
             print('message', message)
             self.messages.append(message)
             if 'White\'s turn;' in  message:
-                self._state = DarkBoardStates.WAITING_FOR_MOVE
+                self.set_state(DarkBoardStates.WAITING_FOR_MOVE)
                 print("It's my turn!")
             
         
@@ -59,14 +61,19 @@ class DarkBoard():
         @self.sio.event
         def error(err):
             print("Error", err)
-            self._state = DarkBoardStates.ERROR
-            self.error_message = 'Error from the other server ' + err
+            self.set_state(DarkBoardStates.ERROR)
+            self.error_message = 'Error from the other server '+err
 
         @self.sio.event
         def disconnect():
             print("Disconneted")
-            self._state = DarkBoardStates.ERROR
+            self.set_state(DarkBoardStates.ERROR)
             self.error_message = 'The other server has disconnected'
+
+    def set_state(self,state):
+        if self._state !=state:
+            self._state = state
+            self.last_interaction = time.time()
 
     @property
     def fen(self):
@@ -75,7 +82,6 @@ class DarkBoard():
     def connect(self, connection_string: str = Config()['URL_KRIEGSPER']): #TODO sosituirlo con un env
         # const connectionPayloadDeveloper f 0 username, .TestBot., gameType, .developer., token: .bec635e710d6cdd5t3d3aa2b1c2e7007e45881eaf5d4g6b. 
         # 5 const connectionPayload f username: .gianlo., gameType: .darkboard., room: .test., 
-
 
         connection_payload = {
             "username": "checkmates-"+str(random.randint(0,1000)),
@@ -142,6 +148,13 @@ class DarkBoard():
     
     @property
     def state(self):
+        if self._state == DarkBoardStates.WAITING_FOR_MOVE or self._state == DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE:
+            if self.last_interaction is None or (time.time() - self.last_interaction > 60):
+                self.set_state(DarkBoardStates.ERROR)
+                if self._state == DarkBoardStates.WAITING_FOR_MOVE:
+                    self.error_message = 'The other server has disconnected'  
+                else:
+                    self.error_message = 'Too much time calculating the move'
         return self._state
 
     def make_move(self,move):
@@ -151,7 +164,7 @@ class DarkBoard():
     def best_move(self):
         invalid_counter = 0
         # Temporary value just used not to infinite loop
-        self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
+        self.set_state(DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE)
         while invalid_counter < 0:
             print("Waiting for best move", invalid_counter)
             game_input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
@@ -163,6 +176,7 @@ class DarkBoard():
             return state.best_move[0]
             
         game_input = GameStateInput(game_type, self.fen, Actions.GET_VALID_MOVE, None)    
+        #breakpoint()
         state = dispatch(game_input)
         print("Best move", state.best_move)
         return state.best_move
