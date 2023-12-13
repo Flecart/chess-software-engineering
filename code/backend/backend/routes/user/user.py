@@ -118,7 +118,10 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
             games,
         )
 
+
         games = list(filter(lambda x: x is not None, games))
+
+        print(games)
         return list(reversed(list(gameinfo_list)))
 
     @app.get(prefix + "/leaderboard")
