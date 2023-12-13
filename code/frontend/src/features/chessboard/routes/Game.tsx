@@ -28,11 +28,12 @@ export const Game = () => {
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
 
-            if (usingTimer.current && message && 'waiting' in message && opponentTimer.totalSeconds <= 0) {
-                // è un messaggio di tipo waiting
-                // se il timer dell'avversario è scaduto, allora la partita è finita
-                gameEnded.value = true;
-                winner.value = true;
+            if (message) {
+                // updating gameEnded, when it's over never change it
+                if (!gameEnded.value) gameEnded.value = message.ended;
+
+                // updating winner
+                if (gameEnded.value) winner.value = message.turn !== boardOrientation;
             }
 
             if (message && !('waiting' in message)) {
@@ -42,11 +43,6 @@ export const Game = () => {
                 isMyTurn.value = message.turn === boardOrientation;
                 // updating fen
                 fen.value = message.view;
-                // updating gameEnded, when it's over never change it
-                if (!gameEnded.value) gameEnded.value = message.ended;
-
-                // updating winner
-                if (gameEnded.value) winner.value = message.turn !== boardOrientation;
 
                 if (message.possible_moves !== null) possibleMoves.value = message.possible_moves;
                 else possibleMoves.value = [];
@@ -113,8 +109,9 @@ export const Game = () => {
     const myTimer = useTimer(timerSettings);
     const opponentTimer = useTimer(timerSettings);
 
-    const myTimeOverString = myTimer.totalSeconds <= 0 ? 'Hai finito il tempo!' : '';
-    const opponentTimeOverString = opponentTimer.totalSeconds <= 0 ? "L'avversario ha finito il tempo!" : '';
+    const myTimeOverString = myTimer.totalSeconds <= 0 && usingTimer.current ? 'Hai finito il tempo!' : '';
+    const opponentTimeOverString =
+        opponentTimer.totalSeconds <= 0 && usingTimer.current ? "L'avversario ha finito il tempo!" : '';
 
     const makeMove = (from: string, to: string) => {
         if (isMyTurn.value) {
