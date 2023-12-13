@@ -91,7 +91,7 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         if games is None or len(games) == 0:
             return []
         
-        games = list(filter(lambda x: x is None, games))
+        games = list(filter(lambda x: x is not None, games))
 
         gameinfo_list = map(
             lambda x: GameInfo(
@@ -119,7 +119,7 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         if rating is None or len(rating) == 0:
             return []
 
-        rating = list(filter(lambda x: x is None, rating))
+        rating = list(filter(lambda x: x is not None, rating))
 
         return list(
             map(
