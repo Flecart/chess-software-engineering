@@ -30,9 +30,10 @@ class DarkBoard():
         # Socket events
         @self.sio.event
         def connect():
-            print("I'm connected Motherfuckers" )
-            self._state = DarkBoardStates.WAITING_FOR_MOVE
-            self.sio.emit("ready")
+            print("I'm connected to darkboard")
+            if self._state != DarkBoardStates.ERROR:
+                self.sio.emit("ready")
+                self._state = DarkBoardStates.WAITING_FOR_MOVE
         
         @self.sio.event
         def game_over(pgn):
