@@ -2,7 +2,7 @@ import { TwitterShareButton } from '@/features/social';
 import { useTokenContext } from '@/lib/tokenContext';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { Button, Flex, Modal, Typography } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTimer, type TimerSettings } from 'react-timer-hook';
 import useWebSocket from 'react-use-websocket';
 import { getWsUrl } from '../api/game';
@@ -18,6 +18,7 @@ export const Game = () => {
     const { boardOrientation, bot } = useSearch({ from: '/game/$gameId' as const });
     const navigate = useNavigate({ from: '/game/$gameId' as const });
     const { token } = useTokenContext();
+    const usingTimer = useRef(false);
     if (!token) throw new Error('Token not found');
 
     const { sendJsonMessage } = useWebSocket<wsMessage>(getWsUrl(gameId), {
@@ -27,7 +28,7 @@ export const Game = () => {
         onMessage: (event) => {
             const message = JSON.parse(event.data) as wsMessage;
 
-            if (message && 'waiting' in message && opponentTimer.totalSeconds <= 0) {
+            if (usingTimer.current && message && 'waiting' in message && opponentTimer.totalSeconds <= 0) {
                 // è un messaggio di tipo waiting
                 // se il timer dell'avversario è scaduto, allora la partita è finita
                 gameEnded.value = true;
@@ -53,6 +54,7 @@ export const Game = () => {
                 // updating chat log
                 chatLog.value = message.message;
 
+                usingTimer.current = message.using_timer;
                 /*
                     timer handling
 
