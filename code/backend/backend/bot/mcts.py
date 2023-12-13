@@ -251,3 +251,11 @@ def dispatch(game_state_input: GameStateInput) -> GameStateOutput:
     out.general_message = _create_observation_string(state, player_id, game_state_input)
 
     return out
+
+if __name__ =='__main__':
+    fen = "1n1r2k1/1p2b1q1/3B3p/5p2/b7/4K3/r7/q7 b - - 2 41"
+    _, statechess = _create_state(GameType.CHESS, fen)
+    out= statechess.is_terminal()
+    print(out)
+
+    

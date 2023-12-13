@@ -19,25 +19,26 @@ game_type = 'kriegspiel'
 class DarkBoard():
 
     def __init__(self, ):
+        print("DarkBoard created")
         self.__fen: str = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0'
         self._state = DarkBoardStates.GAME_OVER
         self.__old_fen: str | None = None
         self.sio = socketio.Client()
         self.messages = []
-        self.last_interaction = None
         self.error_message = None
-
 
         # Socket events
         @self.sio.event
         def connect():
+            print("I'm connected Motherfuckers" )
             self._state = DarkBoardStates.WAITING_FOR_MOVE
             self.sio.emit("ready")
         
         @self.sio.event
         def game_over(pgn):
             self._state = DarkBoardStates.GAME_OVER
-        
+            print("Game over")
+       
         @self.sio.event
         def read_message(message):
             print('message', message)
@@ -52,11 +53,13 @@ class DarkBoard():
             self.__old_fen = self.__fen
             if fen != self.__fen:
                 self.__fen = fen
+                 
 
         @self.sio.event
         def error(err):
+            print("Error", err)
             self._state = DarkBoardStates.ERROR
-            self.error_message = 'Error from the other server '+err
+            self.error_message = 'Error from the other server ' + err
 
         @self.sio.event
         def disconnect():
@@ -80,13 +83,13 @@ class DarkBoard():
         }
 
         query_string = "&".join([f"{key}={value}" for key, value in connection_payload.items()])
-
         self.sio.connect(connection_string + query_string)
 
     def send_move(self, move: str):
         """ A move in algebraic notation, e.g. e2e4
+        For pawn promotion 5th character is the piece to promote to, e.g. e7e8q
         """
-        assert len(move) == 4, "Invalid move"
+        assert len(move) == 4 or len(move) == 5, "Invalid move"
         assert move[0].isalpha() and move[1].isdigit() and move[2].isalpha() and move[3].isdigit(), "Invalid move"
 
         self.sio.emit("make_move", DarkBoard.move_to_san(self.__fen, move))
@@ -147,9 +150,9 @@ class DarkBoard():
     def best_move(self):
         invalid_counter = 0
         # Temporary value just used not to infinite loop
+        self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
         while invalid_counter < 0:
             print("Waiting for best move", invalid_counter)
-            self._state = DarkBoardStates.WAITING_FOR_COMPUTER_BEST_MOVE
             game_input = GameStateInput(game_type, self.fen, Actions.MAKE_BEST_MOVE, None)    
             state = dispatch(game_input)
             if state.white_view != KRIEGSPIEL_INVALID_MOVE or state.black_view != KRIEGSPIEL_INVALID_MOVE:
