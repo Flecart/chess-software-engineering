@@ -93,8 +93,8 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         
         games = list(filter(lambda x: x is not None, games))
 
-        gameinfo_list = map(
-            lambda x: GameInfo(
+
+        game_info_from_game = lambda x: GameInfo(
                 id=x.game_id,
                 opponentName=x.get_opponent(user),
                 opponentAvatar=db.query(User)
@@ -104,10 +104,21 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
                 eloGain=round(x.get_point_difference(user)),
                 opponentElo=round(x.get_opponent_rating(user)),
                 result=x.get_state_game(user),
-            ),
+            )
+
+        def game_try_game_info(x):
+            try:
+                return game_info_from_game(x)
+            except:
+                return None
+
+
+        gameinfo_list = map(
+            game_try_game_info, 
             games,
         )
 
+        games = list(filter(lambda x: x is not None, games))
         return list(reversed(list(gameinfo_list)))
 
     @app.get(prefix + "/leaderboard")
