@@ -84,7 +84,6 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
                 Game.white_player is not None,
                 Game.black_player is not None,
                 Game.winner is not None,
-
             )
             .all()
         )
@@ -119,9 +118,9 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         )
 
 
-        games = list(filter(lambda x: x is not None, games))
+        gameinfo_list = list(filter(lambda x: x is not None, gameinfo_list))
 
-        print(games)
+        print(gameinfo_list)
         return list(reversed(list(gameinfo_list)))
 
     @app.get(prefix + "/leaderboard")
