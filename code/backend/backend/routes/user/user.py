@@ -60,6 +60,10 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
     @app.get(prefix + "/info/{user}")
     def info(user: str, db: Session = Depends(get_db)) -> InfoUser:
         selected_user = db.query(User).filter(User.user == user).first()
+        if selected_user is None:
+            raise JSONException(
+                status_code=400, error={"message": "User does not exist"}
+            )
         return InfoUser(
             username=selected_user.user,
             avatar=selected_user.profile_image_url,
@@ -84,6 +88,10 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
             )
             .all()
         )
+        if games is None or len(games) == 0:
+            return []
+        
+        games = list(filter(lambda x: x is None, games))
 
         gameinfo_list = map(
             lambda x: GameInfo(
@@ -110,6 +118,8 @@ def create_user_routes(app: FastAPI, prefix: str = ""):
         rating = db.query(User).order_by(User.rating.desc()).all()
         if rating is None or len(rating) == 0:
             return []
+
+        rating = list(filter(lambda x: x is None, rating))
 
         return list(
             map(
