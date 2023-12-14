@@ -87,7 +87,9 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
                                 player_color == Color.WHITE
                                 and player_color == Color.BLACK
                             ):
-                                raise NotImplementedError("Watching player not supported yet")
+                                raise NotImplementedError(
+                                    "Watching player not supported yet"
+                                )
                         case "list_move":
                             # rispondi con la lista delle mosse
 
@@ -101,7 +103,14 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
                     await websocket.send_json(jsonable_encoder(data))
 
                 else:
-                    await websocket.send_json({"waiting": True})
+                    game_status = game.get_player_response(player_color)
+                    await websocket.send_json(
+                        {
+                            "ended": game_status.ended,
+                            "turn": game_status.turn,
+                            "waiting": True,
+                        }
+                    )
                     await asyncio.sleep(1)
 
         except WebSocketDisconnect:
@@ -151,4 +160,3 @@ def create_game_routes(app: FastAPI, prefix: str = ""):
             "data": f"user has correctly joined game {game_id} as {color}",
             "color": color,
         }
-

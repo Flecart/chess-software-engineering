@@ -16,6 +16,8 @@ type GameState = {
 };
 
 type WaitingState = {
+    ended: boolean;
+    turn: color;
     waiting: true;
 };
 
