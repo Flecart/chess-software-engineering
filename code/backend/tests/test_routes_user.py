@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.database.database import get_db
+from backend.database.database import Base, get_db
 from backend.routes.auth import create_guest_access_token
 from backend.routes.user.data import (
     InfoUser,
@@ -15,6 +15,7 @@ from backend.routes.user.data import (
 from backend.routes.user.user import create_user_routes
 
 engine = create_engine("sqlite:///./test.db")
+Base.metadata.create_all(engine)
 TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
