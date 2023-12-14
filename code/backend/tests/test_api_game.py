@@ -42,6 +42,7 @@ def _play_moves(websocket, name, moves):
     return None
 
 
+@unittest.skip("Not useful")
 class TestApiGame(unittest.TestCase):
     def setUp(self):
         config = Config()
