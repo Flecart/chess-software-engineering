@@ -44,7 +44,10 @@ services:
       no_cache: true
     environment:
       - "TELEGRAM_TOKEN=${TELEGRAM_TOKEN}"
-      - "BACKEND_URL=${BACKEND_URL}"
+      - "TIME_TO_VOTE_IN_SECONDS=${TIME_TO_VOTE_IN_SECONDS}"
+      - "HOST=${HOST}"
+      - "PROTOCOL=${PROTOCOL}"
+      - "WS_PROTOCOL=${WS_PROTOCOL}"
     networks:
       - deploy
     restart: unless-stopped
