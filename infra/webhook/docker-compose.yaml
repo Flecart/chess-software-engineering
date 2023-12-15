@@ -19,3 +19,4 @@ services:
     environment:
       - WEBHOOK_TOKEN=${WEBHOOK_TOKEN}
       - POST_SCRIPT=cd deploy/infra && ./deploy.sh
+    restart: unless-stopped
