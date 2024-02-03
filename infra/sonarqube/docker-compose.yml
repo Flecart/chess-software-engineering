@@ -1,0 +1,20 @@
+version: "3.5"
+
+services:
+  sonarqube:
+    image: "sonarqube:latest"
+    container_name: sonarqube
+    ports:
+      - "9009:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - "sonarqube-data:/opt/sonarqube/data"
+      - "sonarqube-logs:/opt/sonarqube/logs"
+      - "sonarqube-extensions:/opt/sonarqube/extensions"
+    restart: unless-stopped
+
+volumes:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check-Mates</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+    <!-- Boxicons CSS -->
+    <link
+      href="https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body>
+    <nav>
+      <div class="logo">
+        <i class="bx bx-menu menu-icon"></i>
+        <span class="logo-name">Check-Mates</span>
+      </div>
+
+      <div class="sidebar">
+        <div class="sidebar-content">
+          <ul class="lists">
+            <li class="list">
+              <a id="gitlab" class="nav-link">
+                <i class="bx bxl-gitlab icon"></i>
+                <span class="link">GitLab</span>
+              </a>
+            </li>
+            <li class="list">
+              <a id="taiga" class="nav-link">
+                <i class="bx bx-task icon"></i>
+                <span class="link">Taiga</span>
+              </a>
+            </li>
+            <li class="list">
+              <a id="mattermost" class="nav-link">
+                <i class="bx bx-chat icon"></i>
+                <span class="link">Mattermost</span>
+              </a>
+            </li>
+            <li class="list">
+              <a id="sonarqube" class="nav-link">
+                <i class="bx bx-bug icon"></i>
+                <span class="link">Sonarqube</span>
+              </a>
+            </li>
+            <li class="list">
+              <a id="timelog" class="nav-link">
+                <i class="bx bx-time icon"></i>
+                <span class="link">TimeLog</span>
+              </a>
+            </li>
+        </div>
+      </div>
+    </nav>
+
+    <section class="overlay"></section>
+
+    <main>
+      <iframe id="main" src="https://gitlab.t1-check-mates.mooo.com/" width="100%" height="100%"></iframe>
+    </main>
+
+    <script>
+      const navBar = document.querySelector("nav"),
+        menuBtns = document.querySelectorAll(".menu-icon"),
+        overlay = document.querySelector(".overlay");
+        navlinks = document.querySelectorAll(".nav-link");
+        iframe = document.getElementById("main")
+
+      menuBtns.forEach((menuBtn) => {
+        menuBtn.addEventListener("click", () => {
+          navBar.classList.toggle("open");
+        });
+      });
+
+      overlay.addEventListener("click", () => {
+        navBar.classList.remove("open");
+      });
+
+      navlinks.forEach((navlink) => {
+        navlink.addEventListener("click", (e) => {
+          console.log(e)
+          switch (e.srcElement.id) {
+            case "gitlab":
+              iframe.setAttribute("src", "https://gitlab.t1-check-mates.mooo.com/")
+              break;
+            case "taiga":
+              iframe.setAttribute("src", "https://taiga.t1-check-mates.mooo.com/")
+              break;
+            case "mattermost":
+              iframe.setAttribute("src", "https://mattermost.t1-check-mates.mooo.com/")
+              break;
+            case "sonarqube":
+              iframe.setAttribute("src", "https://sonarqube.t1-check-mates.mooo.com/")
+              break;
+            case "timelog":
+              iframe.setAttribute("src", "https://time.t1-check-mates.mooo.com/")
+              break;
+            default:
+              break;
+          }
+          navBar.classList.remove("open");
+        });
+      })
+
+    </script>
+  </body>
+</html>

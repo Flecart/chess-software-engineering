@@ -1,0 +1,23 @@
+version : "3.5"
+services :
+  nginx:
+    image: nginx:1.19-alpine
+    container_name: nginx_container
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./errorpages.conf:/etc/nginx/errorpages.conf
+      - ./proxy_home:/usr/share/nginx/html:ro
+      - ./certbot/www/:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/letsencrypt/ssl/:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw

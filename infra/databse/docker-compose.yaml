@@ -1,0 +1,12 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "jZ9D55fSA9bEp"
+    ports:
+      - 5432:5432
+

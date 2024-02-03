@@ -1,0 +1,63 @@
+version: '3.6'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: unless-stopped
+    hostname: 'gitlab.t1-check-mates.mooo.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        #        gitlab_rails['smtp_enable'] = true
+        #        gitlab_rails['smtp_address'] = "mail.gmx.com"
+        #        gitlab_rails['smtp_port'] = 587
+        #        gitlab_rails['smtp_user_name'] = "t1-check-mates@gmx.com"
+        #        #gitlab_rails['smtp_tls'] = true
+        #        gitlab_rails['smtp_enable_starttls_auto'] = true
+        #        gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+        #        gitlab_rails['gitlab_email_from'] = 't1-check-mates@gmx.com'
+        #        gitlab_rails['gitlab_email_reply_to'] = 't1-check-mates@gmx.com'
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = "mail.gmx.com"
+        gitlab_rails['smtp_port'] = 587
+        gitlab_rails['smtp_user_name'] = "t1-check-mates@gmx.com"
+        gitlab_rails['smtp_password'] = "<no>"
+        gitlab_rails['smtp_domain'] = "mail.gmx.com"
+        gitlab_rails['smtp_authentication'] = "login"
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_tls'] = false
+        gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+        
+        ### Email Settings
+        gitlab_rails['gitlab_email_enabled'] = true
+        gitlab_rails['gitlab_email_from'] = 't1-check-mates@gmx.com'
+        gitlab_rails['gitlab_email_display_name'] = 't1-check-mates GitLab'
+        gitlab_rails['gitlab_email_reply_to'] = 't1-check-mates@gmx.com'
+
+        nginx['enable'] = true
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        external_url 'https://gitlab.t1-check-mates.mooo.com'
+        #gitlab_rails['internal_api_url'] = 'https://gitlab.t1-check-mates.mooo.com'
+    ports:
+      - '8080:80'
+      - '4443:443'
+      - '2222:22'
+    volumes:
+      - '/srv/gitlab/config:/etc/gitlab'
+      - '/srv/gitlab/logs:/var/log/gitlab'
+      - '/srv/gitlab/data:/var/opt/gitlab'
+    shm_size: '256m'
+    networks:
+      - gitlab
+
+  runner:
+    image: gitlab/gitlab-runner:latest
+    restart: unless-stopped
+    volumes:
+      - /srv/gitlab-runner/config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gitlab-runner
+
+networks:
+  gitlab:
+  gitlab-runner:
